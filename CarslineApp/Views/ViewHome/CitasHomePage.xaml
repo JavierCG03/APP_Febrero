@@ -144,6 +144,38 @@
                                     VerticalOptions="Center"/>
                         </Grid>
                     </Frame>
+                    
+                    <Frame Margin="10,5"
+                           Padding="0"
+                           CornerRadius="8"
+                           HasShadow="False"
+                           BackgroundColor="#B00000">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding CrearCitaCommand}"/>
+                        </Frame.GestureRecognizers>
+                        <Grid Padding="15,12"
+                              ColumnDefinitions="40,*,Auto"
+                              ColumnSpacing="10">
+                            <Label Grid.Column="0"
+                                   Text="📅"
+                                   FontSize="24"
+                                   VerticalOptions="Center"/>
+                            <Label Grid.Column="1"
+                                   Text="Agenda Citas "
+                                   FontSize="16"
+                                   TextColor="White"
+                                   VerticalOptions="Center"/>
+                            <Border Grid.Column="2"
+                                    WidthRequest="24"
+                                    HeightRequest="24"
+                                    StrokeShape="RoundRectangle 12"
+                                    Stroke="#FFD700"
+                                    StrokeThickness="2"
+                                    BackgroundColor="{Binding EsTercerRecordatorio, Converter={StaticResource BoolToColorConverter}, ConverterParameter=#FFD700|Transparent}"
+                                    VerticalOptions="Center"/>
+                        </Grid>
+                    </Frame>
+
 
                     <!-- Separador -->
                     <BoxView HeightRequest="2"

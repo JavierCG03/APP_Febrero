@@ -2,11 +2,329 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="CarslineApp.Views.AgendaCitas"
-             Title="AgendaCitas">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+             Title="Agenda de Citas"
+             Shell.NavBarIsVisible="False"
+             NavigationPage.HasNavigationBar="False"
+             BackgroundColor="White">
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*" Padding="0">
+
+        <Frame  Grid.Row="0"  BackgroundColor="#800020" CornerRadius="0">
+            <Label 
+               HorizontalOptions="Center"
+                VerticalOptions="Center"
+               Text="📅 Agenda de Citas"
+               FontSize="20"
+               FontAttributes="Bold"
+               TextColor="White"
+               Margin="0,0,0,10"/>
+        </Frame>
+               
+        <!-- Selector de Vista -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="8" Margin="10,10,10,15">
+            <Button Grid.Column="0" Text="Día"
+                Style="{StaticResource TabButtonStyle}"
+                Command="{Binding CambiarVistaDiaCommand}" />
+            <Button Grid.Column="1" Text="Semana"
+                Style="{StaticResource TabButtonStyle}"
+                Command="{Binding CambiarVistaSemanaActualCommand}" />
+            <Button  Grid.Column="2" Text="Mes"
+                Style="{StaticResource TabButtonStyle}"
+                Command="{Binding CambiarVistaMesCommand}" />
+        </Grid>
+        
+        <!-- Navegación de fecha -->
+        <Grid  Grid.Row="2" ColumnDefinitions="Auto,*,Auto" Margin="10,0,10,15">
+
+            <Button Grid.Column="0"
+              Text="◀"
+              Command="{Binding AnteriorCommand}"
+              BackgroundColor="#E0E0E0"
+              TextColor="#333333"
+              WidthRequest="50"
+              CornerRadius="8"/>
+            <Label Grid.Column="1"
+               Text="{Binding TituloVista}"
+               FontSize="20"
+               VerticalOptions="Center"
+               HorizontalOptions="Center"
+               FontAttributes="Bold"
+               TextColor="Black"/>
+
+            <Button Grid.Column="2"
+               Text="▶"
+               Command="{Binding SiguienteCommand}"
+               BackgroundColor="#E0E0E0"
+               TextColor="#333333"
+               WidthRequest="50"
+                CornerRadius="8"/>
+        </Grid>
+        <!-- Contenido Principal -->
+        <ScrollView Grid.Row="3" Margin="10,0,10,0">
+            <VerticalStackLayout>
+
+                <!-- Loading Indicator -->
+                <ActivityIndicator IsRunning="{Binding IsLoading}"
+                                 IsVisible="{Binding IsLoading}"
+                                 Color="#B00000"
+                                 HeightRequest="50"/>
+
+                <!-- VISTA DÍA -->
+                <VerticalStackLayout IsVisible="{Binding EsVistaDia}">
+                    <!-- Slots Horarios -->
+                    <CollectionView ItemsSource="{Binding SlotsHorarios}" SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,0,0,10">
+
+                                    <!-- Slot con Cita -->
+                                    <Frame IsVisible="{Binding TieneCita}"
+                                           BackgroundColor="#FFEBEE"
+                                           BorderColor="#B00000"
+                                           CornerRadius="8"
+                                           Padding="12"
+                                           HasShadow="False">
+                                        <Frame.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.VerDetalleCitaCommand}"
+                                                                CommandParameter="{Binding Cita}"/>
+                                        </Frame.GestureRecognizers>
+                                        <Grid ColumnDefinitions="Auto,*,Auto">
+                                            <Label Grid.Column="0"
+                                                   Text="{Binding HoraTexto}"
+                                                   FontSize="16"
+                                                   FontAttributes="Bold"
+                                                   TextColor="#B00000"
+                                                   VerticalTextAlignment="Center"
+                                                   Margin="0,0,15,0"/>
+
+                                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                                                <Label Text="{Binding Cita.ClienteNombre}"
+                                                       FontSize="14"
+                                                       FontAttributes="Bold"
+                                                       TextColor="#333333"/>
+                                                <Label Text="{Binding Cita.TipoOrden}"
+                                                       FontSize="12"
+                                                       TextColor="#666666"/>
+                                            </VerticalStackLayout>
+
+                                            <Frame Grid.Column="2"
+                                                   BackgroundColor="#B00000"
+                                                   Padding="8,4"
+                                                   CornerRadius="4"
+                                                   HasShadow="False"
+                                                   VerticalOptions="Center">
+                                                <Label Text="Ver"
+                                                       FontSize="11"
+                                                       TextColor="White"
+                                                       FontAttributes="Bold"/>
+                                            </Frame>
+                                        </Grid>
+                                    </Frame>
+
+                                    <!-- Slot Disponible -->
+                                    <Frame IsVisible="{Binding Disponible}"
+                                           BackgroundColor="White"
+                                           BorderColor="#E0E0E0"
+                                           CornerRadius="8"
+                                           Padding="12"
+                                           HasShadow="False">
+                                        <Frame.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CrearCitaCommand}"
+                                                                CommandParameter="{Binding}"/>
+                                        </Frame.GestureRecognizers>
+                                        <Grid ColumnDefinitions="Auto,*,Auto">
+                                            <Label Grid.Column="0"
+                                                   Text="{Binding HoraTexto}"
+                                                   FontSize="16"
+                                                   TextColor="#666666"
+                                                   VerticalTextAlignment="Center"
+                                                   Margin="0,0,15,0"/>
+
+                                            <Label Grid.Column="1"
+                                                   Text="Disponible"
+                                                   FontSize="14"
+                                                   TextColor="#999999"
+                                                   VerticalTextAlignment="Center"/>
+
+                                            <Label Grid.Column="2"
+                                                   Text="+"
+                                                   FontSize="24"
+                                                   TextColor="#4CAF50"
+                                                   FontAttributes="Bold"
+                                                   VerticalTextAlignment="Center"/>
+                                        </Grid>
+                                    </Frame>
+
+                                    <!-- Slot Pasado -->
+                                    <Frame IsVisible="{Binding EsPasado}"
+                                           BackgroundColor="#F5F5F5"
+                                           BorderColor="#CCCCCC"
+                                           CornerRadius="8"
+                                           Padding="12"
+                                           Opacity="0.8"
+                                           HasShadow="False">
+                                        <Grid ColumnDefinitions="Auto,*,Auto">
+                                            <Label Grid.Column="0"
+                                                   Text="{Binding HoraTexto}"
+                                                   FontSize="16"
+                                                   TextColor="#999999"
+                                                   VerticalTextAlignment="Center"
+                                                   Margin="0,0,15,0"/>
+
+                                            <Label Grid.Column="1"
+                                                   Text="No disponible"
+                                                   FontSize="14"
+                                                   TextColor="#CCCCCC"
+                                                   VerticalTextAlignment="Center"/>
+
+                                            <Label Grid.Column="2"
+                                                   Text="✕"
+                                                   FontSize="20"
+                                                   TextColor="#CCCCCC"
+                                                   VerticalTextAlignment="Center"/>
+                                        </Grid>
+                                    </Frame>
+
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+                <!-- VISTA SEMANA -->
+                <VerticalStackLayout IsVisible="{Binding EsVistaSemana}">
+
+                    <!-- Días de la Semana -->
+                    <CollectionView ItemsSource="{Binding DiasSemana}" SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <VerticalStackLayout Margin="0,0,0,20"  >
+
+                                    <!-- Encabezado del Día -->
+                                    <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,5">
+                                        <Label Grid.Column="0"
+                                               FontSize="16"
+                                               FontAttributes="Bold"
+                                               TextColor="#B00000"
+                                               VerticalTextAlignment="Center">
+                                            <Label.Text>
+                                                <MultiBinding StringFormat="{}{0} {1}">
+                                                    <Binding Path="NombreDia"/>
+                                                    <Binding Path="NumeroDia"/>
+                                                </MultiBinding>
+                                            </Label.Text>
+                                        </Label>
+
+                                        <Label Grid.Column="1"
+                                               Text="✕"
+                                               FontSize="20"
+                                               TextColor="#999999"
+                                               IsVisible="{Binding EsPasado}"/>
+                                    </Grid>
+
+                                    <!-- Slots del Día en Grid 2 columnas -->
+                                    <CollectionView ItemsSource="{Binding Slots}" SelectionMode="None" Margin="0,0,0,20">
+                                        <CollectionView.ItemsLayout>
+                                            <GridItemsLayout Orientation="Vertical" Span="2" HorizontalItemSpacing="8" VerticalItemSpacing="8"/>
+                                        </CollectionView.ItemsLayout>
+                                        <CollectionView.ItemTemplate>
+                                            <DataTemplate>
+                                                <Frame BackgroundColor="{Binding ColorFondo}"
+                                                       BorderColor="{Binding ColorBorde}"
+                                                       CornerRadius="6"
+                                                       Padding="8"
+                                                       HasShadow="False"
+                                                       HeightRequest="60">
+                                                    <VerticalStackLayout Spacing="2">
+                                                        <Label Text="{Binding HoraTexto}"
+                                                               FontSize="12"
+                                                               FontAttributes="Bold"
+                                                               TextColor="#333333"/>
+
+                                                        <Label Text="{Binding Cita.ClienteNombre}"
+                                                               FontSize="11"
+                                                               TextColor="#666666"
+                                                               LineBreakMode="TailTruncation"
+                                                               IsVisible="{Binding TieneCita}"/>
+
+                                                        <Label Text="+"
+                                                               FontSize="16"
+                                                               TextColor="#4CAF50"
+                                                               FontAttributes="Bold"
+                                                               HorizontalTextAlignment="Center"
+                                                               IsVisible="{Binding Disponible}"/>
+                                                    </VerticalStackLayout>
+                                                </Frame>
+                                            </DataTemplate>
+                                        </CollectionView.ItemTemplate>
+                                    </CollectionView>
+
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+                <!-- VISTA MES -->
+                <VerticalStackLayout IsVisible="{Binding EsVistaMes}">
+
+                    <!-- Encabezados de días -->
+                    <Grid ColumnDefinitions="*,*,*,*,*,*,*" Margin="0,0,0,10">
+                        <Label Grid.Column="0" Text="L" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
+                        <Label Grid.Column="1" Text="M" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
+                        <Label Grid.Column="2" Text="M" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
+                        <Label Grid.Column="3" Text="J" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
+                        <Label Grid.Column="4" Text="V" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
+                        <Label Grid.Column="5" Text="S" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
+                        <Label Grid.Column="6" Text="D" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
+                    </Grid>
+
+                    <!-- Días del Mes -->
+                    <CollectionView ItemsSource="{Binding DiasMes}" SelectionMode="None">
+                        <CollectionView.ItemsLayout>
+                            <GridItemsLayout Orientation="Vertical" Span="7" HorizontalItemSpacing="4" VerticalItemSpacing="4"/>
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame BackgroundColor="{Binding ColorFondo}"
+                                       BorderColor="#800020"
+                                       CornerRadius="6"
+                                       Padding="4"
+                                       HasShadow="False"
+                                       HeightRequest="70"
+                                       WidthRequest="50">
+                                    <Frame.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SeleccionarDiaCommand}"
+                                                            CommandParameter="{Binding}"/>
+                                    </Frame.GestureRecognizers>
+
+                                    <Grid RowDefinitions="Auto,*,Auto">
+                                        <!-- Número del día -->
+                                        <Label Grid.Row="0"
+                                               Text="{Binding NumeroDia}"
+                                               FontSize="16"
+                                               FontAttributes="Bold"
+                                               TextColor="{Binding EsHoy, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#B00000|#333333'}"
+                                               HorizontalTextAlignment="Center"/>
+
+                                        <!-- Indicador de citas pasadas -->
+                                        <Label Grid.Row="1"
+                                               Text="✕"
+                                               FontSize="20"
+                                               TextColor="#CCCCCC"
+                                               HorizontalTextAlignment="Center"
+                                               VerticalTextAlignment="Center"
+                                               IsVisible="{Binding EsPasado}"/>
+
+                                    </Grid>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
 </ContentPage>

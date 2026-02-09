@@ -34,6 +34,8 @@ namespace CarslineApp.ViewModels.ViewModelsHome
             // Otros comandos
             RefreshCommand = new Command(async () => await CargarRecordatoriosPorTipo(_tipoRecordatorioActual));
             LogoutCommand = new Command(async () => await CerrarSesion());
+            CrearCitaCommand = new Command(async () => await CrearNuevaCita(), () => !IsLoading);
+     
         }
 
         /// <summary>
@@ -97,6 +99,7 @@ namespace CarslineApp.ViewModels.ViewModelsHome
         public ICommand VerDetalleRecordatorioCommand { get; }
         public ICommand RefreshCommand { get; }
         public ICommand LogoutCommand { get; }
+        public ICommand CrearCitaCommand { get; }
 
         #endregion
 
@@ -119,6 +122,26 @@ namespace CarslineApp.ViewModels.ViewModelsHome
         #endregion
 
         #region Métodos Privados
+
+        private async Task CrearNuevaCita ()
+        {
+            try
+            {
+                IsLoading = true;
+                await Application.Current.MainPage.Navigation.PushAsync(new AgendaCitas());
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert(
+                    "Error",
+                    $"No se pudo abrir la agenda de citas: {ex.Message}",
+                    "OK");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
 
         /// <summary>
         /// Cargar recordatorios por tipo (1, 2 o 3)
