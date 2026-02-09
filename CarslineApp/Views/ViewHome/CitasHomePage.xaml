@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<FlyoutPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CarslineApp.Views.CitasHomePage"
+             xmlns:viewmodels="clr-namespace:CarslineApp.ViewModels.ViewModelsHome"
+             xmlns:models="clr-namespace:CarslineApp.Models"
+             x:DataType="viewmodels:CitasMainViewModel"
+             FlyoutLayoutBehavior="Popover">
+
+    <!-- ============================================ -->
+    <!-- MENÚ LATERAL -->
+    <!-- ============================================ -->
+    <FlyoutPage.Flyout>
+        <ContentPage Title="Menú"
+                     BackgroundColor="Black">
+            <ScrollView>
+                <VerticalStackLayout Padding="0"
+                                     Spacing="5">
+
+                    <!-- HEADER DEL MENÚ -->
+                    <Frame BackgroundColor="#B00000" Padding="10,10,20,5" Margin="0" CornerRadius="0" HasShadow="False" BorderColor="#B00000">
+                        <VerticalStackLayout Spacing="0">
+                            <Image Source="asesor.png"
+                               HeightRequest="100"
+                               WidthRequest="100"
+                               HorizontalOptions="Center"
+                               Aspect="AspectFit"/>
+                            <Label Text="{Binding NombreUsuarioActual}"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   TextColor="White"
+                                   HorizontalOptions="Center"/>
+                            <Label Text="Encargado de Citas"
+                                   FontSize="14"
+                                   TextColor="#FFCCCB"
+                                   HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <!-- Separador -->
+                    <BoxView HeightRequest="2"
+                             BackgroundColor="#8B0000"
+                             Margin="0"/>
+
+                    <!-- SECCIÓN: RECORDATORIOS -->
+                    <Label Text="RECORDATORIOS"
+                           FontSize="12"
+                           FontAttributes="Bold"
+                           TextColor="#FFCCCB"
+                           Margin="20,20,20,10"/>
+
+                    <!-- Primer Recordatorio -->
+                    <Frame Margin="10,5"
+                           Padding="0"
+                           CornerRadius="8"
+                           HasShadow="False"
+                           BackgroundColor="#B00000">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding PrimerRecordatorioCommand}"/>
+                        </Frame.GestureRecognizers>
+                        <Grid Padding="15,12"
+                              ColumnDefinitions="40,*,Auto"
+                              ColumnSpacing="10">
+                            <Label Grid.Column="0"
+                                   Text="📅"
+                                   FontSize="24"
+                                   VerticalOptions="Center"/>
+                            <Label Grid.Column="1"
+                                   Text="1er Recordatorio"
+                                   FontSize="16"
+                                   TextColor="White"
+                                   VerticalOptions="Center"/>
+                            <Border Grid.Column="2"
+                                    WidthRequest="24"
+                                    HeightRequest="24"
+                                    StrokeShape="RoundRectangle 12"
+                                    Stroke="#FFD700"
+                                    StrokeThickness="2"
+                                    BackgroundColor="{Binding EsPrimerRecordatorio, Converter={StaticResource BoolToColorConverter}, ConverterParameter=#FFD700|Transparent}"
+                                    VerticalOptions="Center"/>
+                        </Grid>
+                    </Frame>
+
+                    <!-- Segundo Recordatorio -->
+                    <Frame Margin="10,5"
+                           Padding="0"
+                           CornerRadius="8"
+                           HasShadow="False"
+                           BackgroundColor="#B00000">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SegundoRecordatorioCommand}"/>
+                        </Frame.GestureRecognizers>
+                        <Grid Padding="15,12"
+                              ColumnDefinitions="40,*,Auto"
+                              ColumnSpacing="10">
+                            <Label Grid.Column="0"
+                                   Text="⏰"
+                                   FontSize="24"
+                                   VerticalOptions="Center"/>
+                            <Label Grid.Column="1"
+                                   Text="2do Recordatorio"
+                                   FontSize="16"
+                                   TextColor="White"
+                                   VerticalOptions="Center"/>
+                            <Border Grid.Column="2"
+                                    WidthRequest="24"
+                                    HeightRequest="24"
+                                    StrokeShape="RoundRectangle 12"
+                                    Stroke="#FFD700"
+                                    StrokeThickness="2"
+                                    BackgroundColor="{Binding EsSegundoRecordatorio, Converter={StaticResource BoolToColorConverter}, ConverterParameter=#FFD700|Transparent}"
+                                    VerticalOptions="Center"/>
+                        </Grid>
+                    </Frame>
+
+                    <!-- Tercer Recordatorio -->
+                    <Frame Margin="10,5"
+                           Padding="0"
+                           CornerRadius="8"
+                           HasShadow="False"
+                           BackgroundColor="#B00000">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding TercerRecordatorioCommand}"/>
+                        </Frame.GestureRecognizers>
+                        <Grid Padding="15,12"
+                              ColumnDefinitions="40,*,Auto"
+                              ColumnSpacing="10">
+                            <Label Grid.Column="0"
+                                   Text="🔔"
+                                   FontSize="24"
+                                   VerticalOptions="Center"/>
+                            <Label Grid.Column="1"
+                                   Text="3er Recordatorio "
+                                   FontSize="16"
+                                   TextColor="White"
+                                   VerticalOptions="Center"/>
+                            <Border Grid.Column="2"
+                                    WidthRequest="24"
+                                    HeightRequest="24"
+                                    StrokeShape="RoundRectangle 12"
+                                    Stroke="#FFD700"
+                                    StrokeThickness="2"
+                                    BackgroundColor="{Binding EsTercerRecordatorio, Converter={StaticResource BoolToColorConverter}, ConverterParameter=#FFD700|Transparent}"
+                                    VerticalOptions="Center"/>
+                        </Grid>
+                    </Frame>
+
+                    <!-- Separador -->
+                    <BoxView HeightRequest="2"
+                             BackgroundColor="#8B0000"
+                             Margin="0,20,0,0"/>
+
+                    <!-- ACCIONES -->
+                    <Label Text="ACCIONES"
+                           FontSize="12"
+                           FontAttributes="Bold"
+                           TextColor="#FFCCCB"
+                           Margin="20,20,20,10"/>
+
+                    <!-- Actualizar -->
+                    <Frame Margin="10,5"
+                           Padding="0"
+                           CornerRadius="8"
+                           HasShadow="False"
+                           BackgroundColor="#B00000">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding RefreshCommand}"/>
+                        </Frame.GestureRecognizers>
+                        <Grid Padding="15,12"
+                              ColumnDefinitions="40,*"
+                              ColumnSpacing="10">
+                            <Label Grid.Column="0"
+                                   Text="🔄"
+                                   FontSize="24"
+                                   VerticalOptions="Center"/>
+                            <Label Grid.Column="1"
+                                   Text="Actualizar"
+                                   FontSize="16"
+                                   TextColor="White"
+                                   VerticalOptions="Center"/>
+                        </Grid>
+                    </Frame>
+
+                    <!-- Cerrar Sesión -->
+                    <Frame Margin="10,5,10,20"
+                           Padding="0"
+                           CornerRadius="8"
+                           HasShadow="False"
+                           BackgroundColor="#B00000">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding LogoutCommand}"/>
+                        </Frame.GestureRecognizers>
+                        <Grid Padding="15,12"
+                              ColumnDefinitions="40,*"
+                              ColumnSpacing="10">
+                            <Label Grid.Column="0"
+                                   Text="🚪"
+                                   FontSize="24"
+                                   VerticalOptions="Center"/>
+                            <Label Grid.Column="1"
+                                   Text="Cerrar Sesión"
+                                   FontSize="16"
+                                   TextColor="White"
+                                   VerticalOptions="Center"/>
+                        </Grid>
+                    </Frame>
+                </VerticalStackLayout>
+            </ScrollView>
+        </ContentPage>
+    </FlyoutPage.Flyout>
+
+    <!-- ============================================ -->
+    <!-- CONTENIDO PRINCIPAL-->
+    <!-- ============================================ -->
+    <FlyoutPage.Detail>
+        <NavigationPage BarBackgroundColor="#B00000"
+                        BarTextColor="White">
+            <x:Arguments>
+                <ContentPage >
+                    <Grid RowDefinitions="Auto,*">
+
+                        <!-- Header con título y botón hamburguesa -->
+                        <Grid Grid.Row="0"
+                              BackgroundColor="#B00000"
+                              Padding="15,10"
+                              ColumnDefinitions="50,*">
+
+                            <!-- Botón Menú -->
+                            <ImageButton Grid.Column="0"
+                                         Source="menu.png"
+                                         BackgroundColor="Transparent"
+                                         WidthRequest="30"
+                                         HeightRequest="30"
+                                         Clicked="OnMenuButtonClicked"
+                                         VerticalOptions="Center"
+                                         HorizontalOptions="Start"/>
+
+                            <!-- Título -->
+                            <Label Grid.Column="1"
+                                   Text="{Binding TituloSeccion}"
+                                   FontSize="20"
+                                   FontAttributes="Bold"
+                                   TextColor="White"
+                                   VerticalOptions="Center"
+                                   HorizontalOptions="Center"/>
+
+                        </Grid>
+
+                        <!-- Contenido Principal -->
+                        <Grid Grid.Row="1">
+
+                            <!-- Loading Indicator -->
+                            <ActivityIndicator IsRunning="{Binding IsLoading}"
+                                               IsVisible="{Binding IsLoading}"
+                                               Color="#B00000"
+                                               VerticalOptions="Center"
+                                               HorizontalOptions="Center"/>
+
+                            <!-- Lista de Recordatorios -->
+                            <RefreshView Command="{Binding RefreshCommand}"
+                                         IsRefreshing="{Binding IsLoading}"
+                                         RefreshColor="#B00000"                                  
+                                         IsVisible="{Binding TieneRecordatorios}">
+                                <CollectionView ItemsSource="{Binding Recordatorios}"
+                                                Margin="10"
+                                                SelectionMode="None">
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate x:DataType="models:RecordatorioServicioSimpleDto">
+                                            <Frame Margin="15,10,15,10" 
+                                                   Padding="15"
+                                                   CornerRadius="12"
+                                                   HasShadow="True"
+                                                   BackgroundColor="White"
+                                                   BorderColor="#B00000">
+                                                <Frame.GestureRecognizers>
+                                                    <TapGestureRecognizer 
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:CitasMainViewModel}}, Path=VerDetalleRecordatorioCommand}"
+                                                        CommandParameter="{Binding .}"/>
+                                                </Frame.GestureRecognizers>
+
+                                                <Grid RowDefinitions="Auto,Auto" RowSpacing="5">
+                                                    <!-- Nombre del Cliente -->
+                                                    <Label Grid.Row="0"
+                                                           Text="{Binding ClienteNombre}"
+                                                           FontSize="18"
+                                                           FontAttributes="Bold"
+                                                           TextColor="#212121"
+                                                           LineBreakMode="TailTruncation"/>
+
+                                                    <!-- Tipo de Servicio -->
+                                                    <HorizontalStackLayout Grid.Row="1" Spacing="15">
+                                                        <Label Text="{Binding FechaProximoServicio, StringFormat='📅{0:dd/MMM/yyyy}'}"
+                                                               FontSize="15"
+                                                               FontAttributes="Bold"
+                                                               TextColor="#B00000"
+                                                               VerticalOptions="Center"/>
+
+                                                        <Label Text="{Binding ProximoServicioNombre, StringFormat='🔧{0:dd/MMM/yyyy}'}"
+                                                               FontSize="15"
+                                                               FontAttributes="Bold"
+                                                               TextColor="#757575"
+                                                               VerticalOptions="Center"/>
+
+                                                    </HorizontalStackLayout>
+
+                                                    <!-- Fecha Próximo Servicio -->
+                                                    <HorizontalStackLayout Grid.Row="2" Grid.Column="1"
+                                                                           Spacing="8">
+
+                                                    </HorizontalStackLayout>
+
+                                                </Grid>
+                                            </Frame>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                            </RefreshView>
+
+                            <!-- Mensaje cuando no hay recordatorios -->
+                            <VerticalStackLayout IsVisible="{Binding TieneRecordatorios, Converter={StaticResource InverseBoolConverter}}"
+                                                 VerticalOptions="Center"
+                                                 HorizontalOptions="Center"
+                                                 Spacing="15"
+                                                 Padding="20">
+                                <Label Text="📋"
+                                       FontSize="60"
+                                       HorizontalOptions="Center"/>
+                                <Label Text="{Binding MensajeNoRecordatorios}"
+                                       FontSize="16"
+                                       TextColor="#757575"
+                                       HorizontalOptions="Center"
+                                       HorizontalTextAlignment="Center"/>
+                            </VerticalStackLayout>
+
+                        </Grid>
+
+                    </Grid>
+                </ContentPage>
+            </x:Arguments>
+        </NavigationPage>
+    </FlyoutPage.Detail>
+
+</FlyoutPage>

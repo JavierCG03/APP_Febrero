@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CarslineApp.Views.RecordatorioDetallePage"
+             Title="Detalle del Recordatorio"
+             BackgroundColor="#F5F5F5">
+
+    <Grid RowDefinitions="*,Auto,Auto">
+
+        <!-- Contenido con Scroll -->
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Spacing="15" Padding="15">
+
+                <!-- Loading Indicator -->
+                <ActivityIndicator x:Name="loadingIndicator"
+                                   IsRunning="False"
+                                   IsVisible="False"
+                                   Color="#D60000"
+                                   VerticalOptions="Center"
+                                   HorizontalOptions="Center"
+                                   Margin="0,50,0,0"/>
+
+                <!-- Contenido del Detalle -->
+                <VerticalStackLayout x:Name="contenidoDetalle" Spacing="15">
+
+                    <!-- INFORMACIÓN DEL CLIENTE -->
+                    <Frame Padding="15"  CornerRadius="12" HasShadow="True" BackgroundColor="White">
+                        <VerticalStackLayout Spacing="12">
+                            <Label Text="👤 INFORMACIÓN DEL CLIENTE"
+                                   FontSize="16"
+                                   FontAttributes="Bold"
+                                   TextColor="#D60000"/>
+
+                            <BoxView HeightRequest="1" BackgroundColor="#E0E0E0"/>
+
+                            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="8" ColumnSpacing="10">
+                                <Label Grid.Row="0" Grid.Column="0" Text="Nombre:" FontSize="14" TextColor="#757575" FontAttributes="Bold"/>
+                                <Label Grid.Row="0" Grid.Column="1" x:Name="lblClienteNombre" FontSize="14" TextColor="#212121"/>
+
+                                <Label Grid.Row="1" Grid.Column="0" Text="Teléfono:" FontSize="14" TextColor="#757575" FontAttributes="Bold"/>
+                                <Label Grid.Row="1" Grid.Column="1" x:Name="lblClienteTelefono" FontSize="14" TextColor="#212121"/>
+
+                                <Label Grid.Row="2" Grid.Column="0" Text="Tel. Casa:" FontSize="14" TextColor="#757575" FontAttributes="Bold"/>
+                                <Label Grid.Row="2" Grid.Column="1" x:Name="lblClienteTelefonoCasa" FontSize="14" TextColor="#212121"/>
+
+                                <Label Grid.Row="3" Grid.Column="0" Text="Correo:" FontSize="14" TextColor="#757575" FontAttributes="Bold"/>
+                                <Label Grid.Row="3" Grid.Column="1" x:Name="lblClienteCorreo" FontSize="14" TextColor="#212121"/>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <!-- INFORMACIÓN DEL VEHÍCULO -->
+                    <Frame Padding="15" CornerRadius="12" HasShadow="True" BackgroundColor="White">
+                        <VerticalStackLayout Spacing="12">
+                            <Label Text="🚗 INFORMACIÓN DEL VEHÍCULO"
+                                   FontSize="16"
+                                   FontAttributes="Bold"
+                                   TextColor="#D60000"/>
+
+                            <BoxView HeightRequest="1" BackgroundColor="#E0E0E0"/>
+
+                            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="8" ColumnSpacing="10">
+                                <Label Grid.Row="0" Grid.Column="0" Text="Vehículo:" FontSize="14" TextColor="#757575" FontAttributes="Bold"/>
+                                <Label Grid.Row="0" Grid.Column="1" x:Name="lblVehiculoInfo" FontSize="14" TextColor="#212121"/>
+
+                                <Label Grid.Row="1" Grid.Column="0" Text="VIN:" FontSize="14" TextColor="#757575" FontAttributes="Bold"/>
+                                <Label Grid.Row="1" Grid.Column="1" x:Name="lblVIN" FontSize="14" TextColor="#212121" FontFamily="Courier"/>
+
+                                <Label Grid.Row="2" Grid.Column="0" Text="Placas:" FontSize="14" TextColor="#757575" FontAttributes="Bold"/>
+                                <Label Grid.Row="2" Grid.Column="1" x:Name="lblPlacas" FontSize="14" TextColor="#212121"/>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <!-- ÚLTIMO SERVICIO -->
+                    <Frame Padding="15" CornerRadius="12" HasShadow="True" BackgroundColor="White">
+                        <VerticalStackLayout Spacing="12">
+                            <Label Text="🔧 ÚLTIMO SERVICIO REALIZADO"
+                                   FontSize="16"
+                                   FontAttributes="Bold"
+                                   TextColor="#D60000"/>
+
+                            <BoxView HeightRequest="1" BackgroundColor="#E0E0E0"/>
+
+                            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="8" ColumnSpacing="10">
+                                <Label Grid.Row="0" Grid.Column="0" Text="Servicio:" FontSize="14" TextColor="#757575" FontAttributes="Bold"/>
+                                <Label Grid.Row="0" Grid.Column="1" x:Name="lblUltimoServicio" FontSize="14" TextColor="#212121"/>
+
+                                <Label Grid.Row="1" Grid.Column="0" Text="Fecha:" FontSize="14" TextColor="#757575" FontAttributes="Bold"/>
+                                <Label Grid.Row="1" Grid.Column="1" x:Name="lblFechaUltimoServicio" FontSize="14" TextColor="#212121"/>
+
+                                <Label Grid.Row="2" Grid.Column="0" Text="Kilometraje:" FontSize="14" TextColor="#757575" FontAttributes="Bold"/>
+                                <Label Grid.Row="2" Grid.Column="1" x:Name="lblUltimoKilometraje" FontSize="14" TextColor="#212121"/>
+                            </Grid>
+
+                            <Border Padding="10" StrokeShape="RoundRectangle 8" Stroke="#E0E0E0" BackgroundColor="#F5F5F5">
+                                <HorizontalStackLayout Spacing="10">
+                                    <Label Text="⏱️" FontSize="16"/>
+                                    <Label Text="Hace " FontSize="12" TextColor="#757575" VerticalOptions="Center"/>
+                                    <Label x:Name="lblDiasDesdeUltimo" FontSize="12" FontAttributes="Bold" TextColor="#D60000" VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <!-- PRÓXIMO SERVICIO -->
+                    <Frame Padding="15" CornerRadius="12" HasShadow="True" BackgroundColor="White" BorderColor="#D60000">
+                        <VerticalStackLayout Spacing="12">
+                            <Label Text="📅 PRÓXIMO SERVICIO PROGRAMADO"
+                                   FontSize="16"
+                                   FontAttributes="Bold"
+                                   TextColor="#D60000"/>
+
+                            <BoxView HeightRequest="1" BackgroundColor="#E0E0E0"/>
+
+                            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="8" ColumnSpacing="10">
+                                <Label Grid.Row="0" Grid.Column="0" Text="Servicio:" FontSize="14" TextColor="#757575" FontAttributes="Bold"/>
+                                <Label Grid.Row="0" Grid.Column="1" x:Name="lblProximoServicio" FontSize="14" TextColor="#212121" FontAttributes="Bold"/>
+
+                                <Label Grid.Row="1" Grid.Column="0" Text="Fecha:" FontSize="14" TextColor="#757575" FontAttributes="Bold"/>
+                                <Label Grid.Row="1" Grid.Column="1" x:Name="lblFechaProximoServicio" FontSize="14" TextColor="#D60000" FontAttributes="Bold"/>
+
+                                <Label Grid.Row="2" Grid.Column="0" Text="Kilometraje:" FontSize="14" TextColor="#757575" FontAttributes="Bold"/>
+                                <Label Grid.Row="2" Grid.Column="1" x:Name="lblProximoKilometraje" FontSize="14" TextColor="#212121"/>
+                            </Grid>
+
+                            <Border Padding="10" StrokeShape="RoundRectangle 8" Stroke="#FFD700" BackgroundColor="#FFFEF0">
+                                <HorizontalStackLayout Spacing="10">
+                                    <Label Text="⏰" FontSize="16"/>
+                                    <Label Text="Faltan " FontSize="12" TextColor="#757575" VerticalOptions="Center"/>
+                                    <Label x:Name="lblDiasParaProximo" FontSize="12" FontAttributes="Bold" TextColor="#D60000" VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- BOTONES DE COMUNICACIÓN -->
+        <Frame Grid.Row="1" 
+               Padding="15,10" 
+               Margin="15,0,15,0" 
+               CornerRadius="12" 
+               HasShadow="True" 
+               BackgroundColor="White">
+            <VerticalStackLayout Spacing="0" HorizontalOptions="Center">
+                <Label Text="📞 CONTACTAR AL CLIENTE"
+                       FontSize="14"
+                       FontAttributes="Bold"
+                       TextColor="#757575"
+                       Margin="0,0,0,10"/>
+                <HorizontalStackLayout Spacing="10">
+
+                    <ImageButton  
+                        Source="whatsapp.png"
+                        BackgroundColor="Transparent"
+                        HeightRequest="50"
+                        WidthRequest="50"
+                        Clicked="OnEnviarWhatsAppClicked"/>
+
+                    <ImageButton  
+                        Source="llamar.png"
+                        BackgroundColor="Transparent"
+                        HeightRequest="50"
+                        WidthRequest="50"
+                        Clicked="OnLlamarTelefonoClicked"/>
+
+                    <ImageButton  
+                        Source="llamarcasa.png"
+                        BackgroundColor="Transparent"
+                        HeightRequest="50"
+                        WidthRequest="50"
+                        Clicked="OnLlamarTelefonoCasaClicked"/>
+
+                    <ImageButton  
+                        Source="correo.png"
+                        BackgroundColor="Transparent"
+                        HeightRequest="50"
+                        WidthRequest="50"
+                        Clicked="OnEnviarCorreoClicked"/>
+
+                </HorizontalStackLayout>
+                
+            </VerticalStackLayout>
+        </Frame>
+
+        <!-- BOTÓN MARCAR COMO ENVIADO -->
+        <Button Grid.Row="2"
+                Text="✅ Marcar como Enviado"
+                BackgroundColor="#D60000"
+                TextColor="White"
+                FontSize="16"
+                FontAttributes="Bold"
+                Margin="15"
+                HeightRequest="50"
+                CornerRadius="25"
+                Clicked="OnMarcarEnviadoClicked"/>
+
+    </Grid>
+
+</ContentPage>
