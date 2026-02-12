@@ -39,6 +39,7 @@
             <Button Grid.Column="0"
               Text="◀"
               Command="{Binding AnteriorCommand}"
+              IsVisible="{Binding PuedeRegresar}"
               BackgroundColor="#E0E0E0"
               TextColor="#333333"
               WidthRequest="50"
@@ -88,36 +89,29 @@
                                             <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.VerDetalleCitaCommand}"
                                                                 CommandParameter="{Binding Cita}"/>
                                         </Frame.GestureRecognizers>
-                                        <Grid ColumnDefinitions="Auto,*,Auto">
-                                            <Label Grid.Column="0"
+
+                                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="*,*" ColumnSpacing="10">
+                                            <Label Grid.Column="0" Grid.Row="0" 
                                                    Text="{Binding HoraTexto}"
                                                    FontSize="16"
                                                    FontAttributes="Bold"
                                                    TextColor="#B00000"
+                                                   HorizontalOptions="Center"
                                                    VerticalTextAlignment="Center"
                                                    Margin="0,0,15,0"/>
-
-                                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
-                                                <Label Text="{Binding Cita.ClienteNombre}"
+                                            <Label  Grid.Column="1" Grid.Row="1" Text="{Binding Cita.VehiculoInfo}"
+                                                       FontSize="14"
+                                                       FontAttributes="Bold"
+                                                       TextColor="#666666"/>
+                                            <Label Grid.Column="1" Grid.Row="0" Text="{Binding Cita.ClienteNombre}"
                                                        FontSize="14"
                                                        FontAttributes="Bold"
                                                        TextColor="#333333"/>
-                                                <Label Text="{Binding Cita.TipoOrden}"
-                                                       FontSize="12"
-                                                       TextColor="#666666"/>
-                                            </VerticalStackLayout>
+                                            <Label Grid.Column="0" Grid.Row="1" Text="{Binding Cita.TipoOrden}"
+                                                       HorizontalOptions="End"
+                                                        FontSize="14"
+                                                       TextColor="#B00000"/>
 
-                                            <Frame Grid.Column="2"
-                                                   BackgroundColor="#B00000"
-                                                   Padding="8,4"
-                                                   CornerRadius="4"
-                                                   HasShadow="False"
-                                                   VerticalOptions="Center">
-                                                <Label Text="Ver"
-                                                       FontSize="11"
-                                                       TextColor="White"
-                                                       FontAttributes="Bold"/>
-                                            </Frame>
                                         </Grid>
                                     </Frame>
 
@@ -129,7 +123,7 @@
                                            Padding="12"
                                            HasShadow="False">
                                         <Frame.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CrearCitaCommand}"
+                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DisponibleCommand}"
                                                                 CommandParameter="{Binding}"/>
                                         </Frame.GestureRecognizers>
                                         <Grid ColumnDefinitions="Auto,*,Auto">
@@ -191,14 +185,31 @@
                     </CollectionView>
                 </VerticalStackLayout>
 
-                <!-- VISTA SEMANA -->
+                <!-- VISTA SEMANA COMPLETA -->
                 <VerticalStackLayout IsVisible="{Binding EsVistaSemana}">
+
+                    <!-- ✅ NUEVO: Indicador de modo -->
+                    <Frame BackgroundColor="#FFF3E0" 
+                           Padding="10" 
+                           Margin="10,5"
+                           CornerRadius="8"
+                           HasShadow="False"
+                           IsVisible="{Binding EsReagendar}">
+                        <HorizontalStackLayout Spacing="8">
+                            <Label Text="🔄" FontSize="16"/>
+                            <Label Text="MODO REAGENDAR: Toque un horario disponible"
+                                   FontSize="13"
+                                   FontAttributes="Bold"
+                                   TextColor="#F57C00"
+                                   VerticalOptions="Center"/>
+                        </HorizontalStackLayout>
+                    </Frame>
 
                     <!-- Días de la Semana -->
                     <CollectionView ItemsSource="{Binding DiasSemana}" SelectionMode="None">
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
-                                <VerticalStackLayout Margin="0,0,0,20"  >
+                                <VerticalStackLayout Margin="0,0,0,20">
 
                                     <!-- Encabezado del Día -->
                                     <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,5">
@@ -222,27 +233,47 @@
                                                IsVisible="{Binding EsPasado}"/>
                                     </Grid>
 
-                                    <!-- Slots del Día en Grid 2 columnas -->
+                                    <!-- Slots del Día -->
                                     <CollectionView ItemsSource="{Binding Slots}" SelectionMode="None" Margin="0,0,0,20">
                                         <CollectionView.ItemsLayout>
-                                            <GridItemsLayout Orientation="Vertical" Span="2" HorizontalItemSpacing="8" VerticalItemSpacing="8"/>
+                                            <GridItemsLayout Orientation="Vertical" Span="2" 
+                                                           HorizontalItemSpacing="8" VerticalItemSpacing="8"/>
                                         </CollectionView.ItemsLayout>
                                         <CollectionView.ItemTemplate>
                                             <DataTemplate>
+                                                <!-- ✅ Frame con TapGestureRecognizer -->
                                                 <Frame BackgroundColor="{Binding ColorFondo}"
                                                        BorderColor="{Binding ColorBorde}"
                                                        CornerRadius="6"
                                                        Padding="8"
                                                        HasShadow="False"
                                                        HeightRequest="60">
+                                    
+                                                    <!-- ✅ Gesture Recognizer -->
+                                                    <Frame.GestureRecognizers>
+                                                        <TapGestureRecognizer 
+                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
+                                                                     Path=BindingContext.HorarioSemanaCommand}"
+                                                            CommandParameter="{Binding}"/>
+                                                    </Frame.GestureRecognizers>
+
                                                     <VerticalStackLayout Spacing="2">
-                                                        <Label Text="{Binding HoraTexto}"
-                                                               FontSize="12"
-                                                               FontAttributes="Bold"
-                                                               TextColor="#333333"/>
+                                                        <HorizontalStackLayout Spacing="10">
+                                                            <Label Text="{Binding HoraTexto}"
+                                                                   FontSize="12"
+                                                                   FontAttributes="Bold"
+                                                                   TextColor="#333333"/>
+                                            
+                                                            <Label Text="{Binding Cita.TipoOrden}"
+                                                                   FontSize="11"
+                                                                   TextColor="#800020"
+                                                                   FontAttributes="Bold"
+                                                                   LineBreakMode="TailTruncation"
+                                                                   IsVisible="{Binding TieneCita}"/>
+                                                        </HorizontalStackLayout>
 
                                                         <Label Text="{Binding Cita.ClienteNombre}"
-                                                               FontSize="11"
+                                                               FontSize="12"
                                                                TextColor="#666666"
                                                                LineBreakMode="TailTruncation"
                                                                IsVisible="{Binding TieneCita}"/>
@@ -265,18 +296,18 @@
                     </CollectionView>
                 </VerticalStackLayout>
 
-                <!-- VISTA MES -->
+                 <!-- VISTA MES -->
                 <VerticalStackLayout IsVisible="{Binding EsVistaMes}">
 
                     <!-- Encabezados de días -->
                     <Grid ColumnDefinitions="*,*,*,*,*,*,*" Margin="0,0,0,10">
-                        <Label Grid.Column="0" Text="L" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
-                        <Label Grid.Column="1" Text="M" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
-                        <Label Grid.Column="2" Text="M" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
-                        <Label Grid.Column="3" Text="J" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
-                        <Label Grid.Column="4" Text="V" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
-                        <Label Grid.Column="5" Text="S" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
-                        <Label Grid.Column="6" Text="D" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
+                        <Label Grid.Column="0" Text="Lun" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
+                        <Label Grid.Column="1" Text="Mar" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
+                        <Label Grid.Column="2" Text="Mie" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
+                        <Label Grid.Column="3" Text="Jue" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
+                        <Label Grid.Column="4" Text="Vie" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
+                        <Label Grid.Column="5" Text="Sab" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
+                        <Label Grid.Column="6" Text="Dom" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
                     </Grid>
 
                     <!-- Días del Mes -->
@@ -292,7 +323,7 @@
                                        Padding="4"
                                        HasShadow="False"
                                        HeightRequest="70"
-                                       WidthRequest="50">
+                                       WidthRequest="45">
                                     <Frame.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SeleccionarDiaCommand}"
                                                             CommandParameter="{Binding}"/>

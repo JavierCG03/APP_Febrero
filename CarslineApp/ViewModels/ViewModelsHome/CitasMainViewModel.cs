@@ -34,7 +34,7 @@ namespace CarslineApp.ViewModels.ViewModelsHome
             // Otros comandos
             RefreshCommand = new Command(async () => await CargarRecordatoriosPorTipo(_tipoRecordatorioActual));
             LogoutCommand = new Command(async () => await CerrarSesion());
-            CrearCitaCommand = new Command(async () => await CrearNuevaCita(), () => !IsLoading);
+            VerAgendaCommand = new Command(async () => await VerAgenda(), () => !IsLoading);
      
         }
 
@@ -99,7 +99,8 @@ namespace CarslineApp.ViewModels.ViewModelsHome
         public ICommand VerDetalleRecordatorioCommand { get; }
         public ICommand RefreshCommand { get; }
         public ICommand LogoutCommand { get; }
-        public ICommand CrearCitaCommand { get; }
+        public ICommand VerAgendaCommand { get; }
+        
 
         #endregion
 
@@ -123,12 +124,12 @@ namespace CarslineApp.ViewModels.ViewModelsHome
 
         #region Métodos Privados
 
-        private async Task CrearNuevaCita ()
+        private async Task VerAgenda ()
         {
             try
             {
                 IsLoading = true;
-                await Application.Current.MainPage.Navigation.PushAsync(new AgendaCitas());
+                await Application.Current.MainPage.Navigation.PushAsync(new AgendaCitas(0,0,0));
             }
             catch (Exception ex)
             {

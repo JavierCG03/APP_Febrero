@@ -48,8 +48,8 @@
                                TextColor="#333333"/>
 
                         <Frame BackgroundColor="#F5F5F5"
-                               CornerRadius="10"
-                               Padding="10">
+                               CornerRadius="14"
+                               Padding="5">
                             <Entry Text="{Binding NombreUsuario}"
                                    Placeholder="Ingresa tu usuario"
                                    TextColor="Black"

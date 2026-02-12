@@ -1,10 +1,11 @@
-﻿// ViewModels/AgendaCitasViewModel.cs
+﻿using CarslineApp.Models;
+using CarslineApp.Services;
+using CarslineApp.Views;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Windows.Input;
-using CarslineApp.Models;
-using CarslineApp.Services;
 
 namespace CarslineApp.ViewModels
 {
@@ -14,9 +15,17 @@ namespace CarslineApp.ViewModels
         private DateTime _fechaSeleccionada;
         private TipoVistaAgenda _vistaActual;
         private bool _isLoading;
+        public int CitaId { get; set; }
+        public int ClienteId { get; set; }
+        public int VehiculoId { get; set; }
         private ObservableCollection<SlotHorario> _slotsHorarios;
         private ObservableCollection<DiaCalendario> _diasSemana;
         private ObservableCollection<DiaCalendario> _diasMes;
+        private DateTime _fechaUsuario;
+        private DateTime _fechaMinimaDia;
+        private DateTime _fechaMinimaSemana;
+        private DateTime _fechaMinimaMes;
+
 
         // Horarios disponibles (8:30 AM - 1:00 PM)
         private readonly List<TimeSpan> _horariosDisponibles = new()
@@ -33,14 +42,24 @@ namespace CarslineApp.ViewModels
             new TimeSpan(13, 0, 0)    // 1:00 PM
         };
 
-        public AgendaCitasViewModel()
+        public AgendaCitasViewModel(int citaId, int clienteId, int vehiculoId)
         {
             _apiService = new ApiService();
             _fechaSeleccionada = DateTime.Today;
+            _fechaUsuario = DateTime.Today;
             _vistaActual = TipoVistaAgenda.Dia;
             _slotsHorarios = new ObservableCollection<SlotHorario>();
             _diasSemana = new ObservableCollection<DiaCalendario>();
             _diasMes = new ObservableCollection<DiaCalendario>();
+            _fechaMinimaDia = DateTime.Today;
+            var diasDesdeLunes = ((int)DateTime.Today.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
+            _fechaMinimaSemana = DateTime.Today.AddDays(-diasDesdeLunes);
+            _fechaMinimaMes = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+
+            CitaId = citaId;
+            ClienteId = clienteId;
+            VehiculoId = vehiculoId;
+
 
             // Comandos
             SiguienteCommand = new Command(async () => await CambiarSiguiente());
@@ -48,7 +67,8 @@ namespace CarslineApp.ViewModels
             CambiarVistaDiaCommand = new Command(async () => await CambiarVista(TipoVistaAgenda.Dia));
             CambiarVistaSemanaActualCommand = new Command(async () => await CambiarVista(TipoVistaAgenda.SemanaActual));
             CambiarVistaMesCommand = new Command(async () => await CambiarVista(TipoVistaAgenda.Mes));
-            CrearCitaCommand = new Command<SlotHorario>(async (slot) => await CrearCita(slot));
+            DisponibleCommand = new Command<SlotHorario>(async (slot) => await DesicionDisponible(slot));
+            HorarioSemanaCommand = new Command<SlotHorario>(async (slot) => await ManejarSlotSemana(slot));
             VerDetalleCitaCommand = new Command<CitaDto>(async (cita) => await VerDetalleCita(cita));
             SeleccionarDiaCommand = new Command<DiaCalendario>(async (dia) => await SeleccionarDia(dia));
 
@@ -64,10 +84,33 @@ namespace CarslineApp.ViewModels
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(FechaSeleccionadaTexto));
                 OnPropertyChanged(nameof(TituloVista));
+                OnPropertyChanged(nameof(PuedeRegresar));
+                
             }
         }
 
         public string FechaSeleccionadaTexto => FechaSeleccionada.ToString("dddd, dd 'de' MMMM yyyy");
+
+        public bool PuedeRegresar
+        {
+            get
+            {
+                return VistaActual switch
+                {
+                    TipoVistaAgenda.Dia =>
+                        FechaSeleccionada.Date > _fechaMinimaDia.Date,
+                    TipoVistaAgenda.SemanaActual =>
+                        ObtenerLunes(FechaSeleccionada) > _fechaMinimaSemana,
+                    TipoVistaAgenda.Mes =>
+                        FechaSeleccionada.Year > _fechaMinimaMes.Year ||
+                        (FechaSeleccionada.Year == _fechaMinimaMes.Year &&
+                         FechaSeleccionada.Month > _fechaMinimaMes.Month),
+
+                    _ => false
+                };
+            }
+        }
+
 
         public TipoVistaAgenda VistaActual
         {
@@ -80,21 +123,24 @@ namespace CarslineApp.ViewModels
                 OnPropertyChanged(nameof(EsVistaSemana));
                 OnPropertyChanged(nameof(EsVistaMes));
                 OnPropertyChanged(nameof(TituloVista));
+                OnPropertyChanged(nameof(PuedeRegresar));
+
             }
         }
 
         public string TituloVista => VistaActual switch
         {
             TipoVistaAgenda.Dia => FechaSeleccionada.ToString("dddd dd MMM"),
-            TipoVistaAgenda.SemanaActual => "Semana",
+            TipoVistaAgenda.SemanaActual => ObtenerTituloSemana(),
             TipoVistaAgenda.Mes => FechaSeleccionada.ToString("MMMM yyyy"),
             _ => ""
         };
-
+        public bool EsCrearNueva => (CitaId == 0 && ClienteId == 0 && VehiculoId == 0);
+        public bool EsReagendar => (CitaId > 0 && ClienteId == 0 && VehiculoId == 0);
+        public bool EsContinuarCita => (CitaId == 0 && VehiculoId > 0 && ClienteId > 0);
         public bool EsVistaDia => VistaActual == TipoVistaAgenda.Dia;
-        public bool EsVistaSemana => VistaActual == TipoVistaAgenda.SemanaActual || VistaActual == TipoVistaAgenda.SemanaSiguiente;
+        public bool EsVistaSemana => VistaActual == TipoVistaAgenda.SemanaActual;
         public bool EsVistaMes => VistaActual == TipoVistaAgenda.Mes;
-
         public bool IsLoading
         {
             get => _isLoading;
@@ -131,7 +177,8 @@ namespace CarslineApp.ViewModels
         public ICommand SeleccionarDiaCommand { get; }
         public ICommand AnteriorCommand { get; }
         public ICommand SiguienteCommand { get; }
-
+        public ICommand DisponibleCommand { get; }
+        public ICommand HorarioSemanaCommand { get; }
 
         #endregion
 
@@ -145,23 +192,44 @@ namespace CarslineApp.ViewModels
         #endregion
 
         #region Métodos Privados
+        private string ObtenerTituloSemana()
+        {
+            var lunesSeleccionado = ObtenerLunes(FechaSeleccionada);
+            var lunesActual = ObtenerLunes(DateTime.Today);
+            var lunesSiguiente = lunesActual.AddDays(7);
+
+            if (lunesSeleccionado == lunesActual)
+                return "Semana actual";
+
+            if (lunesSeleccionado == lunesSiguiente)
+                return "Semana siguiente";
+
+            var sabado = lunesSeleccionado.AddDays(5);
+
+            return $"Semana del {lunesSeleccionado:dd} – {sabado:dd MMM}";
+        }
+
+        private DateTime ObtenerLunes(DateTime fecha)
+        {
+            int diff = (7 + (fecha.DayOfWeek - DayOfWeek.Monday)) % 7;
+            return fecha.AddDays(-diff).Date;
+        }
+
 
         private async Task CambiarVista(TipoVistaAgenda nuevaVista)
         {
             VistaActual = nuevaVista;
 
-            if (nuevaVista == TipoVistaAgenda.SemanaSiguiente)
+            if (nuevaVista == TipoVistaAgenda.Dia)
             {
-                // Calcular lunes de la próxima semana
-                var diasHastaLunes = ((int)DayOfWeek.Monday - (int)DateTime.Today.DayOfWeek + 7) % 7;
-                if (diasHastaLunes == 0) diasHastaLunes = 7;
-                FechaSeleccionada = DateTime.Today.AddDays(diasHastaLunes);
+                // ✅ Al regresar a DÍA, restaurar la fecha del usuario
+                FechaSeleccionada = _fechaUsuario;
             }
-            else if (nuevaVista == TipoVistaAgenda.SemanaActual)
+
+            if (nuevaVista == TipoVistaAgenda.SemanaActual)
             {
-                // Calcular lunes de esta semana
-                var diasDesdeeLunes = ((int)DateTime.Today.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
-                FechaSeleccionada = DateTime.Today.AddDays(-diasDesdeeLunes);
+                FechaSeleccionada = ObtenerLunes(DateTime.Today);
+
             }
 
             await CargarVista();
@@ -179,7 +247,6 @@ namespace CarslineApp.ViewModels
                         await CargarVistaDia();
                         break;
                     case TipoVistaAgenda.SemanaActual:
-                    case TipoVistaAgenda.SemanaSiguiente:
                         await CargarVistaSemana();
                         break;
                     case TipoVistaAgenda.Mes:
@@ -217,39 +284,45 @@ namespace CarslineApp.ViewModels
                     return horaCita >= horario && horaCita < horaFin;
                 });
 
+                bool esPasado = fechaHoraCita < DateTime.Now;
+                bool tieneCita = (citaEnHorario != null);
+
                 var slot = new SlotHorario
                 {
                     FechaHora = fechaHoraCita,
                     HoraTexto = horario.ToString(@"hh\:mm"),
-                    TieneCita = citaEnHorario != null,
                     Cita = citaEnHorario,
-                    EsPasado = fechaHoraCita < DateTime.Now
+                    EsPasado = esPasado && !tieneCita,
+                    TieneCita = tieneCita
                 };
 
                 SlotsHorarios.Add(slot);
-
-                // Debug para verificar
-                if (citaEnHorario != null)
-                {
-                    System.Diagnostics.Debug.WriteLine($"🔴 Slot {slot.HoraTexto} OCUPADO por: {citaEnHorario.ClienteNombre} ({citaEnHorario.FechaCita:HH:mm})");
-                }
             }
-
-            System.Diagnostics.Debug.WriteLine($"✅ Slots creados: {SlotsHorarios.Count}, Ocupados: {SlotsHorarios.Count(s => s.TieneCita)}");
         }
 
         private async Task CargarVistaSemana()
         {
             DiasSemana.Clear();
 
-            // Calcular lunes de la semana
-            var diasDesdeLunes = ((int)FechaSeleccionada.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
-            var lunesSemana = FechaSeleccionada.AddDays(-diasDesdeLunes);
+            var lunesSemana = ObtenerLunes(FechaSeleccionada);
+            var lunesActual = ObtenerLunes(DateTime.Today);
 
-            // Crear días de lunes a sábado
-            for (int i = 0; i < 6; i++)
+            DateTime diaInicio;
+
+            if (lunesSemana == lunesActual)
             {
-                var dia = lunesSemana.AddDays(i);
+                diaInicio = DateTime.Today;
+            }
+            else
+            {
+                diaInicio = lunesSemana;
+            }
+
+            // 🔹 Mostrar hasta sábado
+            var sabado = lunesSemana.AddDays(5);
+
+            for (var dia = diaInicio; dia <= sabado; dia = dia.AddDays(1))
+            {
                 var response = await _apiService.ObtenerCitasPorFechaAsync(dia);
 
                 var diaCalendario = new DiaCalendario
@@ -263,27 +336,29 @@ namespace CarslineApp.ViewModels
                     Citas = new ObservableCollection<CitaDto>(response.Citas ?? new List<CitaDto>())
                 };
 
-                // Crear slots de horario para cada día
+                // Crear slots
                 diaCalendario.Slots = new ObservableCollection<SlotHorario>();
                 foreach (var horario in _horariosDisponibles)
                 {
                     var fechaHoraCita = dia.Date + horario;
                     var horaFin = horario.Add(TimeSpan.FromMinutes(30));
 
-                    // ✅ CORRECCIÓN: Buscar citas que caen dentro de este slot
                     var citaEnHorario = response.Citas?.FirstOrDefault(c =>
                     {
                         var horaCita = c.FechaCita.TimeOfDay;
                         return horaCita >= horario && horaCita < horaFin;
                     });
 
+                    bool esPasado = fechaHoraCita < DateTime.Now;
+                    bool tieneCita = citaEnHorario != null;
+
                     diaCalendario.Slots.Add(new SlotHorario
                     {
                         FechaHora = fechaHoraCita,
                         HoraTexto = horario.ToString(@"hh\:mm"),
-                        TieneCita = citaEnHorario != null,
                         Cita = citaEnHorario,
-                        EsPasado = fechaHoraCita < DateTime.Now
+                        EsPasado = esPasado && !tieneCita,
+                        TieneCita = tieneCita
                     });
                 }
 
@@ -301,7 +376,7 @@ namespace CarslineApp.ViewModels
             }
             else if (EsVistaSemana)
             {
-                FechaSeleccionada = FechaSeleccionada.AddDays(7);
+                FechaSeleccionada = ObtenerLunes(FechaSeleccionada.AddDays(7));
                 await CargarVistaSemana();
             }
             else
@@ -312,25 +387,18 @@ namespace CarslineApp.ViewModels
         }
         private async Task CambiarAnterior()
         {
+            if (!PuedeRegresar)
+                return;
+
             if (EsVistaDia)
-            {
                 FechaSeleccionada = FechaSeleccionada.AddDays(-1);
-                await CargarVista();
-
-            }
             else if (EsVistaSemana)
-            {
-                FechaSeleccionada = FechaSeleccionada.AddDays(-7);
-                await CargarVistaSemana();
-            }
+                FechaSeleccionada = ObtenerLunes(FechaSeleccionada.AddDays(-7));
             else
-            {
                 FechaSeleccionada = FechaSeleccionada.AddMonths(-1);
-                await CargarVistaMes();
-            }
 
+            await CargarVista();
         }
-
 
         private async Task CargarVistaMes()
         {
@@ -342,11 +410,15 @@ namespace CarslineApp.ViewModels
             // Agregar días vacíos al inicio para alinear
             var primerDiaSemana = (int)primerDiaMes.DayOfWeek;
             var diasVaciosInicio = primerDiaSemana == 0 ? 6 : primerDiaSemana - 1;
+
             for (int i = 0; i < diasVaciosInicio; i++)
             {
-                DiasMes.Add(new DiaCalendario { EsVacio = true });
+                DiasMes.Add(new DiaCalendario 
+                { 
+                    EsVacio = true,
+                    EsPasado = true
+                });
             }
-
             // Agregar todos los días del mes
             for (var dia = primerDiaMes; dia <= ultimoDiaMes; dia = dia.AddDays(1))
             {
@@ -360,8 +432,7 @@ namespace CarslineApp.ViewModels
                 });
             }
         }
-
-        private async Task CrearCita(SlotHorario slot)
+        private async Task DesicionDisponible(SlotHorario slot)
         {
             if (slot.EsPasado)
             {
@@ -381,18 +452,287 @@ namespace CarslineApp.ViewModels
                 return;
             }
 
-            // Navegar a página de crear cita con el horario preseleccionado
-            //var crearCitaPage = new CrearCitaPage(slot.FechaHora);
-            //await Application.Current.MainPage.Navigation.PushAsync(crearCitaPage);
+            if (EsCrearNueva)
+            {
+                await CrearNuevaCita(slot);
+            }
+            if (EsReagendar)
+            {
+                await ReagendarCita(slot);
+            }
+            if (EsContinuarCita)
+            {
+                await ContinuarCita(slot);
+            }
+
+        }
+        private async Task ManejarSlotSemana(SlotHorario slot)
+        {
+            if (slot == null) return;
+
+            if (slot.EsPasado)
+            {
+                await Application.Current.MainPage.DisplayAlert(
+                    "⚠️ Horario Pasado",
+                    "No se pueden realizar acciones en horarios que ya pasaron",
+                    "OK");
+                return;
+            }
+            if (slot.TieneCita)
+            {
+                await ManejarSlotConCita(slot);
+            }
+            else
+            {
+                await ManejarSlotDisponible(slot);
+            }
+        }
+        /// <summary>
+        /// Maneja el toque en un slot que tiene una cita
+        /// </summary>
+        private async Task ManejarSlotConCita(SlotHorario slot)
+        {
+            if (slot.Cita == null) return;
+
+            // ✅ SI ESTAMOS EN MODO REAGENDAR: Mostrar que no puede seleccionar cita ocupada
+            if (EsReagendar)
+            {
+                await Application.Current.MainPage.DisplayAlert(
+                    "⚠️ Horario Ocupado",
+                    $"Este horario ya está ocupado por {slot.Cita.ClienteNombre}.\n\nSeleccione un horario disponible para reagendar.",
+                    "OK");
+                return;
+            }
+
+            // ✅ SI NO ESTAMOS REAGENDANDO: Mostrar opciones de la cita
+            var accion = await Application.Current.MainPage.DisplayActionSheet(
+                $"Cita: {slot.Cita.ClienteNombre}",
+                "Cancelar",
+                null,
+                "👁️ Ver Detalles",
+                "🗑️ Cancelar Cita"
+            );
+
+            switch (accion)
+            {
+                case "👁️ Ver Detalles":
+                    await VerDetalleCita(slot.Cita);
+                    break;
+
+                case "🗑️ Cancelar Cita":
+                    await CancelarCitaConfirmacion(slot.Cita);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Maneja el toque en un slot disponible
+        /// </summary>
+        private async Task ManejarSlotDisponible(SlotHorario slot)
+        {
+            // ✅ MODO 1: CREAR NUEVA CITA
+            if (EsCrearNueva)
+            {
+                await CrearNuevaCita(slot);
+            }
+
+            // ✅ MODO 2: REAGENDAR CITA EXISTENTE
+            else if (EsReagendar)
+            {
+                await ReagendarCita(slot);
+            }
+
+            // ✅ MODO 3: CONTINUAR CREACIÓN DE CITA (con cliente/vehículo)
+            else if (EsContinuarCita)
+            {
+                await ContinuarCita(slot);
+            }
+
+            // ✅ MODO DEFAULT: Preguntar qué hacer
+            else
+            {
+                await CrearNuevaCita(slot);
+            }
+        }
+
+        private async Task CrearNuevaCita(SlotHorario slot)
+        {
+            try
+            {
+                var accion = await Application.Current.MainPage.DisplayActionSheet(
+                    "Selecciona tu tipo de Cita",
+                    "Cancelar",
+                    null,
+                    "🔧 Servicio",
+                    "🔍 Diagnóstico",
+                    "🛠️ Reparación",
+                    "✅ Garantía"
+                );
+
+                if (accion == "Cancelar" || string.IsNullOrEmpty(accion))
+                    return;
+
+                // Determinar el tipo de orden según la selección
+                int tipoOrden = accion switch
+                {
+                    "🔧 Servicio" => 1,
+                    "🔍 Diagnóstico" => 2,
+                    "🛠️ Reparación" => 3,
+                    "✅ Garantía" => 4,
+                    _ => 1
+                };
+
+                // Navegar a la página de crear orden
+                var crearOrdenPage = new CrearCitaPage(tipoOrden, 0, 0, slot.FechaHora);
+                await Application.Current.MainPage.Navigation.PushAsync(crearOrdenPage);
+
+                // Recargar cuando regrese
+                crearOrdenPage.Disappearing += async (s, e) =>
+                {
+                    FechaSeleccionada = slot.FechaHora;
+                    await CargarVistaDia();
+                };
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert(
+                    "Error",
+                    $"Error al abrir selector: {ex.Message}",
+                    "OK");
+            }
+        }
+        private async Task ReagendarCita(SlotHorario slot)
+        {
+            try
+            {
+                IsLoading = true;
+
+                var response = await _apiService.ReagendarCitaAsync(CitaId, slot.FechaHora);
+
+                if (response != null && response.Success)
+                {
+                    await Application.Current.MainPage.DisplayAlert(
+                        "✅ Cita reagendada",
+                        "La cita fue reagendada exitosamente.",
+                        "OK");
+
+                    CitaId = 0;
+                    ClienteId = 0;
+                    VehiculoId = 0;
+
+                    OnPropertyChanged(nameof(EsCrearNueva));
+                    OnPropertyChanged(nameof(EsReagendar));
+                    OnPropertyChanged(nameof(EsContinuarCita));
+
+                    FechaSeleccionada = slot.FechaHora.Date;
+                    await CargarVistaDia();
+                }
+                else
+                {
+                    await Application.Current.MainPage.DisplayAlert(
+                        "⚠️ Error",
+                        response?.Message ?? "No se pudo reagendar la cita.",
+                        "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert(
+                    "❌ Error",
+                    $"Error al reagendar: {ex.Message}",
+                    "OK");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        private async Task ContinuarCita(SlotHorario slot)
+        {
+
+
+        }
+
+        /// <summary>
+        /// Cancela una cita con confirmación
+        /// </summary>
+        private async Task CancelarCitaConfirmacion(CitaDto cita)
+        {
+            bool confirmar = await Application.Current.MainPage.DisplayAlert(
+                "🗑️ Cancelar Cita",
+                $"¿Está seguro que desea cancelar la cita de {cita.ClienteNombre}?\n\nEsta acción no se puede deshacer.",
+                "Sí, cancelar",
+                "No");
+
+            if (!confirmar) return;
+
+            try
+            {
+                IsLoading = true;
+
+                var response = await _apiService.CancelarCitaAsync(cita.Id);
+
+                if (response.Success)
+                {
+                    await Application.Current.MainPage.DisplayAlert(
+                        "✅ Cita Cancelada",
+                        "La cita ha sido cancelada exitosamente",
+                        "OK");
+
+                    // Recargar la vista
+                    await CargarVista();
+                }
+                else
+                {
+                    await Application.Current.MainPage.DisplayAlert(
+                        "❌ Error",
+                        response.Message ?? "No se pudo cancelar la cita",
+                        "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ Error al cancelar cita: {ex.Message}");
+                await Application.Current.MainPage.DisplayAlert(
+                    "❌ Error",
+                    "Ocurrió un error al cancelar la cita",
+                    "OK");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         private async Task VerDetalleCita(CitaDto cita)
         {
-            if (cita == null) return;
+            if (EsReagendar  )
+            {
+                await Application.Current.MainPage.DisplayAlert(
+                    "⚠️ Horario ocupado",
+                    $"Elige un horario disponible para reagendar",
+                    "OK");
+                return;
+            }
+            else if(EsContinuarCita)
+            {
+                await Application.Current.MainPage.DisplayAlert(
+                "⚠️ Horario ocupado",
+                $"Elige un horario disponible para tu nueva cita",
+                "OK");
+                return;
 
-            // Navegar a detalle de cita
-            // var detallePage = new DetalleCitaPage(cita.Id);
-            //await Application.Current.MainPage.Navigation.PushAsync(detallePage);
+            }
+            else
+            {
+                if (cita == null) return;
+
+                // Navegar a detalle de cita
+                var detallePage = new ResumenCitaPage(cita.Id);
+                await Application.Current.MainPage.Navigation.PushAsync(detallePage);
+
+            }
         }
 
         private async Task SeleccionarDia(DiaCalendario dia)
@@ -420,7 +760,6 @@ namespace CarslineApp.ViewModels
     {
         Dia,
         SemanaActual,
-        SemanaSiguiente,
         Mes
     }
 
@@ -447,11 +786,9 @@ namespace CarslineApp.ViewModels
 
         public bool Disponible => !TieneCita && !EsPasado;
 
-        // ✅ NUEVA PROPIEDAD: Información a mostrar en el slot ocupado
-        public string InfoCita => TieneCita && Cita != null
+        public string InfoCita => !EsPasado && TieneCita && Cita != null
             ? $"{Cita.ClienteNombre}\n{Cita.TipoOrden}"
-            : string.Empty;
-
+    :       string.Empty;
         public string ColorFondo =>EsPasado? "#F5F5F5": (TieneCita ? "#FFEBEE" : "White"); // fondo rojo suave
 
         public string ColorBorde => EsPasado? "#E0E0E0": (TieneCita ? "#B00000" : "#BDBDBD"); // rojo fuerte
@@ -476,7 +813,7 @@ namespace CarslineApp.ViewModels
         public ObservableCollection<CitaDto> Citas { get; set; }
         public ObservableCollection<SlotHorario> Slots { get; set; }
 
-        public string ColorFondo => EsVacio ? "Transparent" : (EsPasado ? "#F5F5F5" : (EsHoy ? "#FFEBEE" : "White"));
+        public string ColorFondo => EsPasado ? "#F5F5F5" : (EsHoy ? "#FFEBEE" : "White");
         public string ColorTexto => EsPasado ? "#BDBDBD" : (EsHoy ? "#B00000" : "Black");
         public bool MostrarTachado => EsPasado && !EsVacio;
 

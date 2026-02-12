@@ -38,6 +38,7 @@ namespace CarslineApp.ViewModels.ViewModelsHome
             CancelarOrdenCommand = new Command<int>(async (ordenId) => await CancelarOrden(ordenId));
             EntregarOrdenCommand = new Command<int>(async (ordenId) => await EntregarOrden(ordenId));
             LogoutCommand = new Command(async () => await OnLogout());
+            VerAgendaCommand = new Command(async () => await VerAgenda(), () => !IsLoading);
             BuscadorCommand = new Command(async () =>
             {
                 try
@@ -161,6 +162,7 @@ namespace CarslineApp.ViewModels.ViewModelsHome
         public ICommand VerDetalleOrdenCommand { get; } // ✅ NUEVO
         public ICommand TomarEvidenciasCommand { get; }
         public ICommand BuscadorCommand { get; }
+        public ICommand VerAgendaCommand { get; }
 
         #endregion
 
@@ -318,80 +320,6 @@ namespace CarslineApp.ViewModels.ViewModelsHome
             }
         }
 
-        /// <summary>
-        /// ✅ NUEVO: Ver detalle completo de una orden con sus trabajos
-        /// </summary>
-        /*
-        private async Task VerDetalleOrden(int ordenId)
-        {
-            try
-            {
-                IsLoading = true;
-
-                // Obtener orden completa con trabajos
-                var ordenCompleta = await _apiService.ObtenerOrdenCompletaAsync(ordenId);
-
-                if (ordenCompleta == null)
-                {
-                    await Application.Current.MainPage.DisplayAlert(
-                        "Error",
-                        "No se pudo cargar el detalle de la orden",
-                        "OK");
-                    return;
-                }
-
-                // Crear mensaje con detalles
-                var mensaje = $"📋 {ordenCompleta.NumeroOrden}\n\n" +
-                             $"Cliente: {ordenCompleta.ClienteNombre}\n" +
-                             $"Telefono: {ordenCompleta.ClienteTelefono}\n" +
-                             $"Vehículo: {ordenCompleta.VehiculoCompleto}\n" +
-                             $"VIN: {ordenCompleta.VIN}\n\n" +
-                             $"Promesa: {ordenCompleta.FechaHoraPromesaEntrega}\n" +
-                             $"📊 Progreso: {ordenCompleta.ProgresoTexto} ({ordenCompleta.ProgresoFormateado})\n\n" +
-                             $"🔧 TRABAJOS:\n";
-
-                foreach (var trabajo in ordenCompleta.Trabajos)
-                {
-                    var icono = trabajo.EstadoTrabajo switch
-                    {
-                        1 => "⏳", // Pendiente
-                        2 => "🛠️", // Asignado
-                        3 => "🔨", // En Proceso
-                        4 => "✅", // Completado
-                        5 => "⏸️", // Pausado
-                        6 => "❌", // Cancelado
-                        _ => "📌"
-                    };
-
-                    mensaje += $"\n{icono}{trabajo.EstadoTrabajoNombre} \n-{trabajo.Trabajo} ";
-
-                    if (!string.IsNullOrEmpty(trabajo.TecnicoNombre))
-                        mensaje += $"\n   👨‍🔧 {trabajo.TecnicoNombre}";
-
-                    if (!string.IsNullOrEmpty(trabajo.DuracionFormateada) && trabajo.DuracionFormateada != "-")
-                        mensaje += $"\n   ⏱️ {trabajo.DuracionFormateada}";
-
-                    mensaje += "\n";
-                }
-
-                await Application.Current.MainPage.DisplayAlert(
-                    "Detalle de Orden",
-                    mensaje,
-                    "OK");
-            }
-            catch (Exception ex)
-            {
-                await Application.Current.MainPage.DisplayAlert(
-                    "Error",
-                    $"Error al cargar detalle: {ex.Message}",
-                    "OK");
-            }
-            finally
-            {
-                IsLoading = false;
-            }
-        }*/
-
         private async Task CancelarOrden(int ordenId)
         {
             bool confirm = await Application.Current.MainPage.DisplayAlert(
@@ -507,6 +435,25 @@ namespace CarslineApp.ViewModels.ViewModelsHome
                 await Application.Current.MainPage.DisplayAlert(
                     "Error",
                     $"Error al entregar orden: {ex.Message}",
+                    "OK");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+        private async Task VerAgenda()
+        {
+            try
+            {
+                IsLoading = true;
+                await Application.Current.MainPage.Navigation.PushAsync(new AgendaCitas(0, 0, 0));
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert(
+                    "Error",
+                    $"No se pudo abrir la agenda de citas: {ex.Message}",
                     "OK");
             }
             finally

@@ -151,7 +151,7 @@
                            HasShadow="False"
                            BackgroundColor="#B00000">
                         <Frame.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding CrearCitaCommand}"/>
+                            <TapGestureRecognizer Command="{Binding VerAgendaCommand}"/>
                         </Frame.GestureRecognizers>
                         <Grid Padding="15,12"
                               ColumnDefinitions="40,*,Auto"
@@ -161,7 +161,7 @@
                                    FontSize="24"
                                    VerticalOptions="Center"/>
                             <Label Grid.Column="1"
-                                   Text="Agenda Citas "
+                                   Text="Agenda de Citas "
                                    FontSize="16"
                                    TextColor="White"
                                    VerticalOptions="Center"/>

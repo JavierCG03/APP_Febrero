@@ -7,10 +7,10 @@ namespace CarslineApp.Views
     {
         private readonly AgendaCitasViewModel _viewModel;
 
-        public AgendaCitas()
+        public AgendaCitas(int CitaId, int ClienteId, int VehiculoId)
         {
             InitializeComponent();
-            _viewModel = new AgendaCitasViewModel();
+            _viewModel = new AgendaCitasViewModel(CitaId,ClienteId,VehiculoId);
             BindingContext = _viewModel;
         }
 

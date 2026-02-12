@@ -226,6 +226,85 @@ namespace CarslineApp.Services
                 };
             }
         }
+        /// <summary>
+        /// Reagendar una cita existente a una nueva fecha
+        /// </summary>
+        public async Task<ReagendarCitaResponse> ReagendarCitaAsync(int citaId, DateTime nuevaFecha)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"🔄 Reagendando cita {citaId} a {nuevaFecha:dd/MMM/yyyy HH:mm}");
+
+                // Validación en el cliente antes de enviar
+                if (nuevaFecha <= DateTime.Now)
+                {
+                    return new ReagendarCitaResponse
+                    {
+                        Success = false,
+                        Message = "La nueva fecha debe ser en el futuro"
+                    };
+                }
+
+                var request = new ReagendarCitaRequest
+                {
+                    NuevaFechaCita = nuevaFecha
+                };
+
+                var response = await _httpClient.PutAsJsonAsync(
+                    $"{BaseUrl}/Citas/reagendar/{citaId}",
+                    request);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<ReagendarCitaResponse>();
+
+                    System.Diagnostics.Debug.WriteLine($"✅ Cita reagendada exitosamente");
+
+                    return result ?? new ReagendarCitaResponse
+                    {
+                        Success = false,
+                        Message = "Error al procesar respuesta"
+                    };
+                }
+
+                // Manejar errores específicos
+                var errorJson = await response.Content.ReadAsStringAsync();
+
+                try
+                {
+                    var errorResponse = JsonSerializer.Deserialize<ReagendarCitaResponse>(errorJson);
+                    if (errorResponse != null && !string.IsNullOrEmpty(errorResponse.Message))
+                    {
+                        System.Diagnostics.Debug.WriteLine($"⚠️ Error al reagendar: {errorResponse.Message}");
+                        return errorResponse;
+                    }
+                }
+                catch
+                {
+                    // Si no se puede deserializar, usar mensaje genérico
+                }
+
+                return new ReagendarCitaResponse
+                {
+                    Success = false,
+                    Message = response.StatusCode switch
+                    {
+                        System.Net.HttpStatusCode.NotFound => "Cita no encontrada",
+                        System.Net.HttpStatusCode.BadRequest => "Fecha inválida o horario ocupado",
+                        _ => $"Error al reagendar: {response.StatusCode}"
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ Excepción al reagendar cita: {ex.Message}");
+                return new ReagendarCitaResponse
+                {
+                    Success = false,
+                    Message = $"Error: {ex.Message}"
+                };
+            }
+        }
 
         /// <summary>
         /// Obtener citas de hoy
