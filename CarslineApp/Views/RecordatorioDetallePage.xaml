@@ -181,6 +181,13 @@
                         HeightRequest="50"
                         WidthRequest="50"
                         Clicked="OnEnviarCorreoClicked"/>
+                    
+                    <ImageButton  
+                        Source="agenda.png"
+                        BackgroundColor="Transparent"
+                        HeightRequest="50"
+                        WidthRequest="50"
+                        Clicked="AgendarCitaClicked"/>
 
                 </HorizontalStackLayout>
                 

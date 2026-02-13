@@ -10,6 +10,8 @@
     public class RecordatorioServicioDto
     {
         public int Id { get; set; }
+        public int ClienteId { get; set; }
+        public int VehiculoId { get; set; }
 
         // Informacion del Cliente
         public string ClienteNombre { get; set; } = string.Empty;

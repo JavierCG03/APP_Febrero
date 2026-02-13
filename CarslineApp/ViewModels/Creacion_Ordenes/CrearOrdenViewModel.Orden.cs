@@ -23,9 +23,6 @@ namespace CarslineApp.ViewModels
         private decimal _costoTotal;
 
 
-
-
-
         #endregion
 
         #region Propiedades Orden

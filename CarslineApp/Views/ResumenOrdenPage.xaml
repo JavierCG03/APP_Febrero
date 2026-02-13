@@ -134,7 +134,7 @@
                                    FontAttributes="Bold"/>
                             <Label Grid.Row="1" Grid.Column="1"
                                    Text="{Binding VinVehiculo}"
-                                   FontSize="11"
+                                   FontSize="13"
                                    TextColor="Black"/>
 
                             <Label Grid.Row="2" Grid.Column="0"

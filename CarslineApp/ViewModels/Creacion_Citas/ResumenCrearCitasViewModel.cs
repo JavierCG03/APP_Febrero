@@ -8,7 +8,7 @@ using CarslineApp.Services;
 
 namespace CarslineApp.ViewModels.Creacion_Citas
 {
-    public class ResumenCitasViewModel : INotifyPropertyChanged
+    public class ResumenCrearCitasViewModel : INotifyPropertyChanged
     {
         private readonly ApiService _apiService;
         private bool _isLoading;
@@ -35,7 +35,7 @@ namespace CarslineApp.ViewModels.Creacion_Citas
         private string _tipoServicioNombre = string.Empty;
         private decimal _costoTotal;
 
-        public ResumenCitasViewModel(
+        public ResumenCrearCitasViewModel(
             int tipoOrdenId,
             int clienteId,
             int vehiculoId,
@@ -266,7 +266,8 @@ namespace CarslineApp.ViewModels.Creacion_Citas
                     "❌ Error",
                     $"Error al crear Cita: {ex.Message}",
                     "OK");
-                await Application.Current.MainPage.Navigation.PushAsync(new AgendaCitas(0, 0, 0));
+
+                Application.Current.MainPage = new NavigationPage(new AgendaCitas(0, 0, 0));
             }
             finally
             {

@@ -60,7 +60,6 @@ namespace CarslineApp.ViewModels
             ClienteId = clienteId;
             VehiculoId = vehiculoId;
 
-
             // Comandos
             SiguienteCommand = new Command(async () => await CambiarSiguiente());
             AnteriorCommand = new Command(async () => await CambiarAnterior());
@@ -71,7 +70,7 @@ namespace CarslineApp.ViewModels
             HorarioSemanaCommand = new Command<SlotHorario>(async (slot) => await ManejarSlotSemana(slot));
             VerDetalleCitaCommand = new Command<CitaDto>(async (cita) => await VerDetalleCita(cita));
             SeleccionarDiaCommand = new Command<DiaCalendario>(async (dia) => await SeleccionarDia(dia));
-
+            BackCommand = new Command(async () => await RegresarAtras());
         }
         #region Propiedades
 
@@ -179,6 +178,7 @@ namespace CarslineApp.ViewModels
         public ICommand SiguienteCommand { get; }
         public ICommand DisponibleCommand { get; }
         public ICommand HorarioSemanaCommand { get; }
+        public ICommand BackCommand { get; }
 
         #endregion
 
@@ -259,7 +259,17 @@ namespace CarslineApp.ViewModels
                 IsLoading = false;
             }
         }
-
+        private async Task RegresarAtras()
+        {
+            try
+            {
+                await Application.Current.MainPage.Navigation.PopToRootAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error al regresar: {ex.Message}");
+            }
+        }
         private async Task CargarVistaDia()
         {
             System.Diagnostics.Debug.WriteLine($"📅 Cargando citas para: {FechaSeleccionada:dd/MMM/yyyy}");
@@ -650,8 +660,33 @@ namespace CarslineApp.ViewModels
 
         private async Task ContinuarCita(SlotHorario slot)
         {
+            try
+            {
+                bool confirmar = await Application.Current.MainPage.DisplayAlert(
+                "Agendar Cita",
+                $"¿Está seguro que desea Agendar la cita de en el horario de {slot.HoraTexto}?",
+                "Sí",
+                "No");
+                if (!confirmar) return;
 
+                // Navegar a la página de crear orden
+                var crearOrdenPage = new CrearCitaPage(1, VehiculoId, ClienteId,  slot.FechaHora);
+                await Application.Current.MainPage.Navigation.PushAsync(crearOrdenPage);
 
+                // Recargar cuando regrese
+                crearOrdenPage.Disappearing += async (s, e) =>
+                {
+                    FechaSeleccionada = slot.FechaHora;
+                    await CargarVistaDia();
+                };
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert(
+                    "Error",
+                    $"Error al seleccionar el Horario",
+                    "OK");
+            }
         }
 
         /// <summary>
@@ -789,10 +824,15 @@ namespace CarslineApp.ViewModels
         public string InfoCita => !EsPasado && TieneCita && Cita != null
             ? $"{Cita.ClienteNombre}\n{Cita.TipoOrden}"
     :       string.Empty;
-        public string ColorFondo =>EsPasado? "#F5F5F5": (TieneCita ? "#FFEBEE" : "White"); // fondo rojo suave
+        public string ColorFondo => EsPasado
+            ? "#F5F5F5"                // gris muy claro
+            : (TieneCita ? "#FFEBEE"   // rojo suave
+                         : "#E8F5E9"); // verde claro
 
-        public string ColorBorde => EsPasado? "#E0E0E0": (TieneCita ? "#B00000" : "#BDBDBD"); // rojo fuerte
-
+        public string ColorBorde => EsPasado
+            ? "#E0E0E0"                // gris medio
+            : (TieneCita ? "#B00000"   // rojo fuerte
+                         : "#1B5E20"); // verde bandera fuerte
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {

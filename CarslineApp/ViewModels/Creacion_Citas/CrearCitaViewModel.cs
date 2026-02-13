@@ -1,5 +1,4 @@
-﻿
-using CarslineApp.Models;
+﻿using CarslineApp.Models;
 using CarslineApp.Services;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -23,7 +22,7 @@ namespace CarslineApp.ViewModels.Creacion_Citas
         private bool _isLoading;
         private string _errorMessage = string.Empty;
 
-        
+
         public CrearCitaViewModel(int tipoOrdenId, int vehiculoId, int clienteId, DateTime fechahoracita)
         {
             _tipoOrdenId = tipoOrdenId;
@@ -51,6 +50,8 @@ namespace CarslineApp.ViewModels.Creacion_Citas
             AgregarTrabajoPersonalizadoCommand = new Command(AgregarTrabajoPersonalizado);
             EliminarTrabajoPersonalizadoCommand = new Command<TrabajoCrearDto>(EliminarTrabajoPersonalizado);
 
+            // Determinar paso inicial y cargar datos si vienen parámetros
+            DeterminarPasoInicial();
 
             CargarCatalogos();
 
@@ -299,6 +300,103 @@ namespace CarslineApp.ViewModels.Creacion_Citas
         #endregion
 
         #region Métodos Auxiliares
+
+        /// <summary>
+        /// Determina el paso inicial basado en los parámetros recibidos y carga los datos correspondientes
+        /// </summary>
+        private async void DeterminarPasoInicial()
+        {
+            // Si vienen tanto clienteId como vehiculoId, ir directo al paso 3 (Orden)
+            if (_entradaclienteId > 0 && _entradavehiculoId > 0)
+            {
+                
+                await CargarDatosCliente(_entradaclienteId);
+                await CargarDatosVehiculo(_entradavehiculoId);
+                System.Diagnostics.Debug.WriteLine($"[DeterminarPasoInicial] ClienteId: {_entradaclienteId}, VehiculoId: {_entradavehiculoId}");
+                await CargarHistorialVehiculo();
+                PasoActual = 3;
+            }
+            // Si solo viene clienteId, ir al paso 2 (Vehículo)
+            else if (_entradaclienteId > 0)
+            {
+                await CargarDatosCliente(_entradaclienteId);
+                PasoActual = 2;
+                // Buscar vehículos del cliente
+                BuscarVehiculoCliente(_entradaclienteId);
+            }
+            // Si no viene ninguno, empezar desde el paso 1 (Cliente)
+            else
+            {
+                PasoActual = 1;
+            }
+        }
+
+        /// <summary>
+        /// Carga los datos del cliente por ID
+        /// </summary>
+        private async Task CargarDatosCliente(int clienteId)
+        {
+            try
+            {
+                var response = await _apiService.ObtenerClientePorIdAsync(clienteId);
+
+                if (response.Success && response.Cliente != null)
+                {
+                    ClienteId = response.Cliente.Id;
+                    NombreCompleto = response.Cliente.NombreCompleto;
+                    RFC = response.Cliente.RFC;
+                    TelefonoMovil = response.Cliente.TelefonoMovil;
+                    TelefonoCasa = response.Cliente.TelefonoCasa ?? "";
+                    CorreoElectronico = response.Cliente.CorreoElectronico ?? "";
+                    Colonia = response.Cliente.Colonia ?? "";
+                    Calle = response.Cliente.Calle ?? "";
+                    NumeroExterior = response.Cliente.NumeroExterior ?? "";
+                    Municipio = response.Cliente.Municipio ?? "";
+                    Estado = response.Cliente.Estado ?? "";
+                    CodigoPostal = response.Cliente.CodigoPostal ?? "";
+                }
+                else
+                {
+                    ErrorMessage = "No se pudo cargar la información del cliente";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Error al cargar cliente: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// Carga los datos del vehículo por ID
+        /// </summary>
+        private async Task CargarDatosVehiculo(int vehiculoId)
+        {
+            try
+            {
+                var response = await _apiService.ObtenerVehiculoPorIdAsync(vehiculoId);
+
+                if (response.Success && response.Vehiculo != null)
+                {
+                    VehiculoId = response.Vehiculo.Id;
+                    VIN = response.Vehiculo.VIN;
+                    Marca = response.Vehiculo.Marca;
+                    Modelo = response.Vehiculo.Modelo;
+                    Version = response.Vehiculo.Version;
+                    Anio = response.Vehiculo.Anio;
+                    Color = response.Vehiculo.Color;
+                    Placas = response.Vehiculo.Placas;
+                    KilometrajeInicial = response.Vehiculo.KilometrajeInicial;
+                }
+                else
+                {
+                    ErrorMessage = "No se pudo cargar la información del vehículo";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Error al cargar vehículo: {ex.Message}";
+            }
+        }
 
         private async void CargarCatalogos()
         {

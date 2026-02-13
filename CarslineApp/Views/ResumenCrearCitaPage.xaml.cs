@@ -16,7 +16,7 @@ namespace CarslineApp.Views
         {
             InitializeComponent();
 
-            var viewModel = new ResumenCitasViewModel(
+            var viewModel = new ResumenCrearCitasViewModel(
                 tipoOrdenId,
                 clienteId,
                 vehiculoId,

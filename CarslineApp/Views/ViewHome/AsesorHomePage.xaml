@@ -178,7 +178,7 @@
                         <BoxView HeightRequest="1" BackgroundColor="#333" Margin="20,10"/>
 
                         <Frame Padding="0"
-                           Margin="0,0,0,20"
+                           Margin="0,0,0,8"
                            CornerRadius="12"
                            HasShadow="False"
                            BackgroundColor="Gray">
@@ -209,7 +209,7 @@
                         </Frame>
 
                         <Frame Padding="0"
-                           Margin="0,0,0,20"
+                           Margin="0,0,0,8"
                            CornerRadius="12"
                            HasShadow="False"
                            BackgroundColor="Gray">
@@ -240,7 +240,7 @@
                         </Frame>
                         
                         <Frame Padding="0"
-                           Margin="0,0,0,20"
+                           Margin="0,0,0,8"
                            CornerRadius="12"
                            HasShadow="False"
                            BackgroundColor="Gray">

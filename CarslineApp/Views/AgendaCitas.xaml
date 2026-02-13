@@ -9,15 +9,28 @@
 
     <Grid RowDefinitions="Auto,Auto,Auto,*" Padding="0">
 
-        <Frame  Grid.Row="0"  BackgroundColor="#800020" CornerRadius="0">
-            <Label 
-               HorizontalOptions="Center"
-                VerticalOptions="Center"
-               Text="📅 Agenda de Citas"
-               FontSize="20"
-               FontAttributes="Bold"
-               TextColor="White"
-               Margin="0,0,0,10"/>
+        <Frame  Grid.Row="0"  BackgroundColor="#B00000" CornerRadius="0">
+            <Grid ColumnDefinitions="Auto,*">
+                <ImageButton Grid.Column="0"
+                    Source="back.png"
+                    BackgroundColor="Transparent"
+                    HeightRequest="35"
+                    WidthRequest="40"
+                    Command="{Binding BackCommand}"
+                    Padding="5"
+                    CornerRadius="25" />
+                <Label Grid.Column="1"
+                   HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                   Text="📅 Agenda de Citas"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   TextColor="White"
+                   Margin="0,0,0,10"/>
+            </Grid>
+
+                <!-- Botón Atrás -->
+
         </Frame>
                
         <!-- Selector de Vista -->
@@ -117,8 +130,8 @@
 
                                     <!-- Slot Disponible -->
                                     <Frame IsVisible="{Binding Disponible}"
-                                           BackgroundColor="White"
-                                           BorderColor="#E0E0E0"
+                                           BackgroundColor="#E8F5E9"
+                                           BorderColor="#1B5E20"
                                            CornerRadius="8"
                                            Padding="12"
                                            HasShadow="False">
@@ -130,22 +143,22 @@
                                             <Label Grid.Column="0"
                                                    Text="{Binding HoraTexto}"
                                                    FontSize="16"
-                                                   TextColor="#666666"
+                                                   TextColor="Black"
                                                    VerticalTextAlignment="Center"
                                                    Margin="0,0,15,0"/>
 
                                             <Label Grid.Column="1"
                                                    Text="Disponible"
                                                    FontSize="14"
-                                                   TextColor="#999999"
+                                                   TextColor="#1B5E20"
                                                    VerticalTextAlignment="Center"/>
+                                            
+                                            <Image 
+                                                Grid.Column="2"
+                                                Source="disponible.png"
+                                                   WidthRequest="40"
+                                                   HeightRequest="40"/>
 
-                                            <Label Grid.Column="2"
-                                                   Text="+"
-                                                   FontSize="24"
-                                                   TextColor="#4CAF50"
-                                                   FontAttributes="Bold"
-                                                   VerticalTextAlignment="Center"/>
                                         </Grid>
                                     </Frame>
 
@@ -212,7 +225,7 @@
                                 <VerticalStackLayout Margin="0,0,0,20">
 
                                     <!-- Encabezado del Día -->
-                                    <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,5">
+
                                         <Label Grid.Column="0"
                                                FontSize="16"
                                                FontAttributes="Bold"
@@ -226,12 +239,6 @@
                                             </Label.Text>
                                         </Label>
 
-                                        <Label Grid.Column="1"
-                                               Text="✕"
-                                               FontSize="20"
-                                               TextColor="#999999"
-                                               IsVisible="{Binding EsPasado}"/>
-                                    </Grid>
 
                                     <!-- Slots del Día -->
                                     <CollectionView ItemsSource="{Binding Slots}" SelectionMode="None" Margin="0,0,0,20">
@@ -258,19 +265,30 @@
                                                     </Frame.GestureRecognizers>
 
                                                     <VerticalStackLayout Spacing="2">
-                                                        <HorizontalStackLayout Spacing="10">
-                                                            <Label Text="{Binding HoraTexto}"
+                                                        <Grid ColumnDefinitions="Auto,*">
+                                                            <Label Grid.Column="0"
+                                                                   VerticalOptions="Center"
+                                                                   Text="{Binding HoraTexto}"
                                                                    FontSize="12"
                                                                    FontAttributes="Bold"
                                                                    TextColor="#333333"/>
-                                            
-                                                            <Label Text="{Binding Cita.TipoOrden}"
+
+                                                            <Label Grid.Column="1"
+                                                                Text="{Binding Cita.TipoOrden}"
                                                                    FontSize="11"
-                                                                   TextColor="#800020"
+                                                                   TextColor="#B00000"
                                                                    FontAttributes="Bold"
                                                                    LineBreakMode="TailTruncation"
                                                                    IsVisible="{Binding TieneCita}"/>
-                                                        </HorizontalStackLayout>
+
+                                                            <Image Grid.Column="1"
+                                                                   HorizontalOptions="End"
+                                                                   Source="disponible.png"
+                                                                   HeightRequest="40"
+                                                                   WidthRequest="40"
+                                                                   IsVisible="{Binding Disponible}"/>
+
+                                                        </Grid>
 
                                                         <Label Text="{Binding Cita.ClienteNombre}"
                                                                FontSize="12"
@@ -278,12 +296,7 @@
                                                                LineBreakMode="TailTruncation"
                                                                IsVisible="{Binding TieneCita}"/>
 
-                                                        <Label Text="+"
-                                                               FontSize="16"
-                                                               TextColor="#4CAF50"
-                                                               FontAttributes="Bold"
-                                                               HorizontalTextAlignment="Center"
-                                                               IsVisible="{Binding Disponible}"/>
+
                                                     </VerticalStackLayout>
                                                 </Frame>
                                             </DataTemplate>
@@ -301,13 +314,13 @@
 
                     <!-- Encabezados de días -->
                     <Grid ColumnDefinitions="*,*,*,*,*,*,*" Margin="0,0,0,10">
-                        <Label Grid.Column="0" Text="Lun" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
-                        <Label Grid.Column="1" Text="Mar" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
-                        <Label Grid.Column="2" Text="Mie" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
-                        <Label Grid.Column="3" Text="Jue" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
-                        <Label Grid.Column="4" Text="Vie" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
-                        <Label Grid.Column="5" Text="Sab" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
-                        <Label Grid.Column="6" Text="Dom" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#800020"/>
+                        <Label Grid.Column="0" Text="Lun" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#B00000"/>
+                        <Label Grid.Column="1" Text="Mar" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#B00000"/>
+                        <Label Grid.Column="2" Text="Mie" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#B00000"/>
+                        <Label Grid.Column="3" Text="Jue" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#B00000"/>
+                        <Label Grid.Column="4" Text="Vie" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#B00000"/>
+                        <Label Grid.Column="5" Text="Sab" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#B00000"/>
+                        <Label Grid.Column="6" Text="Dom" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#B00000"/>
                     </Grid>
 
                     <!-- Días del Mes -->
@@ -318,7 +331,7 @@
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
                                 <Frame BackgroundColor="{Binding ColorFondo}"
-                                       BorderColor="#800020"
+                                       BorderColor="#B00000"
                                        CornerRadius="6"
                                        Padding="4"
                                        HasShadow="False"

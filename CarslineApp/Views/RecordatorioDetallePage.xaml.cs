@@ -128,6 +128,7 @@ namespace CarslineApp.Views
         /// <summary>
         /// Enviar mensaje de WhatsApp con recordatorio de servicio
         /// </summary>
+
         private async void OnEnviarWhatsAppClicked(object sender, EventArgs e)
         {
             if (_recordatorioDetalle == null) return;
@@ -346,7 +347,22 @@ Teléfono: 771 183 9338
         #endregion
 
         #region Marcar como Enviado
+        private async void AgendarCitaClicked(object sender, EventArgs e)
+        {
 
+            await DisplayAlert("Agendar Cita", "Selecciona un Horario Disponible en la agenda", "OK");
+            try
+            {
+                await Application.Current.MainPage.Navigation.PushAsync(new AgendaCitas(0, _recordatorioDetalle.ClienteId,_recordatorioDetalle.VehiculoId ));
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert(
+                    "Error",
+                    $"No se pudo abrir la agenda de citas: {ex.Message}",
+                    "OK");
+            }
+        }
         private async void OnMarcarEnviadoClicked(object sender, EventArgs e)
         {
             bool confirmar = await DisplayAlert(
