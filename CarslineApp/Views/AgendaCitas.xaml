@@ -275,7 +275,8 @@
 
                                                             <Label Grid.Column="1"
                                                                 Text="{Binding Cita.TipoOrden}"
-                                                                   FontSize="11"
+                                                                   HorizontalOptions="End"
+                                                                   FontSize="13"
                                                                    TextColor="#B00000"
                                                                    FontAttributes="Bold"
                                                                    LineBreakMode="TailTruncation"

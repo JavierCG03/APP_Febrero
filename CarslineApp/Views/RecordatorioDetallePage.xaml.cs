@@ -1,5 +1,6 @@
 using CarslineApp.Models;
 using CarslineApp.Services;
+using System.Collections.Specialized;
 using System.Diagnostics;
 
 namespace CarslineApp.Views
@@ -300,6 +301,11 @@ namespace CarslineApp.Views
                 _ => "recordatorio"
             };
 
+            var Final = " y mantener su garantía.";
+            if (_recordatorioDetalle.TipoProximoServicio == "Servicio Externo")
+            {
+                Final = ".";
+            }
             var mensaje = $@"*RECORDATORIO DE SERVICIO*
 
 Estimado(a) *{_recordatorioDetalle.ClienteNombre}*,
@@ -313,14 +319,15 @@ Le recordamos que su vehículo *{_recordatorioDetalle.InfoVehiculo}* tiene progra
 • Faltan {_recordatorioDetalle.DiasParaProximoServicio} días
 
 Este es su *{tipoRecordatorioTexto}*.
-Le recomendamos agendar su cita para conservar su vehículo en óptimas condiciones y mantener su garantía.
+Le recomendamos agendar su cita para conservar su vehículo en óptimas condiciones{Final}
 
 *CONTACTO*
 Teléfono: 771 183 9338
 
 ¡Gracias por su preferencia!";
 
-            return mensaje;
+
+              return mensaje;
 
         }
 

@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Collections.ObjectModel;
 
 namespace CarslineApp.ViewModels.ViewModelBuscador
 {
@@ -18,11 +19,16 @@ namespace CarslineApp.ViewModels.ViewModelBuscador
         private VehiculoDto _vehiculo;
         private bool _isLoading;
         private string _errorMessage;
+        private bool _mostrarModalTrabajos;
+        private ObservableCollection<CatalogoServicioSeleccionable> _serviciosDisponibles;
 
         public OrdenDetalleViewModel(int ordenId)
         {
             _apiService = new ApiService();
             _ordenId = ordenId;
+
+            // Inicializar colecciones
+            ServiciosDisponibles = new ObservableCollection<CatalogoServicioSeleccionable>();
 
             // Comandos
             VerClienteCommand = new Command(async () => await VerCliente());
@@ -34,6 +40,11 @@ namespace CarslineApp.ViewModels.ViewModelBuscador
             RefreshCommand = new Command(async () => await CargarDatosOrden());
             VerEvidenciasTrabajoCommand = new Command(async () => await VerEvidenciasTrabajo());
             GenerarPdfCommand = new Command(async () => await OnVerReporte());
+            AbrirModalTrabajosCommand = new Command(async () => await AbrirModalTrabajos());
+            CerrarModalTrabajosCommand = new Command(() => CerrarModalTrabajos());
+            ConfirmarAgregarTrabajosCommand = new Command(async () => await ConfirmarAgregarTrabajos());
+            EliminarTrabajoCommand = new Command<int>(async (id) => await EliminarTrabajo(id)); // NUEVO
+
             _ = CargarDatosOrden();
         }
 
@@ -57,6 +68,7 @@ namespace CarslineApp.ViewModels.ViewModelBuscador
                 OnPropertyChanged(nameof(PuedeCancelar));
                 OnPropertyChanged(nameof(ColorEstado));
                 OnPropertyChanged(nameof(IconoEstado));
+                OnPropertyChanged(nameof(MostrarBotonAgregarTrabajos));
 
                 // Actualizar comando
                 try
@@ -71,6 +83,7 @@ namespace CarslineApp.ViewModels.ViewModelBuscador
                 }
             }
         }
+
         public ClienteDto Cliente
         {
             get => _cliente;
@@ -95,13 +108,36 @@ namespace CarslineApp.ViewModels.ViewModelBuscador
             set { _errorMessage = value; OnPropertyChanged(); }
         }
 
+        public bool MostrarModalTrabajos
+        {
+            get => _mostrarModalTrabajos;
+            set
+            {
+                _mostrarModalTrabajos = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public ObservableCollection<CatalogoServicioSeleccionable> ServiciosDisponibles
+        {
+            get => _serviciosDisponibles;
+            set
+            {
+                _serviciosDisponibles = value;
+                OnPropertyChanged();
+            }
+        }
+
         // Propiedades calculadas
         public bool TieneOrden => Orden != null;
         public bool EsPendiente => Orden?.EstadoOrdenId == 1;
         public bool EsEnProceso => Orden?.EstadoOrdenId == 2;
         public bool EsFinalizada => Orden?.EstadoOrdenId == 3;
         public bool PuedeEntregar => EsFinalizada && Orden?.ProgresoGeneral >= 100;
-        public bool PuedeCancelar => EsPendiente ;
+        public bool PuedeCancelar => EsPendiente;
+
+        // Nueva propiedad: Solo muestra el botón si es TipoOrdenId == 1 (Servicio) y la orden aun no ha sido entregada
+        public bool MostrarBotonAgregarTrabajos => Orden?.TipoOrdenId == 1 && Orden?.EstadoOrdenId < 4;
 
         public string ColorEstado => Orden?.EstadoOrdenId switch
         {
@@ -119,7 +155,7 @@ namespace CarslineApp.ViewModels.ViewModelBuscador
             2 => "⚙️",  // En Proceso
             3 => "✔️",  // Finalizada
             4 => "✅",  // Entregada
-            5 =>  "❌",  // Cancelada          
+            5 => "❌",  // Cancelada          
             _ => "❓"   // Desconocido
         };
         #endregion
@@ -135,9 +171,263 @@ namespace CarslineApp.ViewModels.ViewModelBuscador
         public ICommand RefreshCommand { get; }
         public ICommand VerEvidenciasTrabajoCommand { get; }
         public ICommand GenerarPdfCommand { get; }
+        public ICommand AbrirModalTrabajosCommand { get; }
+        public ICommand CerrarModalTrabajosCommand { get; }
+        public ICommand ConfirmarAgregarTrabajosCommand { get; }
+        public ICommand EliminarTrabajoCommand { get; } // NUEVO
 
         #endregion
 
+        #region Métodos - Eliminar Trabajo
+
+        private async Task EliminarTrabajo(int trabajoId)
+        {
+            try
+            {
+                // Buscar el trabajo en la lista actual
+                var trabajo = Orden?.Trabajos?.FirstOrDefault(t => t.Id == trabajoId);
+
+                if (trabajo == null)
+                {
+                    await MostrarAlerta("Error", "Trabajo no encontrado");
+                    return;
+                }
+
+                // Validación: Estado del trabajo debe ser < 3 (Pendiente o Asignado)
+                if (trabajo.EstadoTrabajo >= 3)
+                {
+                    await MostrarAlerta(
+                        "No se puede eliminar",
+                        "Solo se pueden eliminar trabajos que estén Pendientes o Asignados.\n\n" +
+                        "Los trabajos En Proceso, Completados o Pausados no pueden eliminarse.");
+                    return;
+                }
+
+                // Validación: No debe ser el único trabajo
+                int totalTrabajos = Orden?.Trabajos?.Count ?? 0;
+                if (totalTrabajos <= 1)
+                {
+                    await MostrarAlerta(
+                        "No se puede eliminar",
+                        "No se puede eliminar el único trabajo de la orden.\n\n" +
+                        "Una orden debe tener al menos un trabajo.");
+                    return;
+                }
+
+                // Confirmación
+                bool confirmar = await Application.Current.MainPage.DisplayAlert(
+                    "⚠️ Eliminar Trabajo",
+                    $"¿Estás seguro de eliminar el siguiente trabajo?\n\n" +
+                    $"📋 {trabajo.Trabajo}\n" +
+                    $"Estado: {trabajo.EstadoTrabajoNombre}\n\n" +
+                    "Esta acción no se puede deshacer.",
+                    "Sí, eliminar",
+                    "Cancelar");
+
+                if (!confirmar) return;
+
+                IsLoading = true;
+
+                // Llamar al API
+                var response = await _apiService.EliminarTrabajoAsync(trabajoId);
+
+                if (response.Success)
+                {
+                    await MostrarAlerta("✅ Éxito", "Trabajo eliminado correctamente");
+
+                    // Recargar la orden para actualizar la vista
+                    await CargarDatosOrden();
+                }
+                else
+                {
+                    await MostrarAlerta("❌ Error", response.Message);
+                }
+            }
+            catch (Exception ex)
+            {
+                await MostrarAlerta("Error", $"Error al eliminar trabajo: {ex.Message}");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        #endregion
+
+        #region Métodos - Agregar Trabajos
+
+        private async Task AbrirModalTrabajos()
+        {
+            bool confirmar = await Application.Current.MainPage.DisplayAlert(
+                "➕ Agregar Trabajos",
+                "¿Deseas agregar trabajos adicionales a esta orden?",
+                "OK",
+                "Cancelar");
+
+            if (!confirmar) return;
+
+            IsLoading = true;
+            try
+            {
+                // Obtener catálogo completo de servicios
+                var catalogoCompleto = await _apiService.ObtenerServiciosFrecuentesAsync();
+
+                if (catalogoCompleto == null || catalogoCompleto.Count == 0)
+                {
+                    await MostrarAlerta("Error", "No se pudo cargar el catálogo de servicios");
+                    return;
+                }
+
+                // Filtrar servicios que ya están en la orden
+                var trabajosExistentes = Orden?.Trabajos?.Select(t => t.Trabajo).ToList() ?? new List<string>();
+
+                var serviciosFiltrados = catalogoCompleto
+                    .Where(s => !trabajosExistentes.Contains(s.Nombre, StringComparer.OrdinalIgnoreCase))
+                    .Select(s => new CatalogoServicioSeleccionable
+                    {
+                        Id = s.Id,
+                        Trabajo = s.Nombre,
+                        Indicaciones = "",
+                        EstaSeleccionado = false
+                    })
+                    .ToList();
+
+                if (serviciosFiltrados.Count == 0)
+                {
+                    await MostrarAlerta(
+                        "Información",
+                        "Todos los servicios disponibles ya están agregados a esta orden");
+                    return;
+                }
+
+                ServiciosDisponibles.Clear();
+                foreach (var servicio in serviciosFiltrados)
+                {
+                    ServiciosDisponibles.Add(servicio);
+                }
+
+                MostrarModalTrabajos = true;
+            }
+            catch (Exception ex)
+            {
+                await MostrarAlerta("Error", $"Error al cargar servicios: {ex.Message}");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        private void CerrarModalTrabajos()
+        {
+            MostrarModalTrabajos = false;
+
+            // Limpiar selecciones
+            foreach (var servicio in ServiciosDisponibles)
+            {
+                servicio.EstaSeleccionado = false;
+                servicio.Indicaciones = "";
+            }
+        }
+
+        private async Task ConfirmarAgregarTrabajos()
+        {
+            var trabajosSeleccionados = ServiciosDisponibles
+                .Where(s => s.EstaSeleccionado)
+                .ToList();
+
+            if (trabajosSeleccionados.Count == 0)
+            {
+                await MostrarAlerta("Atención", "Debes seleccionar al menos un trabajo");
+                return;
+            }
+
+            // Crear mensaje con los trabajos seleccionados
+            var mensaje = "Se agregarán los siguientes trabajos:\n\n";
+            foreach (var trabajo in trabajosSeleccionados)
+            {
+                mensaje += $"• {trabajo.Trabajo}\n";
+                if (!string.IsNullOrWhiteSpace(trabajo.Indicaciones))
+                {
+                    mensaje += $"  Indicaciones: {trabajo.Indicaciones}\n";
+                }
+            }
+            mensaje += "\n¿Deseas continuar?";
+
+            bool confirmar = await Application.Current.MainPage.DisplayAlert(
+                "Confirmar Trabajos",
+                mensaje,
+                "Sí, agregar",
+                "Cancelar");
+
+            if (!confirmar) return;
+
+            IsLoading = true;
+            MostrarModalTrabajos = false;
+
+            try
+            {
+                int exitosos = 0;
+                int fallidos = 0;
+                string errores = "";
+
+                foreach (var trabajo in trabajosSeleccionados)
+                {
+                    var dto = new TrabajoCrearDto
+                    {
+                        Trabajo = trabajo.Trabajo,
+                        Indicaciones = string.IsNullOrWhiteSpace(trabajo.Indicaciones)
+                            ? "Sin indicaciones"
+                            : trabajo.Indicaciones
+                    };
+
+                    var resultado = await _apiService.AgregarTrabajoAsync(_ordenId, dto);
+
+                    if (resultado.Success)
+                    {
+                        exitosos++;
+                    }
+                    else
+                    {
+                        fallidos++;
+                        errores += $"• {trabajo.Trabajo}: {resultado.Message}\n";
+                    }
+                }
+
+                // Recargar la orden
+                await CargarDatosOrden();
+
+                // Mostrar resultado
+                if (fallidos == 0)
+                {
+                    await MostrarAlerta(
+                        "✅ Éxito",
+                        $"Se agregaron {exitosos} trabajo(s) exitosamente");
+                }
+                else
+                {
+                    await MostrarAlerta(
+                        "⚠️ Resultado Parcial",
+                        $"Exitosos: {exitosos}\nFallidos: {fallidos}\n\nErrores:\n{errores}");
+                }
+
+                // Limpiar selecciones
+                ServiciosDisponibles.Clear();
+            }
+            catch (Exception ex)
+            {
+                await MostrarAlerta("Error", $"Error al agregar trabajos: {ex.Message}");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        #endregion
+
+        #region Métodos Originales
 
         private async Task OnVerReporte()
         {
@@ -145,7 +435,6 @@ namespace CarslineApp.ViewModels.ViewModelBuscador
             {
                 IsLoading = true;
 
-                // Validar que tengas un OrdenId válido
                 if (_ordenId <= 0)
                 {
                     await Application.Current.MainPage.DisplayAlert(
@@ -155,7 +444,6 @@ namespace CarslineApp.ViewModels.ViewModelBuscador
                     return;
                 }
 
-                // Navegar a la página de reporte pasando el OrdenId y el ApiService
                 await Application.Current.MainPage.Navigation.PushAsync(
                     new VerReportePage(_ordenId));
             }
@@ -172,23 +460,21 @@ namespace CarslineApp.ViewModels.ViewModelBuscador
             }
         }
 
-
-        #region Métodos
         private async Task VerEvidenciasTrabajo()
         {
             if (Orden == null) return;
 
             try
             {
-                var evidenciasPage = new EvidenciasOrdenTrabajo(Orden.Id,1);
+                var evidenciasPage = new EvidenciasOrdenTrabajo(Orden.Id, 1);
                 await Application.Current.MainPage.Navigation.PushAsync(evidenciasPage);
-
             }
             catch (Exception ex)
             {
                 await MostrarAlerta("Error", $"No se pudo abrir las evidencias de trabajo: {ex.Message}");
             }
         }
+
         private async Task VerRefaccionesTrabajo(int TrabajoID)
         {
             int trabajoId = TrabajoID;
@@ -200,7 +486,7 @@ namespace CarslineApp.ViewModels.ViewModelBuscador
             }
             catch (Exception ex)
             {
-                await MostrarAlerta("Error", $"No se pudo abrir las evidencias de trabajo: {ex.Message}");
+                await MostrarAlerta("Error", $"No se pudo abrir las refacciones de trabajo: {ex.Message}");
             }
         }
 
@@ -219,8 +505,20 @@ namespace CarslineApp.ViewModels.ViewModelBuscador
                 if (ordenCompleta != null)
                 {
                     System.Diagnostics.Debug.WriteLine($"✅ Orden cargada: {ordenCompleta.NumeroOrden}");
-                    Orden = ordenCompleta;
 
+                    // Calcular si cada trabajo puede ser eliminado
+                    if (ordenCompleta.Trabajos != null && ordenCompleta.Trabajos.Count > 0)
+                    {
+                        bool esUnicoTrabajo = ordenCompleta.Trabajos.Count == 1;
+
+                        foreach (var trabajo in ordenCompleta.Trabajos)
+                        {
+                            // Puede eliminar si: Estado < 3 Y no es el único trabajo
+                            trabajo.PuedeEliminar = trabajo.EstadoTrabajo < 3 && !esUnicoTrabajo;
+                        }
+                    }
+
+                    Orden = ordenCompleta;
                 }
                 else
                 {
@@ -282,9 +580,8 @@ namespace CarslineApp.ViewModels.ViewModelBuscador
             }
             catch (Exception ex)
             {
-                await MostrarAlerta("Error", $"No se pudo abrir las evidencias de trabajo: {ex.Message}");
+                await MostrarAlerta("Error", $"No se pudo abrir las evidencias: {ex.Message}");
             }
-
         }
 
         private async Task CancelarOrden()
@@ -308,7 +605,7 @@ namespace CarslineApp.ViewModels.ViewModelBuscador
                 if (response.Success)
                 {
                     await MostrarAlerta("✅ Éxito", "Orden cancelada correctamente");
-                    await CargarDatosOrden(); // Recargar datos
+                    await CargarDatosOrden();
                 }
                 else
                 {
@@ -329,7 +626,6 @@ namespace CarslineApp.ViewModels.ViewModelBuscador
         {
             if (Orden == null || !PuedeEntregar) return;
 
-            // Verificar progreso
             if (Orden.ProgresoGeneral < 100)
             {
                 await MostrarAlerta(
@@ -363,7 +659,6 @@ namespace CarslineApp.ViewModels.ViewModelBuscador
                         "El vehículo ha sido entregado correctamente.\n" +
                         "Se ha registrado en el historial.");
 
-                    // Regresar a la página anterior
                     await Application.Current.MainPage.Navigation.PopAsync();
                 }
                 else
@@ -406,4 +701,47 @@ namespace CarslineApp.ViewModels.ViewModelBuscador
 
         #endregion
     }
+
+    #region Clases Auxiliares
+
+    public class CatalogoServicioSeleccionable : INotifyPropertyChanged
+    {
+        private bool _estaSeleccionado;
+        private string _indicaciones;
+
+        public int Id { get; set; }
+        public string Trabajo { get; set; }
+
+        public bool EstaSeleccionado
+        {
+            get => _estaSeleccionado;
+            set
+            {
+                _estaSeleccionado = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(MostrarIndicaciones));
+            }
+        }
+
+        public string Indicaciones
+        {
+            get => _indicaciones;
+            set
+            {
+                _indicaciones = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool MostrarIndicaciones => EstaSeleccionado;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+    #endregion
 }

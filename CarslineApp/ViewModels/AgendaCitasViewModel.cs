@@ -39,7 +39,13 @@ namespace CarslineApp.ViewModels
             new TimeSpan(11, 30, 0),  // 11:30 AM
             new TimeSpan(12, 0, 0),   // 12:00 PM
             new TimeSpan(12, 30, 0),  // 12:30 PM
-            new TimeSpan(13, 0, 0)    // 1:00 PM
+            new TimeSpan(13, 0, 0),   // 1:00 PM
+            new TimeSpan(13, 30, 0),  // 1:30 PM 
+            new TimeSpan(14, 0, 0),   // 2:00 PM 
+            new TimeSpan(14, 30, 0),  // 2:30 PM 
+            new TimeSpan(15, 0, 0),   // 3:00 PM 
+            new TimeSpan(15, 30, 0),  // 3:30 PM 
+            new TimeSpan(16, 0, 0)   // 4:00 PM 
         };
 
         public AgendaCitasViewModel(int citaId, int clienteId, int vehiculoId)

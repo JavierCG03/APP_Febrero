@@ -13,6 +13,7 @@ namespace CarslineApp.ViewModels.ViewModelsHome
     {
         private readonly ApiService _apiService;
         private bool _isLoading;
+        private bool _isRefreshing;
         private string _tituloSeccion = "Recordatorios";
         private string _mensajeNoRecordatorios = "No hay recordatorios pendientes";
         private int _tipoRecordatorioActual = 1;
@@ -59,6 +60,11 @@ namespace CarslineApp.ViewModels.ViewModelsHome
                 _isLoading = value;
                 OnPropertyChanged();
             }
+        }
+        public bool IsRefreshing
+        {
+            get => _isRefreshing;
+            set { _isRefreshing = value; OnPropertyChanged(); }
         }
 
         public string TituloSeccion
@@ -149,7 +155,7 @@ namespace CarslineApp.ViewModels.ViewModelsHome
         /// </summary>
         private async Task CargarRecordatoriosPorTipo(int tipo)
         {
-            // Evitar carga si ya estamos cargando
+
             if (IsLoading)
             {
                 Debug.WriteLine("⚠️ Ya hay una carga en progreso, ignorando...");
@@ -159,6 +165,7 @@ namespace CarslineApp.ViewModels.ViewModelsHome
             try
             {
                 IsLoading = true;
+                IsRefreshing = true;
                 _tipoRecordatorioActual = tipo;
 
                 Debug.WriteLine($"📥 Cargando recordatorios tipo {tipo}...");
@@ -214,6 +221,7 @@ namespace CarslineApp.ViewModels.ViewModelsHome
             finally
             {
                 IsLoading = false;
+                IsRefreshing = false;
             }
         }
 

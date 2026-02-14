@@ -107,7 +107,7 @@ namespace CarslineApp.Models
         VIN.Length >= 4 ? VIN.Substring(VIN.Length - 4) : VIN;
 
         public string ProgresoTexto => $"{TrabajosCompletados}/{TotalTrabajos}";
-        public string ProgresoFormateado => $"{ProgresoGeneral:F1}%";
+        public string ProgresoFormateado => $"{ProgresoGeneral:F0} %";
         public bool TieneTrabajosEnProceso => Trabajos.Any(t => t.EnProceso);
         public bool TieneTrabajosCompletados => Trabajos.Any(t => t.EstaCompletado);
         public bool TieneTrabajos => Trabajos.Any();
@@ -249,7 +249,8 @@ namespace CarslineApp.Models
 
         // Solo se puede reasignar si tiene técnico Y no está en proceso
         public bool PuedeReasignar => TieneTecnicoAsignado && !EnProceso && !EstaCompletado && !EstaCancelado;
-
+        public bool PuedeEliminar { get; set; }
+        public bool MostrarBotonEliminar => PuedeEliminar;
         // Solo se puede asignar si NO tiene técnico Y está pendiente
         public bool PuedeAsignar => NoTieneTecnicoAsignado;
 
@@ -483,5 +484,10 @@ namespace CarslineApp.Models
         public string VehiculoCompleto { get; set; } = string.Empty;
         public string VIN { get; set; } = string.Empty;
 
+    }
+    public class CrearTrabajoResponse
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
     }
 }

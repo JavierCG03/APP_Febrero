@@ -888,6 +888,7 @@
                                 </DataTemplate>
                             </CollectionView.ItemTemplate>
                         </CollectionView>
+                        
                         <BoxView HeightRequest="2" BackgroundColor="#E0E0E0" Margin="0,10"/>
 
 

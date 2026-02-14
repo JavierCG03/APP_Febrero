@@ -18,7 +18,7 @@ namespace CarslineApp.ViewModels.Creacion_Citas
         private readonly DateTime _entradafechahoracita;
 
 
-        private int _pasoActual = 1; // 1=Cliente, 2=Vehículo, 3=Orden
+        private int _pasoActual;
         private bool _isLoading;
         private string _errorMessage = string.Empty;
 
@@ -31,7 +31,18 @@ namespace CarslineApp.ViewModels.Creacion_Citas
             _entradafechahoracita = fechahoracita;
 
             _apiService = new ApiService();
-
+            if (_entradaclienteId > 0 && _entradavehiculoId > 0)
+            {
+                _pasoActual = 3;
+            }
+            else if (_entradaclienteId > 0)
+            {
+                _pasoActual = 2; 
+            }
+            else
+            {
+                _pasoActual = 1;
+            }
             // Comandos
             BuscarClienteCommand = new Command(async () => await BuscarCliente());
             SeleccionarClienteCommand = new Command<ClienteDto>(async (cliente) => await SeleccionarCliente(cliente));
@@ -50,8 +61,8 @@ namespace CarslineApp.ViewModels.Creacion_Citas
             AgregarTrabajoPersonalizadoCommand = new Command(AgregarTrabajoPersonalizado);
             EliminarTrabajoPersonalizadoCommand = new Command<TrabajoCrearDto>(EliminarTrabajoPersonalizado);
 
-            // Determinar paso inicial y cargar datos si vienen parámetros
-            DeterminarPasoInicial();
+            // Cargar datos de forma asíncrona DESPUÉS de establecer el paso
+            CargarDatosIniciales();
 
             CargarCatalogos();
 
@@ -302,33 +313,26 @@ namespace CarslineApp.ViewModels.Creacion_Citas
         #region Métodos Auxiliares
 
         /// <summary>
-        /// Determina el paso inicial basado en los parámetros recibidos y carga los datos correspondientes
+        /// Carga los datos iniciales de cliente y vehículo si vienen como parámetros
         /// </summary>
-        private async void DeterminarPasoInicial()
+        private async void CargarDatosIniciales()
         {
-            // Si vienen tanto clienteId como vehiculoId, ir directo al paso 3 (Orden)
+            // Si vienen tanto clienteId como vehiculoId, cargar ambos
             if (_entradaclienteId > 0 && _entradavehiculoId > 0)
             {
-                
                 await CargarDatosCliente(_entradaclienteId);
                 await CargarDatosVehiculo(_entradavehiculoId);
-                System.Diagnostics.Debug.WriteLine($"[DeterminarPasoInicial] ClienteId: {_entradaclienteId}, VehiculoId: {_entradavehiculoId}");
+                System.Diagnostics.Debug.WriteLine($"[CargarDatosIniciales] ClienteId: {_entradaclienteId}, VehiculoId: {_entradavehiculoId}");
                 await CargarHistorialVehiculo();
-                PasoActual = 3;
             }
-            // Si solo viene clienteId, ir al paso 2 (Vehículo)
+            // Si solo viene clienteId, cargarlo y buscar sus vehículos
             else if (_entradaclienteId > 0)
             {
                 await CargarDatosCliente(_entradaclienteId);
-                PasoActual = 2;
                 // Buscar vehículos del cliente
                 BuscarVehiculoCliente(_entradaclienteId);
             }
-            // Si no viene ninguno, empezar desde el paso 1 (Cliente)
-            else
-            {
-                PasoActual = 1;
-            }
+            // Si no viene ninguno, no hacer nada (el usuario empezará desde cero)
         }
 
         /// <summary>

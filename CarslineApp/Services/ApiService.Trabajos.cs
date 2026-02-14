@@ -440,6 +440,115 @@ namespace CarslineApp.Services
             }
         }
 
+        /// <summary>
+        /// Agrega un nuevo trabajo a una orden existente
+        /// </summary>
+        public async Task<CrearTrabajoResponse> AgregarTrabajoAsync(int ordenId,TrabajoCrearDto request)
+        {
+            try
+            {
+                var url = $"{BaseUrl}/Trabajos/agregar/{ordenId}";
+
+                System.Diagnostics.Debug.WriteLine($"🌐 POST: {url}");
+                System.Diagnostics.Debug.WriteLine($"📦 Body: Trabajo='{request.Trabajo}', Indicaciones='{request.Indicaciones}'");
+
+                var response = await _httpClient.PostAsJsonAsync(url, request);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    System.Diagnostics.Debug.WriteLine($"❌ Error HTTP {response.StatusCode}: {errorContent}");
+
+                    return new CrearTrabajoResponse
+                    {
+                        Success = false,
+                        Message = string.IsNullOrWhiteSpace(errorContent)
+                            ? $"Error HTTP: {response.StatusCode}"
+                            : errorContent
+                    };
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                System.Diagnostics.Debug.WriteLine($"✅ Response: {json}");
+
+                var result = JsonSerializer.Deserialize<CrearTrabajoResponse>(
+                    json,
+                    new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                return result ?? new CrearTrabajoResponse
+                {
+                    Success = false,
+                    Message = "Respuesta vacía del servidor"
+                };
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ Exception en AgregarTrabajoAsync: {ex.Message}");
+                return new CrearTrabajoResponse
+                {
+                    Success = false,
+                    Message = $"Error: {ex.Message}"
+                };
+            }
+        }
+
+        /// <summary>
+        /// Elimina un trabajo de una orden existente
+        /// </summary>
+        public async Task<TrabajoResponse> EliminarTrabajoAsync(int trabajoId)
+        {
+            try
+            {
+                var url = $"{BaseUrl}/Trabajos/eliminar/{trabajoId}";
+
+                System.Diagnostics.Debug.WriteLine($"🌐 DELETE: {url}");
+
+                var response = await _httpClient.DeleteAsync(url);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    System.Diagnostics.Debug.WriteLine($"❌ Error HTTP {response.StatusCode}: {errorContent}");
+
+                    return new TrabajoResponse
+                    {
+                        Success = false,
+                        Message = string.IsNullOrWhiteSpace(errorContent)
+                            ? $"Error HTTP: {response.StatusCode}"
+                            : errorContent
+                    };
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                System.Diagnostics.Debug.WriteLine($"✅ Response: {json}");
+
+                var result = JsonSerializer.Deserialize<TrabajoResponse>(
+                    json,
+                    new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                return result ?? new TrabajoResponse
+                {
+                    Success = false,
+                    Message = "Respuesta vacía del servidor"
+                };
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ Exception en EliminarTrabajoAsync: {ex.Message}");
+                return new TrabajoResponse
+                {
+                    Success = false,
+                    Message = $"Error: {ex.Message}"
+                };
+            }
+        }
+
     }
 
 }
