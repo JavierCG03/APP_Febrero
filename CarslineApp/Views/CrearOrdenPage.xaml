@@ -434,46 +434,162 @@
                            FontAttributes="Bold"
                            TextColor="#404040"/>
 
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
                         <Label Grid.Column="0"
-                                Text="VIN Completo:"
-                                FontSize="14"
-                                FontAttributes="Italic"
-                                VerticalOptions="Center"
-                                TextColor="#B00000"/>
+                               Text="VIN Completo:"
+                               FontSize="14"
+                               FontAttributes="Italic"
+                               VerticalOptions="Center"
+                               TextColor="#B00000"/>
                         <Entry Grid.Column="1"
-                                Text="{Binding VIN}"
-                                Placeholder="17 caracteres"
-                                MaxLength="17"
-                                IsReadOnly="{Binding CamposVehiculoBloqueados}"/>
+                               Text="{Binding VIN}"
+                               Placeholder="17 caracteres"
+                               MaxLength="17"
+                               IsReadOnly="{Binding CamposVehiculoBloqueados}"/>
+                        <!-- Botón para decodificar manualmente (útil si se pegó el VIN) -->
+                        <Button Grid.Column="2"
+                                Text="🔍"
+                                Command="{Binding DecodificarVinManualCommand}"
+                                IsVisible="{Binding CamposVehiculoBloqueados, Converter={StaticResource InvertedBoolConverter}}"
+                                BackgroundColor="#1565C0"
+                                TextColor="White"
+                                CornerRadius="8"
+                                WidthRequest="44"
+                                HeightRequest="44"
+                                FontSize="16"
+                                Padding="0"
+                                VerticalOptions="Center"
+                                ToolTipProperties.Text="Decodificar VIN"/>
                     </Grid>
 
+                    <!-- Panel de estado de decodificación VIN -->
+                    <Frame IsVisible="{Binding MostrarEstadoVin}"
+                           BackgroundColor="{Binding ColorEstadoVin}"
+                           BorderColor="{Binding ColorBordeEstadoVin}"
+                           CornerRadius="8"
+                           Padding="12,8"
+                           HasShadow="False"
+                           Margin="0,-8,0,0">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                            <ActivityIndicator Grid.Column="0"
+                                               IsRunning="{Binding VinDecodificando}"
+                                               IsVisible="{Binding VinDecodificando}"
+                                               Color="#E65100"
+                                               WidthRequest="20"
+                                               HeightRequest="20"
+                                               VerticalOptions="Center"/>
+                            <Label Grid.Column="1"
+                                   Text="{Binding VinMensajeDecodificacion}"
+                                   FontSize="13"
+                                   FontAttributes="Bold"
+                                   TextColor="{Binding ColorTextoEstadoVin}"
+                                   VerticalOptions="Center"
+                                   LineBreakMode="WordWrap"/>
+                        </Grid>
+                    </Frame>
+
+                    <!-- ══ MARCA con autocompletado ══ -->
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
                         <Label Grid.Column="0"
-                                Text="Marca:"
-                                FontSize="14"
-                                FontAttributes="Italic"
-                                VerticalOptions="Center"
-                                TextColor="#B00000"/>
-                        <Entry Grid.Column="1"
-                                Text="{Binding Marca}"
-                                Placeholder="Marca del vehículo"
-                                IsReadOnly="{Binding CamposVehiculoBloqueados}"/>
+                               Text="Marca:"
+                               FontSize="14"
+                               FontAttributes="Italic"
+                               VerticalOptions="Start"
+                               Margin="0,10,0,0"
+                               TextColor="#B00000"/>
+                        <VerticalStackLayout Grid.Column="1" Spacing="0">
+                            <!-- Entry de búsqueda -->
+                            <Entry Text="{Binding BusquedaMarca}"
+                                   Placeholder="Escribe o toca para ver marcas"
+                                   IsReadOnly="{Binding CamposVehiculoBloqueados}">
+                                <Entry.Behaviors>
+                                </Entry.Behaviors>
+                                <Entry.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding AbrirSugerenciasMarcaCommand}"/>
+                                </Entry.GestureRecognizers>
+                            </Entry>
+                            <!-- Lista de sugerencias Marca -->
+                            <Frame IsVisible="{Binding MostrarSugerenciasMarca}"
+                                   BorderColor="#B00000"
+                                   BackgroundColor="White"
+                                   Padding="0"
+                                   HasShadow="True"
+                                   CornerRadius="6"
+                                   Margin="0,-2,0,0">
+                                <CollectionView ItemsSource="{Binding MarcasFiltradas}"
+                                               SelectionMode="None"
+                                               MaximumHeightRequest="200">
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Padding="14,10" BackgroundColor="White">
+                                                <Grid.GestureRecognizers>
+                                                    <TapGestureRecognizer
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SeleccionarMarcaCommand}"
+                                                        CommandParameter="{Binding .}"/>
+                                                </Grid.GestureRecognizers>
+                                                <Label Text="{Binding .}"
+                                                       FontSize="14"
+                                                       TextColor="#212121"/>
+                                                <BoxView HeightRequest="1" Color="#F0F0F0"
+                                                         VerticalOptions="End"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                            </Frame>
+                        </VerticalStackLayout>
                     </Grid>
 
+                    <!-- ══ MODELO con autocompletado ══ -->
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
                         <Label Grid.Column="0"
-                                Text="Modelo:"
-                                FontSize="14"
-                                FontAttributes="Italic"
-                                VerticalOptions="Center"
-                                TextColor="#B00000"/>
-                        <Entry Grid.Column="1"
-                                Text="{Binding Modelo}"
-                                Placeholder="Modelo del vehículo"
-                                IsReadOnly="{Binding CamposVehiculoBloqueados}"/>
+                               Text="Modelo:"
+                               FontSize="14"
+                               FontAttributes="Italic"
+                               VerticalOptions="Start"
+                               Margin="0,10,0,0"
+                               TextColor="#B00000"/>
+                        <VerticalStackLayout Grid.Column="1" Spacing="0">
+                            <Entry Text="{Binding BusquedaModelo}"
+                                   Placeholder="Selecciona la marca primero"
+                                   IsReadOnly="{Binding CamposVehiculoBloqueados}">
+                                <Entry.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding AbrirSugerenciasModeloCommand}"/>
+                                </Entry.GestureRecognizers>
+                            </Entry>
+                            <!-- Lista de sugerencias Modelo -->
+                            <Frame IsVisible="{Binding MostrarSugerenciasModelo}"
+                                   BorderColor="#B00000"
+                                   BackgroundColor="White"
+                                   Padding="0"
+                                   HasShadow="True"
+                                   CornerRadius="6"
+                                   Margin="0,-2,0,0">
+                                <CollectionView ItemsSource="{Binding ModelosFiltrados}"
+                                               SelectionMode="None"
+                                               MaximumHeightRequest="200">
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Padding="14,10" BackgroundColor="White">
+                                                <Grid.GestureRecognizers>
+                                                    <TapGestureRecognizer
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SeleccionarModeloCommand}"
+                                                        CommandParameter="{Binding .}"/>
+                                                </Grid.GestureRecognizers>
+                                                <Label Text="{Binding .}"
+                                                       FontSize="14"
+                                                       TextColor="#212121"/>
+                                                <BoxView HeightRequest="1" Color="#F0F0F0"
+                                                         VerticalOptions="End"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                            </Frame>
+                        </VerticalStackLayout>
                     </Grid>
 
+                    <!-- ══ VERSIÓN (campo libre) ══ -->
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
                         <Label Grid.Column="0"
                                 Text="Version:"
@@ -487,6 +603,7 @@
                                 IsReadOnly="{Binding CamposVehiculoBloqueados}"/>
                     </Grid>
 
+                    <!-- ══ COLOR (campo libre) ══ -->
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
                         <Label Grid.Column="0"
                                 Text="Color:"
@@ -500,25 +617,62 @@
                                 IsReadOnly="{Binding CamposVehiculoBloqueados}"/>
                     </Grid>
 
-                    <Grid ColumnDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="10">
+                    <!-- ══ AÑO con autocompletado  +  PLACA en la misma fila ══ -->
+                    <Grid ColumnDefinitions="Auto,*,Auto,*" ColumnSpacing="10">
                         <Label Grid.Column="0"
-                                Text="Año:"
-                                FontSize="14"
-                                FontAttributes="Italic"
-                                VerticalOptions="Center"
-                                TextColor="#B00000"/>
-                        <Entry Grid.Column="1"
-                               Text="{Binding Anio}"
-                               Placeholder="Año"
-                               Keyboard="Numeric"
-                               MaxLength="4"
-                               IsReadOnly="{Binding CamposVehiculoBloqueados}"/>
+                               Text="Año:"
+                               FontSize="14"
+                               FontAttributes="Italic"
+                               VerticalOptions="Start"
+                               Margin="0,10,0,0"
+                               TextColor="#B00000"/>
+                        <VerticalStackLayout Grid.Column="1" Spacing="0">
+                            <Entry Text="{Binding BusquedaAnio}"
+                                   Placeholder="2025"
+                                   Keyboard="Numeric"
+                                   MaxLength="4"
+                                   IsReadOnly="{Binding CamposVehiculoBloqueados}">
+                                <Entry.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding AbrirSugerenciasAnioCommand}"/>
+                                </Entry.GestureRecognizers>
+                            </Entry>
+                            <!-- Lista de sugerencias Año -->
+                            <Frame IsVisible="{Binding MostrarSugerenciasAnio}"
+                                   BorderColor="#B00000"
+                                   BackgroundColor="White"
+                                   Padding="0"
+                                   HasShadow="True"
+                                   CornerRadius="6"
+                                   Margin="0,-2,0,0">
+                                <CollectionView ItemsSource="{Binding AniosFiltrados}"
+                                               SelectionMode="None"
+                                               MaximumHeightRequest="180">
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Padding="14,10" BackgroundColor="White">
+                                                <Grid.GestureRecognizers>
+                                                    <TapGestureRecognizer
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SeleccionarAnioCommand}"
+                                                        CommandParameter="{Binding .}"/>
+                                                </Grid.GestureRecognizers>
+                                                <Label Text="{Binding .}"
+                                                       FontSize="14"
+                                                       TextColor="#212121"/>
+                                                <BoxView HeightRequest="1" Color="#F0F0F0"
+                                                         VerticalOptions="End"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                            </Frame>
+                        </VerticalStackLayout>
+
                         <Label Grid.Column="2"
-                                Text="Placa:"
-                                FontSize="14"
-                                FontAttributes="Italic"
-                                VerticalOptions="Center"
-                                TextColor="#B00000"/>
+                               Text="Placa:"
+                               FontSize="14"
+                               FontAttributes="Italic"
+                               VerticalOptions="Center"
+                               TextColor="#B00000"/>
                         <Entry Grid.Column="3"
                                Text="{Binding Placas}"
                                Placeholder="Placa"
@@ -538,29 +692,6 @@
                                 Placeholder="Kilometraje"
                                 IsReadOnly="{Binding CamposVehiculoBloqueados}"/>
                     </Grid>
-
-                    <Border
-                                BackgroundColor="#FFF0F0"
-                                StrokeThickness=".7"
-                                Stroke="#B00000"
-                                Padding="6"
-                                HorizontalOptions="Fill"
-                                VerticalOptions="Center"
-                                StrokeShape="RoundRectangle 12">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
-                            <Label  Grid.Column="0"
-                                Text="Kilometraje ACTUAL:"
-                                FontSize="14"
-                                FontAttributes="Bold"
-                                VerticalOptions="Center"
-                                TextColor="Black"/>
-                            <Entry Grid.Column="1"
-                                Text="{Binding KilometrajeActual}"
-                                Placeholder="Kilometraje"
-                                ReturnCommand="{Binding SiguienteCommand}"/>
-                        </Grid>
-
-                    </Border>
 
                     <Button Text="{Binding TextoBotonVehiculo}"
                             Command="{Binding EditarGuardarVehiculoCommand}"
@@ -604,6 +735,8 @@
                     </Grid>
 
                 </VerticalStackLayout>
+
+
                 <!-- ====================================== -->
                 <!-- PASO 3: ORDEN DE SERVICIO CON HISTORIAL -->
                 <!-- ====================================== -->
