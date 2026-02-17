@@ -155,17 +155,35 @@ namespace CarslineApp.ViewModels
             set { _imagenesTotales = value; OnPropertyChanged(); OnPropertyChanged(nameof(ProgresoTexto)); OnPropertyChanged(nameof(ProgresoValor)); }
         }
 
+        // Solo true en Windows — se evalúa una vez al inicio, no cambia en runtime
+        public static bool EsWindows =>
+            DeviceInfo.Platform == DevicePlatform.WinUI;
+
         public bool MostrarBotonAnterior
         {
             get => _mostrarBotonAnterior;
-            set { _mostrarBotonAnterior = value; OnPropertyChanged(); }
+            set
+            {
+                _mostrarBotonAnterior = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(MostrarBotonAnteriorEnWindows));
+            }
         }
 
         public bool MostrarBotonSiguiente
         {
             get => _mostrarBotonSiguiente;
-            set { _mostrarBotonSiguiente = value; OnPropertyChanged(); }
+            set
+            {
+                _mostrarBotonSiguiente = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(MostrarBotonSiguienteEnWindows));
+            }
         }
+
+        // Combinan la plataforma con el estado: solo visibles si es Windows Y hay contenido
+        public bool MostrarBotonAnteriorEnWindows => EsWindows && _mostrarBotonAnterior;
+        public bool MostrarBotonSiguienteEnWindows => EsWindows && _mostrarBotonSiguiente;
 
         public int IndiceActual
         {

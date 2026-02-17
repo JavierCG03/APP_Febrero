@@ -10,11 +10,11 @@ namespace CarslineApp.Views
         {
             InitializeComponent();
 
-            System.Diagnostics.Debug.WriteLine($"?? Constructor de EvidenciasOrdenTrabajo - OrdenId: {ordenGeneralId}");
+            System.Diagnostics.Debug.WriteLine($" Constructor de EvidenciasOrdenTrabajo - OrdenId: {ordenGeneralId}");
 
             if (BindingContext is EvidenciaOrdenTrabajoViewModel viewModel)
             {
-                System.Diagnostics.Debug.WriteLine($"? ViewModel encontrado, asignando OrdenGeneralId: {ordenGeneralId}");
+                System.Diagnostics.Debug.WriteLine($" ViewModel encontrado, asignando OrdenGeneralId: {ordenGeneralId}");
                 viewModel.OrdenGeneralId = ordenGeneralId;
                 viewModel.TipoEvidencia = tipoevidenica;
 
@@ -23,7 +23,7 @@ namespace CarslineApp.Views
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine($"? ERROR: BindingContext no es EvidenciaOrdenTrabajoViewModel");
+                System.Diagnostics.Debug.WriteLine($" ERROR: BindingContext no es EvidenciaOrdenTrabajoViewModel");
             }
         }
 
@@ -36,13 +36,13 @@ namespace CarslineApp.Views
         protected override void OnAppearing()
         {
             base.OnAppearing();
-            System.Diagnostics.Debug.WriteLine("??? EvidenciasOrdenTrabajo - OnAppearing");
+            System.Diagnostics.Debug.WriteLine(" EvidenciasOrdenTrabajo - OnAppearing");
         }
 
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
-            System.Diagnostics.Debug.WriteLine("?? EvidenciasOrdenTrabajo - OnDisappearing");
+            System.Diagnostics.Debug.WriteLine(" EvidenciasOrdenTrabajo - OnDisappearing");
         }
     }
 }
