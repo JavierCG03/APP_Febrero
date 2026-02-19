@@ -511,6 +511,7 @@
                                                                             WidthRequest="35"
                                                                             IsVisible="{Binding NoTieneEvidencia}"
                                                                             BackgroundColor="Transparent"
+                                                                            ToolTipProperties.Text="Tomar Evidencia"
                                                                             Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.TomarEvidenciasCommand}" 
                                                                             CommandParameter="{Binding Id}" 
                                                                             Source="camara.png"/>

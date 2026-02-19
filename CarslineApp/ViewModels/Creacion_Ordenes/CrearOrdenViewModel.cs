@@ -1,5 +1,4 @@
-﻿
-using CarslineApp.Models;
+﻿using CarslineApp.Models;
 using CarslineApp.Services;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -19,13 +18,12 @@ namespace CarslineApp.ViewModels
         private bool _isLoading;
         private string _errorMessage = string.Empty;
 
-        
         public CrearOrdenViewModel(int tipoOrdenId)
         {
             _tipoOrdenId = tipoOrdenId;
             _apiService = new ApiService();
 
-            // Comandos
+            // ── Comandos generales ─────────────────────────────────────────
             BuscarClienteCommand = new Command(async () => await BuscarCliente());
             SeleccionarClienteCommand = new Command<ClienteDto>(async (cliente) => await SeleccionarCliente(cliente));
             BuscarVehiculoCommand = new Command(async () => await BuscarVehiculo());
@@ -42,7 +40,17 @@ namespace CarslineApp.ViewModels
             EditarGuardarVehiculoCommand = new Command(async () => await EditarGuardarVehiculo());
             AgregarTrabajoPersonalizadoCommand = new Command(AgregarTrabajoPersonalizado);
             EliminarTrabajoPersonalizadoCommand = new Command<TrabajoCrearDto>(EliminarTrabajoPersonalizado);
-
+            DecodificarVinManualCommand = new Command(
+                async () => await DecodificarVinAsync(VIN),
+                () => VehiculoId == 0);
+            SeleccionarMarcaCommand = new Command<string>(SeleccionarMarca);
+            AbrirSugerenciasMarcaCommand = new Command(() => { FiltrarMarcas(); MostrarSugerenciasMarca = true; });
+            SeleccionarModeloCommand = new Command<string>(SeleccionarModelo);
+            AbrirSugerenciasModeloCommand = new Command(() => { FiltrarModelos(); MostrarSugerenciasModelo = true; });
+            SeleccionarVersionCommand = new Command<string>(SeleccionarVersion);
+            AbrirSugerenciasVersionCommand = new Command(() => { FiltrarVersiones(); MostrarSugerenciasVersion = true; });
+            SeleccionarAnioCommand = new Command<string>(SeleccionarAnio);
+            AbrirSugerenciasAnioCommand = new Command(() => { FiltrarAnios(); MostrarSugerenciasAnio = true; });
 
             CargarCatalogos();
 
@@ -121,6 +129,7 @@ namespace CarslineApp.ViewModels
 
         #region Comandos
 
+        // Generales
         public ICommand HabilitarEdicionClienteCommand { get; }
         public ICommand HabilitarEdicionVehiculoCommand { get; }
         public ICommand BuscarClienteCommand { get; }
@@ -138,7 +147,15 @@ namespace CarslineApp.ViewModels
         public ICommand EditarGuardarVehiculoCommand { get; }
         public ICommand AgregarTrabajoPersonalizadoCommand { get; }
         public ICommand EliminarTrabajoPersonalizadoCommand { get; }
-
+        public ICommand DecodificarVinManualCommand { get; }
+        public ICommand SeleccionarMarcaCommand { get; }
+        public ICommand AbrirSugerenciasMarcaCommand { get; }
+        public ICommand SeleccionarModeloCommand { get; }
+        public ICommand AbrirSugerenciasModeloCommand { get; }
+        public ICommand SeleccionarVersionCommand { get; }
+        public ICommand AbrirSugerenciasVersionCommand { get; }
+        public ICommand SeleccionarAnioCommand { get; }
+        public ICommand AbrirSugerenciasAnioCommand { get; }
 
         #endregion
 
@@ -163,13 +180,9 @@ namespace CarslineApp.ViewModels
 
                 // Ocultar listas al regresar
                 if (PasoActual == 1)
-                {
                     MostrarListaClientes = false;
-                }
                 else if (PasoActual == 2)
-                {
                     MostrarListaVehiculos = false;
-                }
             }
         }
 
@@ -214,9 +227,7 @@ namespace CarslineApp.ViewModels
                         var response = await _apiService.CrearClienteAsync(request);
 
                         if (response.Success)
-                        {
                             ClienteId = response.ClienteId;
-                        }
                         else
                         {
                             ErrorMessage = response.Message;
@@ -266,9 +277,7 @@ namespace CarslineApp.ViewModels
                         var response = await _apiService.CrearVehiculoAsync(request);
 
                         if (response.Success)
-                        {
                             VehiculoId = response.VehiculoId;
-                        }
                         else
                         {
                             ErrorMessage = response.Message;
@@ -281,7 +290,6 @@ namespace CarslineApp.ViewModels
                     }
                 }
 
-                // Cargar historial al pasar al paso 3
                 await CargarHistorialVehiculo();
 
                 PasoActual = 3;
@@ -299,16 +307,12 @@ namespace CarslineApp.ViewModels
                 var tipos = await _apiService.ObtenerTiposServicioAsync();
                 TiposServicio.Clear();
                 foreach (var tipo in tipos)
-                {
                     TiposServicio.Add(tipo);
-                }
 
                 var extras = await _apiService.ObtenerServiciosFrecuentesAsync();
                 ServiciosExtra.Clear();
                 foreach (var extra in extras)
-                {
                     ServiciosExtra.Add(extra);
-                }
             }
             catch (Exception ex)
             {

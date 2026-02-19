@@ -143,15 +143,14 @@ namespace CarslineApp.ViewModels
             {
                 _modoEdicionCliente = value;
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(TextoBotonCliente));
-                OnPropertyChanged(nameof(ColorBotonCliente));
+
+                OnPropertyChanged(nameof(ImagenBotonCliente));
                 OnPropertyChanged(nameof(CamposClienteBloqueados));
             }
         }
 
         public bool CamposClienteBloqueados => ClienteId > 0 && !ModoEdicionCliente;
-        public string TextoBotonCliente => ModoEdicionCliente ? "💾 Guardar Cambios" : "✏️ Editar";
-        public string ColorBotonCliente => ModoEdicionCliente ? "#4CAF50" : "#FF9800";
+        public string ImagenBotonCliente => ModoEdicionCliente ? "guardar.png" : "editar.png";
 
         #endregion
 

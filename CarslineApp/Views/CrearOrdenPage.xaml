@@ -39,7 +39,7 @@
                                Placeholder="Ej: Sebastian Aldama"
                                MaxLength="100"
                                ReturnCommand="{Binding BuscarClienteCommand}"/>
-                        
+
                         <ImageButton Grid.Column="1"
                                          Command="{Binding BuscarClienteCommand}"
                                          Source="buscar.png"
@@ -48,7 +48,7 @@
                                          HeightRequest="50"
                                          VerticalOptions="Center"/>
                     </Grid>
-                    
+
                     <Label Text="{Binding ErrorMessage}"
                            TextColor="#B00000"
                            FontSize="13"
@@ -122,10 +122,24 @@
 
 
 
-                    <Label Text="Datos del Cliente"
+
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                        <Label Grid.Column="0"
+                           VerticalOptions="Center"
+                           Text="Datos del cliente"
                            FontSize="16"
                            FontAttributes="Bold"
                            TextColor="#404040"/>
+                        
+                        <ImageButton Grid.Column="1"
+                            HorizontalOptions="End"
+                            Source="{Binding ImagenBotonCliente}"
+                            Command="{Binding EditarGuardarClienteCommand}"
+                            IsVisible="{Binding MostrarBotonEditarCliente}"
+                            BackgroundColor="Transparent"
+                            HeightRequest="35"
+                            WidthRequest="35"/>
+                    </Grid>
 
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
                         <Label Grid.Column="0"
@@ -281,7 +295,7 @@
                                 Placeholder="#Ext"
                                 IsReadOnly="{Binding CamposClienteBloqueados}"/>
                     </Grid>
-                    
+
                     <Label Text="{Binding ErrorMessage}"
                            TextColor="#B00000"
                            FontSize="13"
@@ -289,16 +303,6 @@
                            IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotEmptyConverter}}"
                            HorizontalOptions="Center"
                            Margin="0,10"/>
-
-                    <Button Text="{Binding TextoBotonCliente}"
-                            Command="{Binding EditarGuardarClienteCommand}"
-                            IsVisible="{Binding MostrarBotonEditarCliente}"
-                            BackgroundColor="{Binding ColorBotonCliente}"
-                            TextColor="White"
-                            Margin="0,10,0,0"
-                            HeightRequest="45"
-                            FontAttributes="Bold"
-                            CornerRadius="10"/>
 
                     <!-- BOTONES DE NAVEGACIÓN (SIN CAMBIOS) -->
                     <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="0" Padding="0">
@@ -359,6 +363,7 @@
                                          VerticalOptions="Center"/>
 
                     </Grid>
+                    
                     <Label Text="{Binding ErrorMessage}"
                            TextColor="#B00000"
                            FontSize="13"
@@ -429,14 +434,27 @@
 
                     <BoxView HeightRequest="2" BackgroundColor="#E0E0E0" Margin="0,10"/>
 
-                    <Label Text="Datos del Vehículo"
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                        <Label Grid.Column="0"
+                           VerticalOptions="Center"
+                           Text="Datos del Vehiculo"
                            FontSize="16"
                            FontAttributes="Bold"
                            TextColor="#404040"/>
+                        <ImageButton Grid.Column="1"
+                            HorizontalOptions="End"
+                            Source="{Binding ImagenBotonVehiculo}"
+                            Command="{Binding EditarGuardarVehiculoCommand}"
+                            IsVisible="{Binding MostrarBotonEditarVehiculo}"
+                            BackgroundColor="Transparent"
+                            HeightRequest="35"
+                            WidthRequest="35"
+                            CornerRadius="10"/>
+                    </Grid>
 
                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
                         <Label Grid.Column="0"
-                               Text="VIN Completo:"
+                               Text="VIN:"
                                FontSize="14"
                                FontAttributes="Italic"
                                VerticalOptions="Center"
@@ -446,20 +464,18 @@
                                Placeholder="17 caracteres"
                                MaxLength="17"
                                IsReadOnly="{Binding CamposVehiculoBloqueados}"/>
-                        <!-- Botón para decodificar manualmente (útil si se pegó el VIN) -->
-                        <Button Grid.Column="2"
-                                Text="🔍"
-                                Command="{Binding DecodificarVinManualCommand}"
-                                IsVisible="{Binding CamposVehiculoBloqueados, Converter={StaticResource InvertedBoolConverter}}"
-                                BackgroundColor="#1565C0"
-                                TextColor="White"
-                                CornerRadius="8"
-                                WidthRequest="44"
-                                HeightRequest="44"
-                                FontSize="16"
-                                Padding="0"
-                                VerticalOptions="Center"
-                                ToolTipProperties.Text="Decodificar VIN"/>
+
+                        <ImageButton Grid.Column="2"
+                                         Command="{Binding DecodificarVinManualCommand}"
+                                         CommandParameter="{Binding VIN}"
+                                         IsVisible="{Binding CamposVehiculoBloqueados, Converter={StaticResource InverseBoolConverter}}"
+                                         Source="buscar.png"
+                                         BackgroundColor="Transparent"
+                                         WidthRequest="40"
+                                         HeightRequest="40"
+                                         VerticalOptions="Center"
+                                         ToolTipProperties.Text="Decodificar VIN"/>
+
                     </Grid>
 
                     <!-- Panel de estado de decodificación VIN -->
@@ -589,19 +605,54 @@
                         </VerticalStackLayout>
                     </Grid>
 
-                    <!-- ══ VERSIÓN (campo libre) ══ -->
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
                         <Label Grid.Column="0"
-                                Text="Version:"
-                                FontSize="14"
-                                FontAttributes="Italic"
-                                VerticalOptions="Center"
-                                TextColor="#B00000"/>
-                        <Entry Grid.Column="1"
-                                Text="{Binding Version}"
-                                Placeholder="Version del vehiculo"
-                                IsReadOnly="{Binding CamposVehiculoBloqueados}"/>
+                               Text="Versión:"
+                               FontSize="14"
+                               FontAttributes="Italic"
+                               VerticalOptions="Start"
+                               Margin="0,10,0,0"
+                               TextColor="#B00000"/>
+                        <VerticalStackLayout Grid.Column="1" Spacing="0">
+                            <Entry Text="{Binding BusquedaVersion}"
+                                   Placeholder="Selecciona el modelo primero"
+                                   IsReadOnly="{Binding CamposVehiculoBloqueados}">
+                                <Entry.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding AbrirSugerenciasVersionCommand}"/>
+                                </Entry.GestureRecognizers>
+                            </Entry>
+                            <!-- Lista de sugerencias Versión -->
+                            <Frame IsVisible="{Binding MostrarSugerenciasVersion}"
+                                   BorderColor="#B00000"
+                                   BackgroundColor="White"
+                                   Padding="0"
+                                   HasShadow="True"
+                                   CornerRadius="6"
+                                   Margin="0,-2,0,0">
+                                <CollectionView ItemsSource="{Binding VersionesFiltradas}"
+                                               SelectionMode="None"
+                                               MaximumHeightRequest="200">
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Padding="14,10" BackgroundColor="White">
+                                                <Grid.GestureRecognizers>
+                                                    <TapGestureRecognizer
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SeleccionarVersionCommand}"
+                                                        CommandParameter="{Binding .}"/>
+                                                </Grid.GestureRecognizers>
+                                                <Label Text="{Binding .}"
+                                                       FontSize="14"
+                                                       TextColor="#212121"/>
+                                                <BoxView HeightRequest="1" Color="#F0F0F0"
+                                                         VerticalOptions="End"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                            </Frame>
+                        </VerticalStackLayout>
                     </Grid>
+
 
                     <!-- ══ COLOR (campo libre) ══ -->
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
@@ -646,7 +697,7 @@
                                    Margin="0,-2,0,0">
                                 <CollectionView ItemsSource="{Binding AniosFiltrados}"
                                                SelectionMode="None"
-                                               MaximumHeightRequest="180">
+                                               MaximumHeightRequest="100">
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate>
                                             <Grid Padding="14,10" BackgroundColor="White">
@@ -692,16 +743,30 @@
                                 Placeholder="Kilometraje"
                                 IsReadOnly="{Binding CamposVehiculoBloqueados}"/>
                     </Grid>
+                    <Border
+                                BackgroundColor="#FFF0F0"
+                                StrokeThickness=".7"
+                                Stroke="Red"
+                                Padding="6"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"
+                                StrokeShape="RoundRectangle 12">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                            <Label  Grid.Column="0"
+                                Text="Kilometraje ACTUAL:"
+                                FontSize="14"
+                                FontAttributes="Bold"
+                                VerticalOptions="Center"
+                                TextColor="Black"/>
+                            <Entry Grid.Column="1"
+                                Text="{Binding KilometrajeActual}"
+                                Placeholder="Kilometraje"
+                                ReturnCommand="{Binding SiguienteCommand}"/>
+                        </Grid>
 
-                    <Button Text="{Binding TextoBotonVehiculo}"
-                            Command="{Binding EditarGuardarVehiculoCommand}"
-                            IsVisible="{Binding MostrarBotonEditarVehiculo}"
-                            BackgroundColor="{Binding ColorBotonVehiculo}"
-                            TextColor="White"
-                            Margin="0,10,0,0"
-                            HeightRequest="45"
-                            FontAttributes="Bold"
-                            CornerRadius="5"/>
+                    </Border>
+
+
                     <Label Text="{Binding ErrorMessage}"
                            TextColor="#B00000"
                            FontSize="13"
@@ -1021,7 +1086,7 @@
                                 </DataTemplate>
                             </CollectionView.ItemTemplate>
                         </CollectionView>
-                        
+
                         <BoxView HeightRequest="2" BackgroundColor="#E0E0E0" Margin="0,10"/>
 
 
@@ -1488,7 +1553,7 @@
                                FontAttributes="Bold"
                                TextColor="#404040"/>
                         </VerticalStackLayout>
-                        
+
                         <Grid ColumnDefinitions="145,Auto" ColumnSpacing="5">
                             <Border  Grid.Column="0"
                                 BackgroundColor="#FFF0F0"
