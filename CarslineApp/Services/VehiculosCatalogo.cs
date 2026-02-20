@@ -39,6 +39,7 @@ namespace CarslineApp.Services
                     ["Tahoe"] = new() { "LS", "LT", "RST", "Premier", "High Country" },
                     ["Trailblazer"] = new() { "LS", "LT", "RS", "Premier", "Activ" },
                     ["Trax"] = new() { "LS", "LT", "Premier", "RS", "Activ" },
+                    ["S10"] = new() { "LS", "LT", "LTZ", "High Country", "Z71"},
                 },
                 // ─────────────────────────────────────────────────────────────────
                 ["Ford"] = new(StringComparer.OrdinalIgnoreCase)
@@ -113,6 +114,7 @@ namespace CarslineApp.Services
                 ["Volkswagen"] = new(StringComparer.OrdinalIgnoreCase)
                 {
                     ["Bora"] = new() { "Trendline", "Comfortline", "Highline", "GLI" },
+                    ["Beetle"] = new() { "Design", "Sport", "R-Line", "Final Edition" },
                     ["Crossfox"] = new() { "Trendline", "Comfortline" },
                     ["Gol"] = new() { "Trendline", "Comfortline" },
                     ["Golf"] = new() { "Trendline", "Comfortline", "Highline", "GTI", "R" },
@@ -120,21 +122,30 @@ namespace CarslineApp.Services
                     ["Passat"] = new() { "Trendline", "Comfortline", "Highline" },
                     ["Polo"] = new() { "Trendline", "Comfortline", "Highline" },
                     ["Saveiro"] = new() { "Trendline", "Comfortline", "Cross" },
+                    ["Taigun"] = new() { "Trendline", "Comfortline", "Highline" },
                     ["Taos"] = new() { "Trendline", "Comfortline", "Highline" },
+                    ["T-Cross"] = new() { "Trendline", "Comfortline", "Highline" },
                     ["Tiguan"] = new() { "Trendline", "Comfortline", "Highline", "R-Line" },
+                    ["Teramont"] = new() { "Trendline", "Comfortline", "Highline" },
                     ["Touareg"] = new() { "Premium", "R-Line", "Elegance" },
                     ["Vento"] = new() { "Trendline", "Comfortline", "Highline", "GLI" },
+                    ["Virtus"] = new() { "Trendline", "Comfortline", "Highline" }
                 },
                 // ─────────────────────────────────────────────────────────────────
                 ["Honda"] = new(StringComparer.OrdinalIgnoreCase)
                 {
                     ["Accord"] = new() { "LX", "Sport", "EX-L", "Touring", "Hybrid" },
                     ["BR-V"] = new() { "Prime", "Uniq", "Epic" },
-                    ["City"] = new() { "Uniq", "Prime", "Epic", "Hatchback" },
-                    ["Civic"] = new() { "Sport", "i-Style", "Touring", "Si", "Type R" },
+                    ["City"] = new() { "Uniq", "Prime", "Epic", "Sport" },
+                    ["Civic"] = new() { "LX", "Sport", "EX", "EX-L", "Touring", "Si", "Type R" },
                     ["CR-V"] = new() { "Turbo", "Turbo Plus", "Touring", "Hybrid" },
                     ["Fit"] = new() { "Fun", "Hit", "EX" },
                     ["HR-V"] = new() { "Prime", "Epic", "Touring" },
+                    ["Insight"] = new() { "EX", "Touring" },
+                    ["WR-V"] = new() { "Uniq", "Prime" },
+                    ["CR-Z"] = new() { "Base", "EX" },
+                    ["Crosstour"] = new() { "EX", "EX-L" },
+                    ["Element"] = new() { "EX", "SC" },
                     ["Odyssey"] = new() { "LX", "EX", "EX-L", "Touring", "Elite" },
                     ["Pilot"] = new() { "Sport", "EX-L", "TrailSport", "Elite" },
                     ["Ridgeline"] = new() { "Sport", "RTL", "RTL-E", "Black Edition" },
@@ -223,7 +234,6 @@ namespace CarslineApp.Services
                     ["700"] = new() { "SLT Cabina Regular", "SLT Cabina Doble", "Big Horn", "Big Horn CVT", "Laramie", "Laramie CVT Turbo" },
                     ["1200"] = new() { "Tradesman Regular Cab", "Tradesman Doble Cab", "Big Horn", "Laramie" },
                     ["1500"] = new() { "Tradesman", "Express", "Big Horn", "Rebel", "Laramie", "Longhorn", "Limited", "TRX", "RHO" },
-                    ["2500"] = new() { "Tradesman", "Big Horn", "Power Wagon", "Laramie", "Longhorn", "Limited" },
                     ["2500"] = new() { "Tradesman", "Big Horn", "Power Wagon", "Laramie", "Longhorn", "Limited" },
                     ["ProMaster"] = new() { "1500 Cargo Van", "2500 Cargo Van", "3500 Cargo Van", "2500 Window Van", "3500 Window Van", "City Cargo Van", "City Wagon" },
                     ["3500"] = new() { "Tradesman", "Big Horn", "Laramie", "Power Wagon", "Limited Longhorn", "Limited" },
