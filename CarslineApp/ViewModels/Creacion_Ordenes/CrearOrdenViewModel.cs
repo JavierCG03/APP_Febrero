@@ -40,9 +40,7 @@ namespace CarslineApp.ViewModels
             EditarGuardarVehiculoCommand = new Command(async () => await EditarGuardarVehiculo());
             AgregarTrabajoPersonalizadoCommand = new Command(AgregarTrabajoPersonalizado);
             EliminarTrabajoPersonalizadoCommand = new Command<TrabajoCrearDto>(EliminarTrabajoPersonalizado);
-            DecodificarVinManualCommand = new Command(
-                async () => await DecodificarVinAsync(VIN),
-                () => VehiculoId == 0);
+            DecodificarVinManualCommand = new Command(async () => await DecodificarVinAsync(VIN),() => VehiculoId == 0);
             SeleccionarMarcaCommand = new Command<string>(SeleccionarMarca);
             AbrirSugerenciasMarcaCommand = new Command(() => { FiltrarMarcas(); MostrarSugerenciasMarca = true; });
             SeleccionarModeloCommand = new Command<string>(SeleccionarModelo);

@@ -293,8 +293,15 @@ namespace CarslineApp.ViewModels
         public string BusquedaMarca
         {
             get => _busquedaMarca;
-            set { _busquedaMarca = value; OnPropertyChanged(); FiltrarMarcas(); }
+            set
+            {
+                _busquedaMarca = value;
+                OnPropertyChanged();
+                Marca = value?.Trim() ?? string.Empty;
+                FiltrarMarcas();
+            }
         }
+
         public ObservableCollection<string> MarcasFiltradas
         {
             get => _marcasFiltradas;
@@ -308,18 +315,26 @@ namespace CarslineApp.ViewModels
 
         private void FiltrarMarcas()
         {
-            var txt = BusquedaMarca.Trim();
-            var lista = string.IsNullOrWhiteSpace(txt)
-                ? _todasLasMarcas
-                : _todasLasMarcas
-                    .Where(m => m.StartsWith(txt, StringComparison.OrdinalIgnoreCase))
-                    .Concat(_todasLasMarcas.Where(m =>
-                        !m.StartsWith(txt, StringComparison.OrdinalIgnoreCase) &&
-                         m.Contains(txt, StringComparison.OrdinalIgnoreCase)))
-                    .ToList();
+            var txt = BusquedaMarca?.Trim() ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(txt))
+            {
+                MarcasFiltradas = new ObservableCollection<string>();
+                MostrarSugerenciasMarca = false;
+                return;
+            }
+
+            var lista = _todasLasMarcas
+                .Where(m => m.StartsWith(txt, StringComparison.OrdinalIgnoreCase))
+                .Concat(_todasLasMarcas.Where(m =>
+                    !m.StartsWith(txt, StringComparison.OrdinalIgnoreCase) &&
+                     m.Contains(txt, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+
             MarcasFiltradas = new ObservableCollection<string>(lista);
             MostrarSugerenciasMarca = MarcasFiltradas.Count > 0;
         }
+
 
         /// <summary>Marca seleccionada → limpia modelo y versión → abre lista de modelos.</summary>
         public void SeleccionarMarca(string marca)
@@ -342,7 +357,13 @@ namespace CarslineApp.ViewModels
         public string BusquedaModelo
         {
             get => _busquedaModelo;
-            set { _busquedaModelo = value; OnPropertyChanged(); FiltrarModelos(); }
+            set
+            {
+                _busquedaModelo = value;
+                OnPropertyChanged();
+                Modelo = value?.Trim() ?? string.Empty;
+                FiltrarModelos();
+            }
         }
         public ObservableCollection<string> ModelosFiltrados
         {
@@ -395,7 +416,13 @@ namespace CarslineApp.ViewModels
         public string BusquedaVersion
         {
             get => _busquedaVersion;
-            set { _busquedaVersion = value; OnPropertyChanged(); FiltrarVersiones(); }
+            set
+            {
+                _busquedaVersion = value;
+                OnPropertyChanged();
+                Version = value?.Trim() ?? string.Empty; // ← AGREGAR ESTA LÍNEA
+                FiltrarVersiones();
+            }
         }
         public ObservableCollection<string> VersionesFiltradas
         {
@@ -461,12 +488,23 @@ namespace CarslineApp.ViewModels
 
         private void FiltrarAnios()
         {
-            AniosFiltrados = string.IsNullOrWhiteSpace(BusquedaAnio)
+            if (string.IsNullOrWhiteSpace(Version))
+            {
+                AniosFiltrados = new ObservableCollection<string>();
+                MostrarSugerenciasAnio = false;
+                return;
+            }
+
+            var txt = BusquedaAnio?.Trim() ?? string.Empty;
+
+            AniosFiltrados = string.IsNullOrWhiteSpace(txt)
                 ? new ObservableCollection<string>(_todosLosAnios)
                 : new ObservableCollection<string>(
-                    _todosLosAnios.Where(a => a.StartsWith(BusquedaAnio.Trim())));
+                    _todosLosAnios.Where(a => a.StartsWith(txt)));
+
             MostrarSugerenciasAnio = AniosFiltrados.Count > 0;
         }
+
 
         public void SeleccionarAnio(string anio)
         {
@@ -604,13 +642,30 @@ namespace CarslineApp.ViewModels
 
         private bool ValidarVehiculo()
         {
-            if (string.IsNullOrWhiteSpace(VIN) || VIN.Length != 17) { ErrorMessage = "El VIN debe tener 17 caracteres"; return false; }
-            if (string.IsNullOrWhiteSpace(Marca)) { ErrorMessage = "La marca es requerida"; return false; }
-            if (string.IsNullOrWhiteSpace(Modelo)) { ErrorMessage = "El modelo es requerido"; return false; }
-            if (string.IsNullOrWhiteSpace(Version)) { ErrorMessage = "La versión es requerida"; return false; }
-            if (Anio < 2000 || Anio > DateTime.Now.Year + 1) { ErrorMessage = "El año ingresado del vehículo no es válido"; return false; }
-            if (KilometrajeInicial <= 0) { ErrorMessage = "Ingresa el kilometraje inicial"; return false; }
-            if (KilometrajeActual < KilometrajeInicial) { ErrorMessage = "El kilometraje Actual no puede ser menor al Inicial"; return false;}
+
+            if (string.IsNullOrWhiteSpace(Marca) && !string.IsNullOrWhiteSpace(BusquedaMarca))
+                Marca = BusquedaMarca.Trim();
+            if (string.IsNullOrWhiteSpace(Modelo) && !string.IsNullOrWhiteSpace(BusquedaModelo))
+                Modelo = BusquedaModelo.Trim();
+            if (string.IsNullOrWhiteSpace(Version) && !string.IsNullOrWhiteSpace(BusquedaVersion))
+                Version = BusquedaVersion.Trim();
+            if (!int.TryParse(BusquedaAnio, out int anioEscrito) == false && Anio == DateTime.Now.Year)
+                if (int.TryParse(BusquedaAnio, out int anioTexto) && anioTexto >= 2000)
+                    Anio = anioTexto;
+            if (string.IsNullOrWhiteSpace(VIN) || VIN.Length != 17)
+            { ErrorMessage = "El VIN debe tener 17 caracteres"; return false; }
+            if (string.IsNullOrWhiteSpace(Marca))
+            { ErrorMessage = "La marca es requerida"; return false; }
+            if (string.IsNullOrWhiteSpace(Modelo))
+            { ErrorMessage = "El modelo es requerido"; return false; }
+            if (string.IsNullOrWhiteSpace(Version))
+            { ErrorMessage = "La versión es requerida"; return false; }
+            if (Anio < 2000 || Anio > DateTime.Now.Year + 1)
+            { ErrorMessage = "El año ingresado del vehículo no es válido"; return false; }
+            if (KilometrajeInicial <= 0)
+            { ErrorMessage = "Ingresa el kilometraje inicial"; return false; }
+            if (KilometrajeActual < KilometrajeInicial)
+            { ErrorMessage = "El kilometraje Actual no puede ser menor al Inicial"; return false; }
             return true;
         }
 

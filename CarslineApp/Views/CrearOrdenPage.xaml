@@ -653,30 +653,16 @@
                         </VerticalStackLayout>
                     </Grid>
 
-
-                    <!-- ══ COLOR (campo libre) ══ -->
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
-                        <Label Grid.Column="0"
-                                Text="Color:"
-                                FontSize="14"
-                                FontAttributes="Italic"
-                                VerticalOptions="Center"
-                                TextColor="#B00000"/>
-                        <Entry Grid.Column="1"
-                                Text="{Binding Color}"
-                                Placeholder="Color del vehículo"
-                                IsReadOnly="{Binding CamposVehiculoBloqueados}"/>
-                    </Grid>
-
                     <!-- ══ AÑO con autocompletado  +  PLACA en la misma fila ══ -->
-                    <Grid ColumnDefinitions="Auto,*,Auto,*" ColumnSpacing="10">
-                        <Label Grid.Column="0"
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                        <Label Grid.Column="0" 
                                Text="Año:"
                                FontSize="14"
                                FontAttributes="Italic"
                                VerticalOptions="Start"
                                Margin="0,10,0,0"
                                TextColor="#B00000"/>
+
                         <VerticalStackLayout Grid.Column="1" Spacing="0">
                             <Entry Text="{Binding BusquedaAnio}"
                                    Placeholder="2025"
@@ -688,7 +674,8 @@
                                 </Entry.GestureRecognizers>
                             </Entry>
                             <!-- Lista de sugerencias Año -->
-                            <Frame IsVisible="{Binding MostrarSugerenciasAnio}"
+                            <Frame 
+                                IsVisible="{Binding MostrarSugerenciasAnio}"
                                    BorderColor="#B00000"
                                    BackgroundColor="White"
                                    Padding="0"
@@ -697,7 +684,7 @@
                                    Margin="0,-2,0,0">
                                 <CollectionView ItemsSource="{Binding AniosFiltrados}"
                                                SelectionMode="None"
-                                               MaximumHeightRequest="100">
+                                               MaximumHeightRequest="120">
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate>
                                             <Grid Padding="14,10" BackgroundColor="White">
@@ -717,14 +704,30 @@
                                 </CollectionView>
                             </Frame>
                         </VerticalStackLayout>
+                    </Grid>
 
-                        <Label Grid.Column="2"
+                    <!-- ══ COLOR (campo libre) ══ -->
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                        <Label Grid.Column="0"
+                                Text="Color:"
+                                FontSize="14"
+                                FontAttributes="Italic"
+                                VerticalOptions="Center"
+                                TextColor="#B00000"/>
+                        <Entry Grid.Column="1"
+                                Text="{Binding Color}"
+                                Placeholder="Color del vehículo"
+                                IsReadOnly="{Binding CamposVehiculoBloqueados}"/>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                        <Label Grid.Column="0" 
                                Text="Placa:"
                                FontSize="14"
-                               FontAttributes="Italic"
                                VerticalOptions="Center"
+                               FontAttributes="Italic"
                                TextColor="#B00000"/>
-                        <Entry Grid.Column="3"
+                        <Entry Grid.Column="1"
                                Text="{Binding Placas}"
                                Placeholder="Placa"
                                MaxLength="7"

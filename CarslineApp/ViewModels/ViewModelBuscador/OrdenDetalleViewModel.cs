@@ -377,9 +377,11 @@ namespace CarslineApp.ViewModels.ViewModelBuscador
                     var dto = new TrabajoCrearDto
                     {
                         Trabajo = trabajo.Trabajo,
-                        Indicaciones = string.IsNullOrWhiteSpace(trabajo.Indicaciones)
+                        Indicaciones = trabajo.Indicaciones ?? null
+
+                       /* Indicaciones = string.IsNullOrWhiteSpace(trabajo.Indicaciones)
                             ? "Sin indicaciones"
-                            : trabajo.Indicaciones
+                            : trabajo.Indicaciones*/
                     };
 
                     var resultado = await _apiService.AgregarTrabajoAsync(_ordenId, dto);

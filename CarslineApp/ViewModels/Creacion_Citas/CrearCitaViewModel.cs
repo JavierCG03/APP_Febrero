@@ -60,6 +60,15 @@ namespace CarslineApp.ViewModels.Creacion_Citas
             EditarGuardarVehiculoCommand = new Command(async () => await EditarGuardarVehiculo());
             AgregarTrabajoPersonalizadoCommand = new Command(AgregarTrabajoPersonalizado);
             EliminarTrabajoPersonalizadoCommand = new Command<TrabajoCrearDto>(EliminarTrabajoPersonalizado);
+            DecodificarVinManualCommand = new Command(async () => await DecodificarVinAsync(VIN),() => VehiculoId == 0);
+            SeleccionarMarcaCommand = new Command<string>(SeleccionarMarca);
+            AbrirSugerenciasMarcaCommand = new Command(() => { FiltrarMarcas(); MostrarSugerenciasMarca = true; });
+            SeleccionarModeloCommand = new Command<string>(SeleccionarModelo);
+            AbrirSugerenciasModeloCommand = new Command(() => { FiltrarModelos(); MostrarSugerenciasModelo = true; });
+            SeleccionarVersionCommand = new Command<string>(SeleccionarVersion);
+            AbrirSugerenciasVersionCommand = new Command(() => { FiltrarVersiones(); MostrarSugerenciasVersion = true; });
+            SeleccionarAnioCommand = new Command<string>(SeleccionarAnio);
+            AbrirSugerenciasAnioCommand = new Command(() => { FiltrarAnios(); MostrarSugerenciasAnio = true; });
 
             // Cargar datos de forma asíncrona DESPUÉS de establecer el paso
             CargarDatosIniciales();
@@ -158,6 +167,15 @@ namespace CarslineApp.ViewModels.Creacion_Citas
         public ICommand EditarGuardarVehiculoCommand { get; }
         public ICommand AgregarTrabajoPersonalizadoCommand { get; }
         public ICommand EliminarTrabajoPersonalizadoCommand { get; }
+        public ICommand DecodificarVinManualCommand { get; }
+        public ICommand SeleccionarMarcaCommand { get; }
+        public ICommand AbrirSugerenciasMarcaCommand { get; }
+        public ICommand SeleccionarModeloCommand { get; }
+        public ICommand AbrirSugerenciasModeloCommand { get; }
+        public ICommand SeleccionarVersionCommand { get; }
+        public ICommand AbrirSugerenciasVersionCommand { get; }
+        public ICommand SeleccionarAnioCommand { get; }
+        public ICommand AbrirSugerenciasAnioCommand { get; }
 
 
         #endregion

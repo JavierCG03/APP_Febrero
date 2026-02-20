@@ -172,24 +172,39 @@ namespace CarslineApp.Services
                 ["Mazda"] = new(StringComparer.OrdinalIgnoreCase)
                 {
                     ["CX-3"] = new() { "i Sport", "i Grand Touring", "s Grand Touring" },
-                    ["CX-30"] = new() { "i Sport", "i SkyActiv", "s Grand Touring", "Turbo" },
-                    ["CX-5"] = new() { "i Sport", "i SkyActiv", "i Grand Touring", "s Grand Touring", "Turbo" },
+                    ["CX-30"] = new() { "i Sport", "i SkyActiv", "i Grand Touring", "s Grand Touring", "Turbo" },
+                    ["CX-5"] = new() { "i Sport", "i SkyActiv", "i Grand Touring", "s Grand Touring", "Turbo", "Signature" },
+                    ["CX-7"] = new() { "i Sport", "i Touring", "i Grand Touring" },
                     ["CX-9"] = new() { "Sport", "Touring", "Grand Touring", "Signature" },
-                    ["Mazda2"] = new() { "i Sport", "i Grand Touring" },
-                    ["Mazda3"] = new() { "i Sport", "i SkyActiv", "i Grand Touring", "s Grand Touring", "Turbo" },
+                    ["CX-50"] = new() { "i Sport", "i Grand Touring", "Turbo", "Turbo Meridian Edition" },
+                    ["CX-60"] = new() { "Prime-Line", "Exclusive-Line", "Homura", "Takumi" },
+                    ["CX-70"] = new() { "Preferred", "Premium", "Premium Plus" },
+                    ["CX-90"] = new() { "Preferred", "Premium", "Premium Plus", "Turbo S", "Turbo S Premium Plus" },
+                    ["Mazda2"] = new() { "i Sport", "i Grand Touring", "Signature" },
+                    ["Mazda3"] = new() { "i Sport", "i SkyActiv", "i Grand Touring", "s Grand Touring", "Turbo", "Signature" },
+                    ["Mazda5"] = new() { "Sport", "Touring", "Grand Touring" },
                     ["Mazda6"] = new() { "i Sport", "i Grand Touring", "s Grand Touring", "Signature" },
                     ["MX-5"] = new() { "Sport", "Club", "Grand Touring", "RF Club", "RF Grand Touring" },
+                    ["MX-30"] = new() { "e-SkyActiv", "Premium Plus" },
+                    ["BT-50"] = new() { "4x2", "4x4", "Pro", "High" }
                 },
                 // ─────────────────────────────────────────────────────────────────
                 ["Dodge"] = new(StringComparer.OrdinalIgnoreCase)
                 {
-                    ["Challenger"] = new() { "SXT", "GT", "R/T", "R/T Scat Pack", "SRT 392", "SRT Hellcat" },
-                    ["Charger"] = new() { "SXT", "GT", "R/T", "Scat Pack", "SRT 392", "SRT Hellcat" },
-                    ["Durango"] = new() { "SXT", "GT", "R/T", "Citadel", "SRT 392" },
+                    ["Attitude"] = new() { "SE", "SXT", "Sport", "GT" },
+                    ["Challenger"] = new() { "SXT", "GT", "R/T", "R/T Scat Pack", "SRT 392", "SRT Hellcat", "SRT Demon" },
+                    ["Charger"] = new() { "SXT", "GT", "R/T", "Scat Pack", "SRT 392", "SRT Hellcat", "SRT Hellcat Redeye" },
+                    ["Durango"] = new() { "SXT", "GT", "R/T", "Citadel", "SRT 392", "SRT Hellcat" },
                     ["Journey"] = new() { "SE", "SXT", "Crossroad", "GT" },
-                    ["Neon"] = new() { "SE", "SXT", "GT" },
-                    ["Ram 1500"] = new() { "Tradesman", "Express", "SLT", "Laramie", "Rebel", "Longhorn" },
-                    ["Ram 2500"] = new() { "Tradesman", "SLT", "Laramie", "Power Wagon", "Limited" },
+                    ["Neon"] = new() { "SE", "SXT", "GT", "Sport" },
+                    ["Vision"] = new() { "SE", "SXT" },
+                    ["Grand Caravan"] = new() { "SE", "SXT", "GT" },
+                    ["Dakota"] = new() { "SLT", "Sport", "Laramie" },
+                    ["Viper"] = new() { "SRT-10", "GTS", "ACR" },
+                    ["Nitro"] = new() { "SE", "SXT", "SLT", "R/T" },
+                    ["Caliber"] = new() { "SE", "SXT", "R/T", "SRT4" },
+                    ["Avenger"] = new() { "SE", "SXT", "R/T" },
+                    ["i10"] = new() { "GL", "GLS" },
                 },
                 // ─────────────────────────────────────────────────────────────────
                 ["Jeep"] = new(StringComparer.OrdinalIgnoreCase)
@@ -289,9 +304,17 @@ namespace CarslineApp.Services
                 {
                     ["Arona"] = new() { "Reference", "Style", "FR", "Xcellence" },
                     ["Ateca"] = new() { "Reference", "Style", "FR", "Xcellence" },
-                    ["Ibiza"] = new() { "Reference", "Style", "FR" },
-                    ["Leon"] = new() { "Reference", "Style", "FR", "Xcellence", "Cupra" },
+                    ["Ibiza"] = new() { "Reference", "Style", "FR", "Xcellence" },
+                    ["Leon"] = new() { "Reference", "Style", "FR", "Xcellence", "Cupra", "FR Black Edition" },
+                    ["Leon Sportstourer"] = new() { "Style", "FR", "Xcellence" },
                     ["Tarraco"] = new() { "Style", "FR", "Xcellence" },
+                    ["Toledo"] = new() { "Reference", "Style", "FR", "Advance" },
+                    ["Altea"] = new() { "Reference", "Style", "XL", "FR" },
+                    ["Altea XL"] = new() { "Reference", "Style", "FR" },
+                    ["Exeo"] = new() { "Reference", "Style", "Sport" },
+                    ["Mii"] = new() { "Reference", "Style", "FR" },
+                    ["Cordoba"] = new() { "Reference", "Style", "Sport" },
+                    ["Freetrack"] = new() { "Style", "4Drive" }
                 },
                 // ─────────────────────────────────────────────────────────────────
                 ["CUPRA"] = new(StringComparer.OrdinalIgnoreCase)
