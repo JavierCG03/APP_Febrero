@@ -51,7 +51,7 @@ namespace CarslineApp.ViewModels
             AbrirSugerenciasAnioCommand = new Command(() => { FiltrarAnios(); MostrarSugerenciasAnio = true; });
             ToggleCamposVehiculoCommand = new Command(() => MostrarCamposVehiculo = !MostrarCamposVehiculo);
             LimpiarVehiculoCommand = new Command(LimpiarDatosVehiculo);
-
+            SeleccionarTipoServicioCommand = new Command<TipoServicioDto>(tipo => {foreach (var t in TiposServicio)t.EstaSeleccionado = false;tipo.EstaSeleccionado = true;TipoServicioSeleccionado = tipo;}); 
             CargarCatalogos();
 
             OnPropertyChanged(nameof(EsServicio));
@@ -156,10 +156,9 @@ namespace CarslineApp.ViewModels
         public ICommand AbrirSugerenciasVersionCommand { get; }
         public ICommand SeleccionarAnioCommand { get; }
         public ICommand AbrirSugerenciasAnioCommand { get; }
-        /// <summary>Alterna la visibilidad del panel de campos del vehículo.</summary>
         public ICommand ToggleCamposVehiculoCommand { get; }
-        /// <summary>Limpia todos los datos del vehículo para seleccionar o registrar otro.</summary>
         public ICommand LimpiarVehiculoCommand { get; }
+        public ICommand SeleccionarTipoServicioCommand { get; }
 
         #endregion
 

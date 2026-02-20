@@ -163,13 +163,31 @@ namespace CarslineApp.Models
     // MODELOS DE SERVICIOS (REFERENCIA)
     // ============================================
 
-    public class TipoServicioDto
+    public class TipoServicioDto : INotifyPropertyChanged
     {
         public int Id { get; set; }
         public string Nombre { get; set; } = string.Empty;
         public string Descripcion { get; set; } = string.Empty;
         public decimal Precio { get; set; }
         public string PrecioFormateado => $"${Precio:N2}";
+
+        private bool _esSugerido;
+        public bool EsSugerido
+        {
+            get => _esSugerido;
+            set { _esSugerido = value; OnPropertyChanged(); }
+        }
+
+        private bool _estaSeleccionado;
+        public bool EstaSeleccionado
+        {
+            get => _estaSeleccionado;
+            set { _estaSeleccionado = value; OnPropertyChanged(); }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string? name = null)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
     public class ServicioExtraDto : INotifyPropertyChanged
     {

@@ -284,7 +284,7 @@ namespace CarslineApp.ViewModels
                     if (_tipoOrdenId == 1)
                     {
                         // Sin historial = Servicio Externo
-                        ServicioSugerido = "🔧 SERVICIO EXTERNO";
+                        ServicioSugerido = "Servicio Externo";
                         MensajeServicioSugerido = "Sin historial de servicios previos";
                         ColorServicioSugerido = "#FF9800";
                     }
@@ -294,9 +294,10 @@ namespace CarslineApp.ViewModels
                         MensajeServicioSugerido = "No tiene historial de servicios previos";
                         ColorServicioSugerido = "#F44336";
                     }
+                    PreseleccionarServicioSugerido();
 
 
-                        System.Diagnostics.Debug.WriteLine("ℹ️ No se encontró historial");
+                    System.Diagnostics.Debug.WriteLine("ℹ️ No se encontró historial");
                 }
             }
             catch (Exception ex)
@@ -309,7 +310,7 @@ namespace CarslineApp.ViewModels
                 if (_tipoOrdenId == 1)
                 {
                     // Sin historial = Servicio Externo
-                    ServicioSugerido = "🔧 SERVICIO EXTERNO";
+                    ServicioSugerido = "Servicio Externo";
                     MensajeServicioSugerido = "No se pudo cargar el historial";
                     ColorServicioSugerido = "#FF9800";
                 }
@@ -345,22 +346,25 @@ namespace CarslineApp.ViewModels
                 if (kmRecorridos<6000 && kmRecorridos != 0 )
                 {
 
-                    ServicioSugerido = $"PRIMER SERVICIO";
+                    //ServicioSugerido = $"PRIMER SERVICIO";
+                    ServicioSugerido = $"1er Servicio";
                     ColorServicioSugerido = "#4CAF50";
                     MensajeServicioSugerido = $"✅ En tiempo y forma ({kmRecorridos:N0} km recorridos)";
 
                     return;
                 }
                 else if(kmRecorridos > 6000)
-                {                     
-                    ServicioSugerido = "🔧 SERVICIO EXTERNO";
+                {
+                    //ServicioSugerido = "🔧 SERVICIO EXTERNO";
+                    ServicioSugerido = "Servicio Externo";
                     MensajeServicioSugerido = $"⚠️ Excedió los 6,000 km ({kmRecorridos:N0} km recorridos)";
                     ColorServicioSugerido = "#FF9800";
                     return;
                 }   
                 else
                 {
-                    ServicioSugerido = "🔧 SERVICIO EXTERNO";
+                    //ServicioSugerido = "🔧 SERVICIO EXTERNO";
+                    ServicioSugerido = "Servicio Externo";
                     MensajeServicioSugerido = $"Sin historial de servicios previos {kmRecorridos:N0} Km ";
                     ColorServicioSugerido = "#FF9800";
                     return;
@@ -388,7 +392,7 @@ namespace CarslineApp.ViewModels
             if (excedioKilometraje || excedioTiempo)
             {
                 // Se excedieron los límites, servicio externo
-                ServicioSugerido = "🔧 SERVICIO EXTERNO";
+                ServicioSugerido = "Servicio Externo";
                 ColorServicioSugerido = "#FF9800";
 
                 List<string> razones = new List<string>();
@@ -402,7 +406,7 @@ namespace CarslineApp.ViewModels
             }
             else if(VioloOdometro)
             {
-                ServicioSugerido = "🔧 SERVICIO EXTERNO";
+                ServicioSugerido = "Servicio Externo";
                 ColorServicioSugerido = "#FF9800";
                 MensajeServicioSugerido = $"Posible violación de odómetro: el kilometraje del último servicio fue de {ultimoServicio.KilometrajeRegistrado:N0} km y el kilometraje actual es de {KilometrajeActual:N0} km.";
 
@@ -414,7 +418,7 @@ namespace CarslineApp.ViewModels
 
                 if (servicioSubsecuente == "EXTERNO")
                 {
-                    ServicioSugerido = "🔧 SERVICIO EXTERNO";
+                    ServicioSugerido = "Servicio Externo";
                     ColorServicioSugerido = "#FF9800";
                     MensajeServicioSugerido = "✅ Ya completó los 3 servicios programados";
                 }
@@ -427,6 +431,8 @@ namespace CarslineApp.ViewModels
 
                 System.Diagnostics.Debug.WriteLine($"   ✅ Servicio sugerido: {ServicioSugerido}");
             }
+            // Preseleccionar automáticamente en la lista de cards
+            PreseleccionarServicioSugerido();
         }
 
         /// <summary>
@@ -436,16 +442,19 @@ namespace CarslineApp.ViewModels
         {
             // Normalizar el nombre del servicio
             if (servicioAnterior.Contains("1") || servicioAnterior.Contains("PRIMER"))
-                return "2DO SERVICIO";
+                //return "2DO SERVICIO";
+                return "2do Servicio";
 
             if (servicioAnterior.Contains("2") || servicioAnterior.Contains("SEGUNDO"))
-                return "3ER SERVICIO";
+                //return "3ER SERVICIO";
+                return "'3er Servicio'";
 
             if (servicioAnterior.Contains("3") || servicioAnterior.Contains("TERCER"))
-                return "EXTERNO";
+                //return "EXTERNO";
+                return "Servicio Externo";
 
             // Si no es ninguno de los anteriores, es externo
-            return "EXTERNO";
+            return "Servicio Externo";
         }
 
         #endregion
@@ -867,7 +876,37 @@ namespace CarslineApp.ViewModels
 
             CostoTotal = total;
         }
+        /// <summary>
+        /// Busca en TiposServicio el ítem cuyo Nombre coincida con el texto del servicio sugerido
+        /// y lo asigna como TipoServicioSeleccionado. Se llama automáticamente al calcular la sugerencia.
+        /// </summary>
+        public void PreseleccionarServicioSugerido()
+        {
+            if (!TiposServicio.Any() || string.IsNullOrEmpty(ServicioSugerido)) return;
 
+            foreach (var t in TiposServicio)
+            {
+                t.EsSugerido = false;
+                t.EstaSeleccionado = false;
+            }
+
+            var sugeridoLimpio = ServicioSugerido
+                .Replace("✨", "").Replace("🔧", "").Replace("✅", "").Replace("⚠️", "")
+                .Trim().ToUpper();
+
+            var coincidencia =
+                TiposServicio.FirstOrDefault(t => t.Nombre.ToUpper() == sugeridoLimpio)
+                ?? TiposServicio.FirstOrDefault(t =>
+                    sugeridoLimpio.Contains(t.Nombre.ToUpper()) ||
+                    t.Nombre.ToUpper().Contains(sugeridoLimpio));
+
+            if (coincidencia != null)
+            {
+                coincidencia.EsSugerido = true;
+                coincidencia.EstaSeleccionado = true;
+                TipoServicioSeleccionado = coincidencia;
+            }
+        }
 
         #endregion
     }

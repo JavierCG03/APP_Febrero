@@ -1029,7 +1029,7 @@
                             </Frame>
                         </VerticalStackLayout>
 
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Padding="6">
+                  <!--      <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Padding="6">
 
                             <Label  
                                 Grid.Column="0"
@@ -1057,10 +1057,153 @@
                                     TextColor="#404040"
                                     BackgroundColor="Transparent"/>
                             </Border>
-                        </Grid>
+                        </Grid> -->
+                        
+                        <!-- ── Etiqueta de sección ── -->
+                        <Label Text="Tipo de Servicio *"
+                               FontSize="16"
+                               FontAttributes="Bold"
+                               TextColor="#404040"
+                               Margin="0,4,0,4"/>
 
+                        <Label Text="Toca una opción para seleccionarla"
+                               FontSize="12"
+                               TextColor="#9E9E9E"
+                               Margin="0,0,0,10"/>
 
+                        <CollectionView ItemsSource="{Binding TiposServicio}"
+                                        SelectionMode="None"
+                                        Margin="0,0,0,4">
 
+                            <CollectionView.ItemsLayout>
+                                <GridItemsLayout Orientation="Vertical"
+                                                 Span="2"
+                                                 HorizontalItemSpacing="10"
+                                                 VerticalItemSpacing="10"/>
+                            </CollectionView.ItemsLayout>
+
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+
+                                    <Border Padding="10,14"
+                                            BackgroundColor="White"
+                                            Stroke="#E0E0E0"
+                                            StrokeThickness="2"
+                                            StrokeShape="RoundRectangle 14"
+                                            Margin="0">
+
+                                        <Border.Triggers>
+                                            <DataTrigger TargetType="Border"
+                                                         Binding="{Binding EstaSeleccionado}"
+                                                         Value="True">
+                                                <Setter Property="BackgroundColor" Value="#FFEBEE"/>
+                                                <Setter Property="Stroke"          Value="#B00000"/>
+                                                <Setter Property="StrokeThickness" Value="3"/>
+                                            </DataTrigger>
+                                        </Border.Triggers>
+
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}},
+                                                                  Path=BindingContext.SeleccionarTipoServicioCommand}"
+                                                CommandParameter="{Binding .}"/>
+                                        </Border.GestureRecognizers>
+
+                                        <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+
+                                            <Label Text="{Binding Nombre}"
+                                                   FontSize="13"
+                                                   FontAttributes="Bold"
+                                                   TextColor="#212121"
+                                                   HorizontalTextAlignment="Center"
+                                                   LineBreakMode="WordWrap"
+                                                   HorizontalOptions="Center">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label"
+                                                                 Binding="{Binding EstaSeleccionado}"
+                                                                 Value="True">
+                                                        <Setter Property="TextColor" Value="#B00000"/>
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+
+                                            <Label Text="{Binding Precio, StringFormat='${0:N2}'}"
+                                                   FontSize="12"
+                                                   TextColor="#757575"
+                                                   HorizontalOptions="Center">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label"
+                                                                 Binding="{Binding EstaSeleccionado}"
+                                                                 Value="True">
+                                                        <Setter Property="TextColor" Value="#C62828"/>
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+
+                                            <Border BackgroundColor="#FFF9C4"
+                                                    StrokeThickness="0"
+                                                    StrokeShape="RoundRectangle 6"
+                                                    Padding="6,2"
+                                                    HorizontalOptions="Center"
+                                                    IsVisible="{Binding EsSugerido}">
+                                                <Label Text="⭐ SUGERIDO"
+                                                       FontSize="10"
+                                                       FontAttributes="Bold"
+                                                       TextColor="#F57F17"/>
+                                            </Border>
+
+                                            <Label Text="✓"
+                                                   FontSize="18"
+                                                   FontAttributes="Bold"
+                                                   TextColor="#B00000"
+                                                   HorizontalOptions="Center"
+                                                   IsVisible="False">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label"
+                                                                 Binding="{Binding EstaSeleccionado}"
+                                                                 Value="True">
+                                                        <Setter Property="IsVisible" Value="True"/>
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+
+                        <!-- ── Barra de confirmación de selección ── -->
+                        <Border IsVisible="{Binding TipoServicioSeleccionado.Nombre,
+                                                    Converter={StaticResource StringNotEmptyConverter}}"
+                                BackgroundColor="#FFEBEE"
+                                StrokeThickness="1"
+                                Stroke="#B00000"
+                                StrokeShape="RoundRectangle 10"
+                                Padding="12,8"
+                                Margin="0,4,0,0">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                <Label Grid.Column="0" FontSize="13">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="Seleccionado: "
+                                                  FontAttributes="Italic"
+                                                  TextColor="#9E9E9E"/>
+                                            <Span Text="{Binding TipoServicioSeleccionado.Nombre}"
+                                                  FontAttributes="Bold"
+                                                  TextColor="#B00000"/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                                <Label Grid.Column="1"
+                                       Text="{Binding TipoServicioSeleccionado.Precio, StringFormat='${0:N2}'}"
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       TextColor="#B00000"
+                                       VerticalOptions="Center"/>
+                            </Grid>
+                        </Border>
+                        
                         <BoxView HeightRequest="2" BackgroundColor="#E0E0E0" Margin="0,10"/>
 
                         <Label Text="Servicios Extra (Opcionales)"
