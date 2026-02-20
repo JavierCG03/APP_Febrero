@@ -38,6 +38,7 @@ namespace CarslineApp.ViewModels
         private string _busquedaAnio = string.Empty;
         private ObservableCollection<string> _aniosFiltrados = new();
         private bool _mostrarSugerenciasAnio;
+        private bool _mostrarCamposVehiculo;
 
         #endregion
 
@@ -79,6 +80,8 @@ namespace CarslineApp.ViewModels
                 OnPropertyChanged(nameof(MostrarBotonEditarVehiculo));
                 OnPropertyChanged(nameof(CampoPlacasBloqueado));
                 OnPropertyChanged(nameof(CamposVehiculoBloqueados));
+                OnPropertyChanged(nameof(MostrarBotonLimpiarVehiculo));
+                OnPropertyChanged(nameof(TextoToggleCamposVehiculo));
             }
         }
 
@@ -143,6 +146,26 @@ namespace CarslineApp.ViewModels
         public string ImagenBotonVehiculo => ModoEdicionVehiculo ? "guardar.png" : "editar.png";
         public bool CampoPlacasBloqueado => VehiculoId > 0 && !ModoEdicionVehiculo;
         public bool CamposVehiculoBloqueados => VehiculoId > 0;
+        public bool MostrarCamposVehiculo
+        {
+            get => _mostrarCamposVehiculo;
+            set
+            {
+                _mostrarCamposVehiculo = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IconoToggleCamposVehiculo));
+                OnPropertyChanged(nameof(TextoToggleCamposVehiculo));
+            }
+        }
+        public string IconoToggleCamposVehiculo => MostrarCamposVehiculo ? "▲" : "▼";
+
+        public string TextoToggleCamposVehiculo =>
+            VehiculoId > 0
+                ? (MostrarCamposVehiculo ? "Ocultar datos del vehículo" : "Ver datos del vehículo seleccionado")
+                : (MostrarCamposVehiculo ? "Ocultar formulario" : "Registrar nuevo vehículo");
+
+        public bool MostrarBotonLimpiarVehiculo => VehiculoId > 0;
+
 
         #endregion
 
@@ -186,7 +209,7 @@ namespace CarslineApp.ViewModels
             VinDecodificando = true;
             VinDecodificadoExito = false;
             VinMensajeDecodificacion = "🔍 Consultando datos del vehículo...";
-            if ( vin.Length == 17)
+            if (vin.Length == 17)
             {
                 try
                 {
@@ -267,7 +290,7 @@ namespace CarslineApp.ViewModels
                 VinMensajeDecodificacion = $"⚠️ Error al decodificar, faltan {faltantes} Caracteres";
                 VinDecodificadoExito = true;
             }
-            
+
         }
 
         /// <summary>
@@ -298,7 +321,7 @@ namespace CarslineApp.ViewModels
                 _busquedaMarca = value;
                 OnPropertyChanged();
                 Marca = value?.Trim() ?? string.Empty;
-                FiltrarMarcas();
+                if (!CamposVehiculoBloqueados) FiltrarMarcas();
             }
         }
 
@@ -362,7 +385,7 @@ namespace CarslineApp.ViewModels
                 _busquedaModelo = value;
                 OnPropertyChanged();
                 Modelo = value?.Trim() ?? string.Empty;
-                FiltrarModelos();
+                if (!CamposVehiculoBloqueados) FiltrarModelos();
             }
         }
         public ObservableCollection<string> ModelosFiltrados
@@ -421,7 +444,7 @@ namespace CarslineApp.ViewModels
                 _busquedaVersion = value;
                 OnPropertyChanged();
                 Version = value?.Trim() ?? string.Empty; // ← AGREGAR ESTA LÍNEA
-                FiltrarVersiones();
+                if (!CamposVehiculoBloqueados) FiltrarVersiones();
             }
         }
         public ObservableCollection<string> VersionesFiltradas
@@ -473,7 +496,7 @@ namespace CarslineApp.ViewModels
         public string BusquedaAnio
         {
             get => _busquedaAnio;
-            set { _busquedaAnio = value; OnPropertyChanged(); FiltrarAnios(); }
+            set { _busquedaAnio = value; OnPropertyChanged(); if (!CamposVehiculoBloqueados) FiltrarAnios(); }
         }
         public ObservableCollection<string> AniosFiltrados
         {
@@ -526,10 +549,14 @@ namespace CarslineApp.ViewModels
                     VehiculosEncontrados.Clear();
                     foreach (var v in response.Vehiculos) VehiculosEncontrados.Add(v);
                     MostrarListaVehiculos = true;
+                    // Si hay vehículos en lista, los campos se ocultan hasta seleccionar uno
+                    MostrarCamposVehiculo = false;
                     ErrorMessage = $"Se encontraron {VehiculosEncontrados.Count} vehículos. Selecciona uno:";
                 }
                 else
                 {
+                    MostrarListaVehiculos = false;
+                    MostrarCamposVehiculo = true;
                     ErrorMessage = response.Message ?? "No hay vehículos. Puedes registrar uno nuevo.";
                     MostrarListaVehiculos = false;
                 }
@@ -592,7 +619,8 @@ namespace CarslineApp.ViewModels
                     MostrarSugerenciasAnio = false;
                     VinDecodificadoExito = false;
                     VinMensajeDecodificacion = string.Empty;
-
+                    // Expandir automáticamente los campos al seleccionar un vehículo
+                    MostrarCamposVehiculo = true;
                     await Application.Current.MainPage.DisplayAlert(
                         "✅ Vehículo Seleccionado",
                         $"Se ha cargado: {response.Vehiculo.VehiculoCompleto}\nCliente: {response.Vehiculo.NombreCliente}", "OK");
@@ -606,6 +634,7 @@ namespace CarslineApp.ViewModels
         private async Task EditarGuardarVehiculo()
         {
             if (!ModoEdicionVehiculo) { ModoEdicionVehiculo = true; return; }
+            MostrarCamposVehiculo = true;
             await GuardarCambiosVehiculo();
         }
 
@@ -639,7 +668,44 @@ namespace CarslineApp.ViewModels
             }
             finally { IsLoading = false; }
         }
+        private void LimpiarDatosVehiculo()
+        {
+            VehiculoId = 0;
+            VIN = string.Empty;
+            Marca = string.Empty;
+            Modelo = string.Empty;
+            Version = string.Empty;
+            Anio = DateTime.Now.Year;
+            Color = string.Empty;
+            Placas = string.Empty;
+            KilometrajeInicial = 0;
+            Ultimos4VIN = string.Empty;
 
+            BusquedaMarca = string.Empty;
+            BusquedaModelo = string.Empty;
+            BusquedaVersion = string.Empty;
+            BusquedaAnio = string.Empty;
+
+            MarcasFiltradas = new ObservableCollection<string>();
+            ModelosFiltrados = new ObservableCollection<string>();
+            VersionesFiltradas = new ObservableCollection<string>();
+            AniosFiltrados = new ObservableCollection<string>();
+
+            MostrarSugerenciasMarca = false;
+            MostrarSugerenciasModelo = false;
+            MostrarSugerenciasVersion = false;
+            MostrarSugerenciasAnio = false;
+
+            VinDecodificadoExito = false;
+            VinMensajeDecodificacion = string.Empty;
+            ModoEdicionVehiculo = false;
+
+            // Mostrar formulario vacío listo para nuevo vehículo
+            MostrarCamposVehiculo = true;
+            MostrarListaVehiculos = true; // Re-mostrar la lista para que pueda volver a seleccionar
+
+            ErrorMessage = string.Empty;
+        }
         private bool ValidarVehiculo()
         {
 

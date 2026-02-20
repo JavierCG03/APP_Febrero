@@ -40,7 +40,7 @@ namespace CarslineApp.ViewModels
             EditarGuardarVehiculoCommand = new Command(async () => await EditarGuardarVehiculo());
             AgregarTrabajoPersonalizadoCommand = new Command(AgregarTrabajoPersonalizado);
             EliminarTrabajoPersonalizadoCommand = new Command<TrabajoCrearDto>(EliminarTrabajoPersonalizado);
-            DecodificarVinManualCommand = new Command(async () => await DecodificarVinAsync(VIN),() => VehiculoId == 0);
+            DecodificarVinManualCommand = new Command(async () => await DecodificarVinAsync(VIN), () => VehiculoId == 0);
             SeleccionarMarcaCommand = new Command<string>(SeleccionarMarca);
             AbrirSugerenciasMarcaCommand = new Command(() => { FiltrarMarcas(); MostrarSugerenciasMarca = true; });
             SeleccionarModeloCommand = new Command<string>(SeleccionarModelo);
@@ -49,6 +49,8 @@ namespace CarslineApp.ViewModels
             AbrirSugerenciasVersionCommand = new Command(() => { FiltrarVersiones(); MostrarSugerenciasVersion = true; });
             SeleccionarAnioCommand = new Command<string>(SeleccionarAnio);
             AbrirSugerenciasAnioCommand = new Command(() => { FiltrarAnios(); MostrarSugerenciasAnio = true; });
+            ToggleCamposVehiculoCommand = new Command(() => MostrarCamposVehiculo = !MostrarCamposVehiculo);
+            LimpiarVehiculoCommand = new Command(LimpiarDatosVehiculo);
 
             CargarCatalogos();
 
@@ -154,6 +156,10 @@ namespace CarslineApp.ViewModels
         public ICommand AbrirSugerenciasVersionCommand { get; }
         public ICommand SeleccionarAnioCommand { get; }
         public ICommand AbrirSugerenciasAnioCommand { get; }
+        /// <summary>Alterna la visibilidad del panel de campos del vehículo.</summary>
+        public ICommand ToggleCamposVehiculoCommand { get; }
+        /// <summary>Limpia todos los datos del vehículo para seleccionar o registrar otro.</summary>
+        public ICommand LimpiarVehiculoCommand { get; }
 
         #endregion
 
