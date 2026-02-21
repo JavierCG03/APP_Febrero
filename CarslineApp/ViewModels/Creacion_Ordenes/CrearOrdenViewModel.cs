@@ -14,6 +14,9 @@ namespace CarslineApp.ViewModels
         private readonly ApiService _apiService;
         private readonly int _tipoOrdenId;
 
+        // Se completa cuando TiposServicio ya está poblado
+        private readonly TaskCompletionSource<bool> _catalogosCargados = new();
+
         private int _pasoActual = 1; // 1=Cliente, 2=Vehículo, 3=Orden
         private bool _isLoading;
         private string _errorMessage = string.Empty;
@@ -51,7 +54,18 @@ namespace CarslineApp.ViewModels
             AbrirSugerenciasAnioCommand = new Command(() => { FiltrarAnios(); MostrarSugerenciasAnio = true; });
             ToggleCamposVehiculoCommand = new Command(() => MostrarCamposVehiculo = !MostrarCamposVehiculo);
             LimpiarVehiculoCommand = new Command(LimpiarDatosVehiculo);
-            SeleccionarTipoServicioCommand = new Command<TipoServicioDto>(tipo => {foreach (var t in TiposServicio)t.EstaSeleccionado = false;tipo.EstaSeleccionado = true;TipoServicioSeleccionado = tipo;}); 
+            SeleccionarTipoServicioCommand = new Command<TipoServicioDto>(tipo =>
+            {
+                // Limpiar selección previa en todos los items
+                foreach (var t in TiposServicio)
+                    t.EstaSeleccionado = false;
+
+                // Marcar el nuevo seleccionado
+                tipo.EstaSeleccionado = true;
+                TipoServicioSeleccionado = tipo;
+                CalcularCostoTotal();
+            });
+
             CargarCatalogos();
 
             OnPropertyChanged(nameof(EsServicio));
@@ -156,8 +170,11 @@ namespace CarslineApp.ViewModels
         public ICommand AbrirSugerenciasVersionCommand { get; }
         public ICommand SeleccionarAnioCommand { get; }
         public ICommand AbrirSugerenciasAnioCommand { get; }
+        /// <summary>Alterna la visibilidad del panel de campos del vehículo.</summary>
         public ICommand ToggleCamposVehiculoCommand { get; }
+        /// <summary>Limpia todos los datos del vehículo para seleccionar o registrar otro.</summary>
         public ICommand LimpiarVehiculoCommand { get; }
+        /// <summary>Selecciona un tipo de servicio de la lista de cards y actualiza EstaSeleccionado.</summary>
         public ICommand SeleccionarTipoServicioCommand { get; }
 
         #endregion
@@ -316,10 +333,14 @@ namespace CarslineApp.ViewModels
                 ServiciosExtra.Clear();
                 foreach (var extra in extras)
                     ServiciosExtra.Add(extra);
+
+                // ── Señalar que los catálogos están listos ──
+                _catalogosCargados.TrySetResult(true);
             }
             catch (Exception ex)
             {
                 ErrorMessage = $"Error al cargar catálogos: {ex.Message}";
+                _catalogosCargados.TrySetResult(false);
             }
         }
 

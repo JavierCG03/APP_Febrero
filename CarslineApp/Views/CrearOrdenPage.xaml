@@ -1059,17 +1059,13 @@
                             </Border>
                         </Grid> -->
                         
-                        <!-- ── Etiqueta de sección ── -->
-                        <Label Text="Tipo de Servicio *"
+                        <!-- ── Etiqueta de sección ── -->                      
+                        <Label Text="Servicios"
                                FontSize="16"
+                               HorizontalOptions="Center"
                                FontAttributes="Bold"
                                TextColor="#404040"
                                Margin="0,4,0,4"/>
-
-                        <Label Text="Toca una opción para seleccionarla"
-                               FontSize="12"
-                               TextColor="#9E9E9E"
-                               Margin="0,0,0,10"/>
 
                         <CollectionView ItemsSource="{Binding TiposServicio}"
                                         SelectionMode="None"
@@ -1127,45 +1123,7 @@
                                                 </Label.Triggers>
                                             </Label>
 
-                                            <Label Text="{Binding Precio, StringFormat='${0:N2}'}"
-                                                   FontSize="12"
-                                                   TextColor="#757575"
-                                                   HorizontalOptions="Center">
-                                                <Label.Triggers>
-                                                    <DataTrigger TargetType="Label"
-                                                                 Binding="{Binding EstaSeleccionado}"
-                                                                 Value="True">
-                                                        <Setter Property="TextColor" Value="#C62828"/>
-                                                    </DataTrigger>
-                                                </Label.Triggers>
-                                            </Label>
 
-                                            <Border BackgroundColor="#FFF9C4"
-                                                    StrokeThickness="0"
-                                                    StrokeShape="RoundRectangle 6"
-                                                    Padding="6,2"
-                                                    HorizontalOptions="Center"
-                                                    IsVisible="{Binding EsSugerido}">
-                                                <Label Text="⭐ SUGERIDO"
-                                                       FontSize="10"
-                                                       FontAttributes="Bold"
-                                                       TextColor="#F57F17"/>
-                                            </Border>
-
-                                            <Label Text="✓"
-                                                   FontSize="18"
-                                                   FontAttributes="Bold"
-                                                   TextColor="#B00000"
-                                                   HorizontalOptions="Center"
-                                                   IsVisible="False">
-                                                <Label.Triggers>
-                                                    <DataTrigger TargetType="Label"
-                                                                 Binding="{Binding EstaSeleccionado}"
-                                                                 Value="True">
-                                                        <Setter Property="IsVisible" Value="True"/>
-                                                    </DataTrigger>
-                                                </Label.Triggers>
-                                            </Label>
 
                                         </VerticalStackLayout>
                                     </Border>
@@ -1186,7 +1144,7 @@
                                 <Label Grid.Column="0" FontSize="13">
                                     <Label.FormattedText>
                                         <FormattedString>
-                                            <Span Text="Seleccionado: "
+                                            <Span Text="Seleccionado:   "
                                                   FontAttributes="Italic"
                                                   TextColor="#9E9E9E"/>
                                             <Span Text="{Binding TipoServicioSeleccionado.Nombre}"
@@ -1195,12 +1153,6 @@
                                         </FormattedString>
                                     </Label.FormattedText>
                                 </Label>
-                                <Label Grid.Column="1"
-                                       Text="{Binding TipoServicioSeleccionado.Precio, StringFormat='${0:N2}'}"
-                                       FontSize="13"
-                                       FontAttributes="Bold"
-                                       TextColor="#B00000"
-                                       VerticalOptions="Center"/>
                             </Grid>
                         </Border>
                         
@@ -1273,18 +1225,18 @@
 
                         <BoxView HeightRequest="2" BackgroundColor="#E0E0E0" Margin="0,10"/>
 
-
                         <Label Text="Detalles de la Orden"
                            FontSize="16"
                            FontAttributes="Bold"
                            TextColor="#404040"/>
+                        
                         <VerticalStackLayout Spacing="5">
                             <Label Text="Promesa de Entrega"
                                FontSize="14"
                                FontAttributes="Bold"
                                TextColor="#404040"/>
                         </VerticalStackLayout>
-
+                        
                         <Grid ColumnDefinitions="145,Auto" ColumnSpacing="5">
                             <Border  Grid.Column="0"
                                 BackgroundColor="#FFF0F0"
@@ -1313,11 +1265,12 @@
                                     BackgroundColor="White"/>
                             </Border>
                         </Grid>
-
+                        
                         <Label Text="Observaciones"
                            FontSize="14"
                            FontAttributes="Bold"
                            TextColor="#404040"/>
+                        
                         <Border                                                           Grid.Column="1"
                                 BackgroundColor="#FFF0F0"
                                 StrokeThickness=".7"
