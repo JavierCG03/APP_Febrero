@@ -1029,35 +1029,6 @@
                             </Frame>
                         </VerticalStackLayout>
 
-                  <!--      <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Padding="6">
-
-                            <Label  
-                                Grid.Column="0"
-                                Text="Tipo de Servicio"
-                                VerticalOptions="Center"
-                                FontSize="18"
-                                FontAttributes="Bold"
-                                TextColor="Black" />
-
-                            <Border 
-                                Grid.Column="1"
-                                BackgroundColor="#FFEBEE"
-                                StrokeThickness=".7"
-                                Stroke="#B00000"
-                                Padding="6"
-                                HorizontalOptions="Fill"
-                                VerticalOptions="Center"
-                                StrokeShape="RoundRectangle 12">
-
-                                <Picker
-                                    ItemsSource="{Binding TiposServicio}"
-                                    ItemDisplayBinding="{Binding Nombre}"
-                                    SelectedItem="{Binding TipoServicioSeleccionado}"
-                                    FontSize="14"
-                                    TextColor="#404040"
-                                    BackgroundColor="Transparent"/>
-                            </Border>
-                        </Grid> -->
                         
                         <!-- ── Etiqueta de sección ── -->                      
                         <Label Text="Servicios"

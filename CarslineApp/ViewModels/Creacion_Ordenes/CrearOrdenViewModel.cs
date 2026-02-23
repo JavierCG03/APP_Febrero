@@ -170,11 +170,8 @@ namespace CarslineApp.ViewModels
         public ICommand AbrirSugerenciasVersionCommand { get; }
         public ICommand SeleccionarAnioCommand { get; }
         public ICommand AbrirSugerenciasAnioCommand { get; }
-        /// <summary>Alterna la visibilidad del panel de campos del vehículo.</summary>
         public ICommand ToggleCamposVehiculoCommand { get; }
-        /// <summary>Limpia todos los datos del vehículo para seleccionar o registrar otro.</summary>
         public ICommand LimpiarVehiculoCommand { get; }
-        /// <summary>Selecciona un tipo de servicio de la lista de cards y actualiza EstaSeleccionado.</summary>
         public ICommand SeleccionarTipoServicioCommand { get; }
 
         #endregion

@@ -69,6 +69,19 @@ namespace CarslineApp.ViewModels.Creacion_Citas
             AbrirSugerenciasVersionCommand = new Command(() => { FiltrarVersiones(); MostrarSugerenciasVersion = true; });
             SeleccionarAnioCommand = new Command<string>(SeleccionarAnio);
             AbrirSugerenciasAnioCommand = new Command(() => { FiltrarAnios(); MostrarSugerenciasAnio = true; });
+            ToggleCamposVehiculoCommand = new Command(() => MostrarCamposVehiculo = !MostrarCamposVehiculo);
+            LimpiarVehiculoCommand = new Command(LimpiarDatosVehiculo);
+            SeleccionarTipoServicioCommand = new Command<TipoServicioDto>(tipo =>
+            {
+                // Limpiar selección previa en todos los items
+                foreach (var t in TiposServicio)
+                    t.EstaSeleccionado = false;
+
+                // Marcar el nuevo seleccionado
+                tipo.EstaSeleccionado = true;
+                TipoServicioSeleccionado = tipo;
+                CalcularCostoTotal();
+            });
 
             // Cargar datos de forma asíncrona DESPUÉS de establecer el paso
             CargarDatosIniciales();
@@ -176,6 +189,9 @@ namespace CarslineApp.ViewModels.Creacion_Citas
         public ICommand AbrirSugerenciasVersionCommand { get; }
         public ICommand SeleccionarAnioCommand { get; }
         public ICommand AbrirSugerenciasAnioCommand { get; }
+        public ICommand ToggleCamposVehiculoCommand { get; }
+        public ICommand LimpiarVehiculoCommand { get; }
+        public ICommand SeleccionarTipoServicioCommand { get; }
 
 
         #endregion

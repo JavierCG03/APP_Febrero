@@ -321,7 +321,7 @@ namespace CarslineApp.ViewModels
             if (nombre.Contains("bujía") || nombre.Contains("bujia") || nombre.Contains("encendido"))
                 return new List<RefaccionPredeterminadaViewModel>
                 {
-                    new() { Nombre = "Bujías",              Cantidad = null }, // variable: 4 o 6 según cilindros
+                    new() { Nombre = "Bujías",              Cantidad = null }, 
                     new() { Nombre = "Cables de bujías",    Cantidad = 1 },
                     new() { Nombre = "Bobina de encendido", Cantidad = 1 },
                 };
@@ -626,6 +626,7 @@ namespace CarslineApp.ViewModels
 
         #endregion
     }
+
     // ViewModel para cada refacción predeterminada
     public class RefaccionPredeterminadaViewModel : INotifyPropertyChanged
     {

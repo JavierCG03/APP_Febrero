@@ -149,55 +149,46 @@ namespace CarslineApp.Services
                 }
             }
 
-            /// <summary>
-            /// Eliminar una refacción específica de un trabajo
-            /// </summary>
-        public async Task<AuthResponse> EliminarRefaccionTrabajo(int refaccionId)
+        /// <summary>
+        /// Eliminar una refacción específica de un trabajo
+        /// </summary>
+        public async Task<AgregarRefaccionesResponse> EliminarRefaccionTrabajo(int refaccionId)
+        {
+            try
             {
-                try
+                Debug.WriteLine($"🗑️ Eliminando refacción {refaccionId}");
+
+                var response = await _httpClient.DeleteAsync(
+                    $"{BaseUrl}/RefaccionesTrabajo/{refaccionId}");
+
+                var content = await response.Content
+                    .ReadFromJsonAsync<AgregarRefaccionesResponse>();
+
+                if (content != null)
                 {
-                    Debug.WriteLine($"🗑️ Eliminando refacción {refaccionId}");
-
-                    var response = await _httpClient.DeleteAsync(
-                        $"{BaseUrl}/RefaccionesTrabajo/{refaccionId}");
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var result = await response.Content
-                            .ReadFromJsonAsync<AuthResponse>();
-
-                        Debug.WriteLine($"✅ Refacción eliminada exitosamente");
-
-                        return result ?? new AuthResponse
-                        {
-                            Success = false,
-                            Message = "Error al procesar la respuesta"
-                        };
-                    }
-
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    Debug.WriteLine($"❌ Error HTTP {response.StatusCode}: {errorContent}");
-
-                    return new AuthResponse
-                    {
-                        Success = false,
-                        Message = $"Error al eliminar: {response.StatusCode}"
-                    };
+                    return content;
                 }
-                catch (Exception ex)
+
+                return new AgregarRefaccionesResponse
                 {
-                    Debug.WriteLine($"❌ Error al eliminar refacción: {ex.Message}");
-                    return new AuthResponse
-                    {
-                        Success = false,
-                        Message = $"Error: {ex.Message}"
-                    };
-                }
+                    Success = false,
+                    Message = $"Error HTTP: {response.StatusCode}"
+                };
             }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"❌ Error al eliminar refacción: {ex.Message}");
+                return new AgregarRefaccionesResponse
+                {
+                    Success = false,
+                    Message = $"Error: {ex.Message}"
+                };
+            }
+        }
 
-            /// <summary>
-            /// Agregar una sola refacción a un trabajo (método simplificado)
-            /// </summary>
+        /// <summary>
+        /// Agregar una sola refacción a un trabajo (método simplificado)
+        /// </summary>
         public async Task<AgregarRefaccionesResponse> AgregarRefaccionSimple(
                 int trabajoId,
                 string nombreRefaccion,
