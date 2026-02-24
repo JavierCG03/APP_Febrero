@@ -60,6 +60,7 @@ namespace CarslineApp.Models
         public int Id { get; set; }
         public string Trabajo { get; set; } = string.Empty;
         public string? IndicacionesTrabajo { get; set; }
+        public bool RefaccionesListas { get; set; }  
 
         // Propiedades calculadas
         public bool TieneIndicaciones => !string.IsNullOrWhiteSpace(IndicacionesTrabajo);
@@ -152,5 +153,22 @@ namespace CarslineApp.Models
         public int CitaId { get; set; }
         public DateTime FechaAnterior { get; set; }
         public DateTime FechaNueva { get; set; }
+    }
+
+    // Nuevo DTO — agrégalo al final del archivo
+    public class CitaConTrabajosDto
+    {
+        public int Id { get; set; }
+        public int TipoOrdenId { get; set; }
+        public int VehiculoId { get; set; }
+        public string VehiculoCompleto { get; set; } = string.Empty;
+        public string VIN { get; set; } = string.Empty;
+        public DateTime FechaCita { get; set; }
+        public List<TrabajoCitaDto> Trabajos { get; set; } = new();
+
+        // Propiedades calculadas
+        public string FechaFormateada => FechaCita.ToString("dd/MMM/yyyy");
+        public string HoraFormateada => FechaCita.ToString("hh:mm tt");
+        public int TotalTrabajos => Trabajos.Count;
     }
 }

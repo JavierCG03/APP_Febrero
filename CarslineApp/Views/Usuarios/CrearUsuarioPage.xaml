@@ -121,7 +121,7 @@
                                 <Grid ColumnDefinitions="*,Auto">
                                     <Entry Grid.Column="0"
                                            Text="{Binding NuevaPassword}"
-                                           Placeholder="Mínimo 8 caracteres"
+                                           Placeholder="Mínimo 6 caracteres"
                                            MaxLength="12"
                                            IsPassword="{Binding IsPasswordVisible, Converter={StaticResource InverseBoolConverter}}"
                                            BackgroundColor="White"
