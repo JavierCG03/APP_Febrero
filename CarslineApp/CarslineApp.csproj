@@ -70,7 +70,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<MauiXaml Update="Views\AgendaCitas.xaml">
+		<MauiXaml Update="Views\Citas\AgendaCitas.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\Buscador\BuscadorPage.xaml">
@@ -103,34 +103,34 @@
 		<MauiXaml Update="Views\ChecksList\CheckListServicioPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Views\CrearCitaPage.xaml">
+		<MauiXaml Update="Views\Citas\CrearCitaPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Views\CrearUsuarioPage.xaml">
+		<MauiXaml Update="Views\Usuarios\CrearUsuarioPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Views\EvidenciasOrdenPage.xaml">
+		<MauiXaml Update="Views\Ordenes\EvidenciasOrdenPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Views\EvidenciasOrdenTrabajo.xaml">
+		<MauiXaml Update="Views\Ordenes\EvidenciasOrdenTrabajo.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\ImagePreviewPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Views\RecordatorioDetallePage.xaml">
+		<MauiXaml Update="Views\Citas\RecordatorioDetallePage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Views\RefaccionesTrabajo.xaml">
+		<MauiXaml Update="Views\Ordenes\RefaccionesTrabajo.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Views\ResumenCitaPage.xaml">
+		<MauiXaml Update="Views\Citas\ResumenCitaPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Views\ResumenCrearCitaPage.xaml">
+		<MauiXaml Update="Views\Citas\ResumenCrearCitaPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Views\ResumenOrdenPage.xaml">
+		<MauiXaml Update="Views\Ordenes\ResumenOrdenPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\TableroPage.xaml">
@@ -139,13 +139,13 @@
 		<MauiXaml Update="Views\ViewHome\AdminHomePage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Views\AgregarRefaccionesPage.xaml">
+		<MauiXaml Update="Views\Inventario\AgregarRefaccionesPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\ViewHome\AsesorHomePage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Views\CrearOrdenPage.xaml">
+		<MauiXaml Update="Views\Ordenes\CrearOrdenPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\ViewHome\CitasHomePage.xaml">
@@ -154,13 +154,13 @@
 		<MauiXaml Update="Views\ViewHome\GerenteHomePage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Views\InventarioPage.xaml">
+		<MauiXaml Update="Views\Inventario\InventarioPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\ViewHome\JefeHomePage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Views\ListaUsuariosPage.xaml">
+		<MauiXaml Update="Views\Usuarios\ListaUsuariosPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\ViewHome\LoginPage.xaml">
@@ -196,10 +196,6 @@
 	  <None Update="Views\TecnicoHomePage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </None>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Views\NewFolder\" />
 	</ItemGroup>
 
 </Project>

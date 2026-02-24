@@ -1,7 +1,7 @@
 ﻿using CarslineApp.Models;
 using CarslineApp.Services;
 using CarslineApp.Views.ViewHome;
-using CarslineApp.Views;
+using CarslineApp.Views.Citas;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
