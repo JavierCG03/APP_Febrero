@@ -391,18 +391,18 @@ Teléfono: 771 183 9338
 
                     if (response.Success)
                     {
-                        await DisplayAlert("? Éxito", "Recordatorio marcado como enviado", "OK");
+                        await DisplayAlert(" Éxito", "Recordatorio marcado como enviado", "OK");
                         await Navigation.PopAsync();
                     }
                     else
                     {
-                        await DisplayAlert("? Error", response.Message, "OK");
+                        await DisplayAlert(" Error", response.Message, "OK");
                     }
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"? Error al marcar enviado: {ex.Message}");
-                    await DisplayAlert("? Error", "No se pudo marcar el recordatorio", "OK");
+                    Debug.WriteLine($" Error al marcar enviado: {ex.Message}");
+                    await DisplayAlert(" Error", "No se pudo marcar el recordatorio", "OK");
                 }
                 finally
                 {
