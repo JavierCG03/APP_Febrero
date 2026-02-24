@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <FlyoutPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="CarslineApp.Views.CitasHomePage"
+             x:Class="CarslineApp.Views.ViewHome.CitasHomePage"
              xmlns:viewmodels="clr-namespace:CarslineApp.ViewModels.ViewModelsHome"
              xmlns:models="clr-namespace:CarslineApp.Models"
              x:DataType="viewmodels:CitasMainViewModel"

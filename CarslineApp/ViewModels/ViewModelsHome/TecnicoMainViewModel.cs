@@ -1,6 +1,6 @@
 ﻿using CarslineApp.Models;
 using CarslineApp.Services;
-using CarslineApp.Views;
+using CarslineApp.Views.ViewHome;
 using CarslineApp.Views.ChecksList;
 using System.Collections.ObjectModel;
 using System.ComponentModel;

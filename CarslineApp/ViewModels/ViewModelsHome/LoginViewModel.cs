@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using CarslineApp.Services;
-using CarslineApp.Views;
+using CarslineApp.Views.ViewHome;
 
 namespace CarslineApp.ViewModels.ViewModelsHome
 {
@@ -126,6 +126,7 @@ namespace CarslineApp.ViewModels.ViewModelsHome
                 "Gerente" => new GerenteHomePage(),
                 "Tecnico de mantenimiento" => new TecnicoHomePage(),
                 "Encargado de Citas" => new CitasHomePage(),
+                "Comprador de  Refacciones" => new RefaccionesHomePage(),
                 _ => null
             };
 

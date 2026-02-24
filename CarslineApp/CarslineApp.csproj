@@ -166,6 +166,9 @@
 		<MauiXaml Update="Views\ViewHome\LoginPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
+		<MauiXaml Update="Views\ViewHome\RefaccionesHomePage.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 		<MauiXaml Update="Views\ViewHome\TecnicoHomePage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
@@ -193,6 +196,10 @@
 	  <None Update="Views\TecnicoHomePage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Views\NewFolder\" />
 	</ItemGroup>
 
 </Project>

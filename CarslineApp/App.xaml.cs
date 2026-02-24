@@ -1,4 +1,4 @@
-﻿using CarslineApp.Views;
+﻿using CarslineApp.Views.ViewHome;
 
 namespace CarslineApp
 {

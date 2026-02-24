@@ -1,82 +1,81 @@
 using Microsoft.Maui.Controls;
 
-namespace CarslineApp.Views
+namespace CarslineApp.Views.ViewHome;
+
+public partial class LoginPage : ContentPage
 {
-    public partial class LoginPage : ContentPage
+    public LoginPage()
     {
-        public LoginPage()
+        InitializeComponent();
+
+        bool isPasswordVisible = false;
+
+        TogglePasswordButton.Clicked += async (s, e) =>
         {
-            InitializeComponent();
+            isPasswordVisible = !isPasswordVisible;
 
-            bool isPasswordVisible = false;
+            PasswordEntry.IsPassword = !isPasswordVisible;
+            TogglePasswordButton.Source = isPasswordVisible ? "eye_off.png" : "eye.png";
 
-            TogglePasswordButton.Clicked += async (s, e) =>
-            {
-                isPasswordVisible = !isPasswordVisible;
+            // Animación moderna
+            await TogglePasswordButton.ScaleTo(0.85, 60);
+            await TogglePasswordButton.ScaleTo(1, 60);
+        };
 
-                PasswordEntry.IsPassword = !isPasswordVisible;
-                TogglePasswordButton.Source = isPasswordVisible ? "eye_off.png" : "eye.png";
-
-                // Animación moderna
-                await TogglePasswordButton.ScaleTo(0.85, 60);
-                await TogglePasswordButton.ScaleTo(1, 60);
-            };
-
-            LoginButton.Pressed += async (_, _) =>
-            {
-                await LoginButton.ScaleTo(0.97, 80);
-            };
-
-            LoginButton.Released += async (_, _) =>
-            {
-                await LoginButton.ScaleTo(1, 80);
-            };
-
-
-        }
-        protected override async void OnAppearing()
+        LoginButton.Pressed += async (_, _) =>
         {
-            base.OnAppearing();
+            await LoginButton.ScaleTo(0.97, 80);
+        };
 
-            LogoImage.TranslationY = -30;
-            LoginCard.TranslationY = 60;
-
-            await Task.WhenAll(
-                LogoImage.FadeTo(1, 600, Easing.CubicOut),
-                LogoImage.TranslateTo(0, 0, 600, Easing.CubicOut)
-            );
-
-            await Task.WhenAll(
-                LoginCard.FadeTo(1, 600, Easing.CubicOut),
-                LoginCard.TranslateTo(0, 0, 600, Easing.CubicOut)
-            );
-
-            await FooterText.FadeTo(1, 600);
-        }
-
-
-        private void NavigateByRole(string rolNombre)
+        LoginButton.Released += async (_, _) =>
         {
-            if (string.IsNullOrEmpty(rolNombre)) return;
+            await LoginButton.ScaleTo(1, 80);
+        };
 
-            Page targetPage = rolNombre switch
+
+    }
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+
+        LogoImage.TranslationY = -30;
+        LoginCard.TranslationY = 60;
+
+        await Task.WhenAll(
+            LogoImage.FadeTo(1, 600, Easing.CubicOut),
+            LogoImage.TranslateTo(0, 0, 600, Easing.CubicOut)
+        );
+
+        await Task.WhenAll(
+            LoginCard.FadeTo(1, 600, Easing.CubicOut),
+            LoginCard.TranslateTo(0, 0, 600, Easing.CubicOut)
+        );
+
+        await FooterText.FadeTo(1, 600);
+    }
+
+
+    private void NavigateByRole(string rolNombre)
+    {
+        if (string.IsNullOrEmpty(rolNombre)) return;
+
+        Page targetPage = rolNombre switch
+        {
+            "Administrador" => new AdminHomePage(),
+            "Asesor de servicio" => new AsesorHomePage(),
+            "Jefe de Taller" => new JefeHomePage(),
+            "Gerente" => new GerenteHomePage(),
+            "Tecnico de mantenimiento" => new TecnicoHomePage(),
+            _ => null
+        };
+
+        if (targetPage != null)
+        {
+            Application.Current.MainPage = new NavigationPage(targetPage)
             {
-                "Administrador" => new AdminHomePage(),
-                "Asesor de servicio" => new AsesorHomePage(),
-                "Jefe de Taller" => new JefeHomePage(),
-                "Gerente" => new GerenteHomePage(),
-                "Tecnico de mantenimiento" => new TecnicoHomePage(),
-                _ => null
+                BarBackgroundColor = Color.FromArgb("#B00000"),
+                BarTextColor = Colors.White
             };
-
-            if (targetPage != null)
-            {
-                Application.Current.MainPage = new NavigationPage(targetPage)
-                {
-                    BarBackgroundColor = Color.FromArgb("#B00000"),
-                    BarTextColor = Colors.White
-                };
-            }
         }
     }
 }
