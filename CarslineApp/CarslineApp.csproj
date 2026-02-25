@@ -106,6 +106,9 @@
 		<MauiXaml Update="Views\Citas\CrearCitaPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
+		<MauiXaml Update="Views\Citas\RefaccionesTrabajoCitaPage.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 		<MauiXaml Update="Views\Usuarios\CrearUsuarioPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>

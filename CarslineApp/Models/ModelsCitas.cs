@@ -60,10 +60,18 @@ namespace CarslineApp.Models
         public int Id { get; set; }
         public string Trabajo { get; set; } = string.Empty;
         public string? IndicacionesTrabajo { get; set; }
-        public bool RefaccionesListas { get; set; }  
+        public bool RefaccionesListas { get; set; }
 
         // Propiedades calculadas
         public bool TieneIndicaciones => !string.IsNullOrWhiteSpace(IndicacionesTrabajo);
+
+        public Color BordeTrabajo => RefaccionesListas
+            ? Color.FromArgb("#43A047") // Verde fuerte para borde
+            : Color.FromArgb("#E53935"); // Rojo fuerte para borde
+
+        public Color FondoTrabajo => RefaccionesListas
+            ? Color.FromArgb("#F1F8F4") // Verde pastel para fondo
+            : Color.FromArgb("#FFE5E5"); // Rojo pastel para fondo
     }
 
     /// <summary>
@@ -167,8 +175,12 @@ namespace CarslineApp.Models
         public List<TrabajoCitaDto> Trabajos { get; set; } = new();
 
         // Propiedades calculadas
-        public string FechaFormateada => FechaCita.ToString("dd/MMM/yyyy");
-        public string HoraFormateada => FechaCita.ToString("hh:mm tt");
+        public bool RefaccionesListas { get; set; } = false;
+        public string FechaFormateada => FechaCita.ToString("dd/MMM  hh:mm tt");
         public int TotalTrabajos => Trabajos.Count;
+        public string BackgroundCita { get; set; }
+        public string BorderCita { get; set; }
+        public string TextCita { get; set; }
+        public string BadgeColor { get; set; }
     }
 }

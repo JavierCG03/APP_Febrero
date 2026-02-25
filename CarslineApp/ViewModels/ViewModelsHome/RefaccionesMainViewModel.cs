@@ -12,37 +12,33 @@ namespace CarslineApp.ViewModels.ViewModelsHome
     public class RefaccionesMainViewModel : INotifyPropertyChanged
     {
         private readonly ApiService _apiService;
-        private int _tipoOrdenSeleccionado = 1;
+        private int _tipoCitaSeleccionado = 1;
         private bool _isLoading;
         private string _nombreUsuarioActual = string.Empty;
-
+        private DateTime _fechaSeleccionada = DateTime.Today.AddDays(1);
         // ✅ LISTA ÚNICA AGRUPADA
-        private ObservableCollection<GrupoOrdenes> _todasLasOrdenesAgrupadas = new();
+        private ObservableCollection<GrupoCitas> _todasLasCitasAgrupadas = new();
 
         public RefaccionesMainViewModel()
         {
             _apiService = new ApiService();
 
             // Comandos de navegación
-            VerServicioCommand = new Command(() => CambiarTipoOrden(1));
-            VerDiagnosticoCommand = new Command(() => CambiarTipoOrden(2));
-            VerReparacionCommand = new Command(() => CambiarTipoOrden(3));
-            VerGarantiaCommand = new Command(() => CambiarTipoOrden(4));
+            VerServicioCommand = new Command(() => CambiarTipoCita(1));
+            VerDiagnosticoCommand = new Command(() => CambiarTipoCita(2));
+            VerReparacionCommand = new Command(() => CambiarTipoCita(3));
+            VerGarantiaCommand = new Command(() => CambiarTipoCita(4));
 
             // Comandos de acciones
-            RefreshCommand = new Command(async () => await CargarOrdenes());
+            RefreshCommand = new Command(async () => await CargarCitas());
             LogoutCommand = new Command(async () => await OnLogout());
 
-            // Comandos para técnicos
-            AsignarTecnicoCommand = new Command<TrabajoDto>(async (trabajo) => await AsignarTecnico(trabajo));
-            ReasignarTecnicoCommand = new Command<TrabajoDto>(async (trabajo) => await ReasignarTecnico(trabajo));
-
-            NombreUsuarioActual = Preferences.Get("user_name", "Jefe de Taller");
+            NombreUsuarioActual = Preferences.Get("user_name", "Encargado Refacciones");
         }
 
         public async Task InicializarAsync()
         {
-            await CargarOrdenes();
+            await CargarCitas();
         }
 
         #region Propiedades
@@ -53,12 +49,12 @@ namespace CarslineApp.ViewModels.ViewModelsHome
             set { _nombreUsuarioActual = value; OnPropertyChanged(); }
         }
 
-        public int TipoOrdenSeleccionado
+        public int TipoCitaSeleccionado
         {
-            get => _tipoOrdenSeleccionado;
+            get => _tipoCitaSeleccionado;
             set
             {
-                _tipoOrdenSeleccionado = value;
+                _tipoCitaSeleccionado = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(TituloSeccion));
                 OnPropertyChanged(nameof(EsServicio));
@@ -67,8 +63,21 @@ namespace CarslineApp.ViewModels.ViewModelsHome
                 OnPropertyChanged(nameof(EsGarantia));
             }
         }
+        public DateTime FechaSeleccionada
+        {
+            get => _fechaSeleccionada;
+            set
+            {
+                if (_fechaSeleccionada != value)
+                {
+                    _fechaSeleccionada = value;
+                    OnPropertyChanged();
+                     _ = CargarCitas();
+                }
+            }
+        }
 
-        public string TituloSeccion => TipoOrdenSeleccionado switch
+        public string TituloSeccion => TipoCitaSeleccionado switch
         {
             1 => "SERVICIOS",
             2 => "DIAGNÓSTICOS",
@@ -77,10 +86,10 @@ namespace CarslineApp.ViewModels.ViewModelsHome
             _ => "ÓRDENES"
         };
 
-        public bool EsServicio => TipoOrdenSeleccionado == 1;
-        public bool EsDiagnostico => TipoOrdenSeleccionado == 2;
-        public bool EsReparacion => TipoOrdenSeleccionado == 3;
-        public bool EsGarantia => TipoOrdenSeleccionado == 4;
+        public bool EsServicio => TipoCitaSeleccionado == 1;
+        public bool EsDiagnostico => TipoCitaSeleccionado == 2;
+        public bool EsReparacion => TipoCitaSeleccionado == 3;
+        public bool EsGarantia => TipoCitaSeleccionado == 4;
         public bool IsLoading
         {
             get => _isLoading;
@@ -88,12 +97,12 @@ namespace CarslineApp.ViewModels.ViewModelsHome
         }
 
         // ✅ LISTA ÚNICA OBSERVABLE
-        public ObservableCollection<GrupoOrdenes> TodasLasOrdenesAgrupadas
+        public ObservableCollection<GrupoCitas> TodasLasCitasAgrupadas
         {
-            get => _todasLasOrdenesAgrupadas;
+            get => _todasLasCitasAgrupadas;
             set
             {
-                _todasLasOrdenesAgrupadas = value;
+                _todasLasCitasAgrupadas = value;
                 OnPropertyChanged();
             }
         }
@@ -108,102 +117,85 @@ namespace CarslineApp.ViewModels.ViewModelsHome
         public ICommand VerGarantiaCommand { get; }
         public ICommand RefreshCommand { get; }
         public ICommand LogoutCommand { get; }
-        public ICommand AsignarTecnicoCommand { get; }
-        public ICommand ReasignarTecnicoCommand { get; }
 
         #endregion
 
         #region Métodos
 
-        private async void CambiarTipoOrden(int tipoOrden)
+        private async void CambiarTipoCita(int tipoCita)
         {
-            TipoOrdenSeleccionado = tipoOrden;
-            await CargarOrdenes();
+            TipoCitaSeleccionado = tipoCita;
+            await CargarCitas();
         }
 
-        private async Task CargarOrdenes()
+        private async Task CargarCitas()
         {
             IsLoading = true;
 
             try
             {
-                // Obtener órdenes básicas
-                var ordenesList = await _apiService.ObtenerOrdenesPorTipo_JefeAsync(TipoOrdenSeleccionado);
-                System.Diagnostics.Debug.WriteLine($"📦 Órdenes recibidas: {ordenesList?.Count ?? 0}");
-
-                if (ordenesList == null || !ordenesList.Any())
+                var citasList = await _apiService.ObtenerTrabajosCitasPorFechaAsync(TipoCitaSeleccionado, FechaSeleccionada);
+                System.Diagnostics.Debug.WriteLine($"📦 Órdenes recibidas: {citasList?.Count ?? 0}");
+                if (citasList == null || !citasList.Any())
                 {
-                    TodasLasOrdenesAgrupadas = new ObservableCollection<GrupoOrdenes>();
+                    TodasLasCitasAgrupadas = new ObservableCollection<GrupoCitas>();
                     return;
                 }
+                // Separar oredenes cuyas refaccioens de trabajos ya estan listas
+                var citasListas = new List<CitaConTrabajosDto>();
+                var citasPendientes = new List<CitaConTrabajosDto>();
 
-                // Separar por estado
-                var ordenesPendientes = new List<OrdenConTrabajosDto>();
-                var ordenesProceso = new List<OrdenConTrabajosDto>();
-                var ordenesFinalizadas = new List<OrdenConTrabajosDto>();
 
-                foreach (var ordenBasica in ordenesList)
+                foreach (var cita in citasList)
                 {
-                    var ordenCompleta = await _apiService.ObtenerOrdenCompletaAsync(ordenBasica.Id);
-
-                    if (ordenCompleta != null)
+                    if (cita != null)
                     {
-                        // ✅ Enriquecer la orden con propiedades de UI
-                        EnriquecerOrden(ordenCompleta);
-
-                        if (ordenCompleta.EstadoOrdenId == 1)
-                            ordenesPendientes.Add(ordenCompleta);
-                        else if (ordenCompleta.EstadoOrdenId == 2)
-                            ordenesProceso.Add(ordenCompleta);
-                        else if (ordenCompleta.EstadoOrdenId == 3)
-                            ordenesFinalizadas.Add(ordenCompleta);
+                        if (cita.Trabajos.All(t => t.RefaccionesListas))
+                        {
+                            citasListas.Add(cita);
+                            cita.RefaccionesListas = true;
+                        }
+                        else
+                        {
+                            citasPendientes.Add(cita);
+                            cita.RefaccionesListas = false;
+                        }
+                        EnriquecerCita(cita);
                     }
                 }
 
-                // ✅ CREAR GRUPOS
-                var grupos = new ObservableCollection<GrupoOrdenes>();
+                var grupos = new ObservableCollection<GrupoCitas>();
 
-                if (ordenesPendientes.Any())
+                if (citasPendientes.Any())
                 {
-                    grupos.Add(new GrupoOrdenes(
-                        "📋 ÓRDENES PENDIENTES",
+                    grupos.Add(new GrupoCitas(
+                        "📋 Refacciones Pendientes",
                         "#FFE5E5",// (string titulo, string backgroundColor, string borderColor, string textColor
                         "#B00000",//
                         "Black",//
-                        ordenesPendientes
+                        citasPendientes
                     ));
                 }
 
-                if (ordenesProceso.Any())
-                {
-                    grupos.Add(new GrupoOrdenes(
-                        "⚙️ ÓRDENES EN PROCESO",
-                        "#FFF8E1",
-                        "#FFA500",
-                        "#404040",
-                        ordenesProceso
-                    ));
-                }
 
-                if (ordenesFinalizadas.Any())
+                if (citasListas.Any())
                 {
-                    grupos.Add(new GrupoOrdenes(
-                        "✅ ÓRDENES FINALIZADAS",
+                    grupos.Add(new GrupoCitas(
+                        "✅ Refacciones compradas",
                         "#F1F8F4",
                         "#4CAF50",
                         "#404040",
-                        ordenesFinalizadas
+                        citasListas
                     ));
                 }
-
-                TodasLasOrdenesAgrupadas = grupos;
+                TodasLasCitasAgrupadas = grupos;                
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"❌ ERROR: {ex.Message}");
                 await Application.Current.MainPage.DisplayAlert(
                     "Error",
-                    $"Error al cargar órdenes: {ex.Message}",
+                    $"Error al cargar citas: {ex.Message}",
                     "OK");
             }
             finally
@@ -211,241 +203,34 @@ namespace CarslineApp.ViewModels.ViewModelsHome
                 IsLoading = false;
             }
         }
-
         /// <summary>
-        /// Enriquece la orden con propiedades calculadas para la UI
+        /// Enriquece la cita con propiedades calculadas para la UI
         /// </summary>
-        private void EnriquecerOrden(OrdenConTrabajosDto orden)
+        private void EnriquecerCita(CitaConTrabajosDto cita)
         {
-            // Propiedades según el estado
-            switch (orden.EstadoOrdenId)
+            if (cita.RefaccionesListas)
             {
-                case 1: // Pendiente
-                    orden.BackgroundOrden = "#2A2A2A";
-                    orden.BorderOrden = "White";
-                    orden.TextOrden = "White";
-                    orden.BadgeColor = "#B00000";
-                    orden.TrabajosHeaderColor = "#B00000";
-                    orden.MostrarProgreso = false;
-                    break;
-
-                case 2: // En Proceso
-                    orden.BackgroundOrden = "#FFF8E1";
-                    orden.BorderOrden = "#FFA500";
-                    orden.TextOrden = "#1A1A1A";
-                    orden.BadgeColor = "#FFA500";
-                    orden.ProgresoBackground = "#FFFBF5";
-                    orden.ProgresoColor = "#FFA500";
-                    orden.TrabajosHeaderColor = "#FFA500";
-                    orden.MostrarProgreso = true;
-                    orden.MostrarBarraProgreso = true;
-                    break;
-
-                case 3: // Finalizada
-                    orden.BackgroundOrden = "#F1F8F4";
-                    orden.BorderOrden = "#4CAF50";
-                    orden.TextOrden = "#1A1A1A";
-                    orden.BadgeColor = "#4CAF50";
-                    orden.ProgresoBackground = "#F9FFF9";
-                    orden.ProgresoColor = "#4CAF50";
-                    orden.TrabajosHeaderColor = "#4CAF50";
-                    orden.MostrarProgreso = true;
-                    orden.MostrarBarraProgreso = false;
-                    break;
+                cita.BackgroundCita = "#F1F8F4";
+                cita.BorderCita = "#4CAF50";
+                cita.TextCita = "#1A1A1A";
+                cita.BadgeColor = "#4CAF50";
+            }
+            else
+            {
+                cita.BackgroundCita = "#FFE5E5";
+                cita.BorderCita = "#B00000";
+                cita.TextCita = "#1A1A1A";
+                cita.BadgeColor = "#B00000";
             }
 
-            // Enriquecer trabajos
-            if (orden.Trabajos != null)
+            if (cita.Trabajos != null)
             {
-                foreach (var trabajo in orden.Trabajos)
+                foreach (var trabajo in cita.Trabajos)
                 {
-                    EnriquecerTrabajo(trabajo, orden.EstadoOrdenId);
+                    //EnriquecerTrabajo(trabajo);
                 }
             }
         }
-
-        /// <summary>
-        /// Enriquece el trabajo con propiedades de UI
-        /// </summary>
-        private void EnriquecerTrabajo(TrabajoDto trabajo, int estadoOrden)
-        {
-            // Mostrar estado solo en Proceso y Finalizadas
-            trabajo.MostrarEstado = estadoOrden == 2 || estadoOrden == 3;
-            trabajo.NoMostrarEstado = estadoOrden == 1;
-
-            // Determinar si tiene técnico
-            trabajo.TieneTecnico = trabajo.TecnicoAsignadoId.HasValue;
-        }
-
-        #endregion
-
-        #region Asignación de Técnicos
-
-        private async Task AsignarTecnico(TrabajoDto trabajo)
-        {
-            try
-            {
-                IsLoading = true;
-
-                var tecnicos = await _apiService.ObtenerTecnicosAsync();
-
-                if (tecnicos == null || !tecnicos.Any())
-                {
-                    await Application.Current.MainPage.DisplayAlert(
-                        "Sin técnicos",
-                        "No hay técnicos disponibles para asignar",
-                        "OK");
-                    return;
-                }
-
-                var nombresTecnicos = tecnicos.Select(t => t.NombreCompleto).ToArray();
-
-                string tecnicoSeleccionado = await Application.Current.MainPage.DisplayActionSheet(
-                    $"Asignar técnico a:\n{trabajo.Trabajo}",
-                    "Cancelar",
-                    null,
-                    nombresTecnicos);
-
-                if (string.IsNullOrEmpty(tecnicoSeleccionado) || tecnicoSeleccionado == "Cancelar")
-                    return;
-
-                var tecnico = tecnicos.FirstOrDefault(t => t.NombreCompleto == tecnicoSeleccionado);
-                if (tecnico == null) return;
-
-                bool confirmar = await Application.Current.MainPage.DisplayAlert(
-                    "Confirmar asignación",
-                    $"¿Asignar a {tecnico.NombreCompleto}?\n\nTrabajo: {trabajo.Trabajo}",
-                    "Sí, asignar",
-                    "Cancelar");
-
-                if (!confirmar) return;
-
-                int jefeId = Preferences.Get("user_id", 0);
-                var response = await _apiService.AsignarTecnicoAsync(trabajo.Id, tecnico.Id, jefeId);
-
-                if (response.Success)
-                {
-                    await Application.Current.MainPage.DisplayAlert(
-                        "✅ Éxito",
-                        $"Trabajo asignado a {tecnico.NombreCompleto}",
-                        "OK");
-
-                    await CargarOrdenes();
-                }
-                else
-                {
-                    await Application.Current.MainPage.DisplayAlert(
-                        "Error",
-                        response.Message,
-                        "OK");
-                }
-            }
-            catch (Exception ex)
-            {
-                await Application.Current.MainPage.DisplayAlert(
-                    "Error",
-                    $"Error al asignar técnico: {ex.Message}",
-                    "OK");
-            }
-            finally
-            {
-                IsLoading = false;
-            }
-        }
-
-        private async Task ReasignarTecnico(TrabajoDto trabajo)
-        {
-            try
-            {
-                if (trabajo.EnProceso)
-                {
-                    await Application.Current.MainPage.DisplayAlert(
-                        "No disponible",
-                        "No se puede reasignar un trabajo que ya está en proceso",
-                        "OK");
-                    return;
-                }
-
-                var tecnicos = await _apiService.ObtenerTecnicosAsync();
-
-                if (tecnicos == null || !tecnicos.Any())
-                {
-                    await Application.Current.MainPage.DisplayAlert(
-                        "Sin técnicos",
-                        "No hay técnicos disponibles",
-                        "OK");
-                    return;
-                }
-
-                var tecnicosDisponibles = tecnicos
-                    .Where(t => t.Id != trabajo.TecnicoAsignadoId)
-                    .ToList();
-
-                if (!tecnicosDisponibles.Any())
-                {
-                    await Application.Current.MainPage.DisplayAlert(
-                        "Sin opciones",
-                        "No hay otros técnicos disponibles para reasignar",
-                        "OK");
-                    return;
-                }
-
-                var nombresTecnicos = tecnicosDisponibles.Select(t => t.NombreCompleto).ToArray();
-
-                string nuevoTecnico = await Application.Current.MainPage.DisplayActionSheet(
-                    $"Reasignar trabajo:\n{trabajo.Trabajo}\n\nTécnico actual: {trabajo.TecnicoNombre}",
-                    "Cancelar",
-                    null,
-                    nombresTecnicos);
-
-                if (string.IsNullOrEmpty(nuevoTecnico) || nuevoTecnico == "Cancelar")
-                    return;
-
-                var tecnico = tecnicosDisponibles.FirstOrDefault(t => t.NombreCompleto == nuevoTecnico);
-                if (tecnico == null) return;
-
-                bool confirmar = await Application.Current.MainPage.DisplayAlert(
-                    "Confirmar reasignación",
-                    $"Cambiar de:\n{trabajo.TecnicoNombre}\n\nA:\n{tecnico.NombreCompleto}\n\nTrabajo: {trabajo.Trabajo}",
-                    "Sí, reasignar",
-                    "Cancelar");
-
-                if (!confirmar) return;
-
-                int jefeId = Preferences.Get("user_id", 0);
-                var response = await _apiService.ReasignarTecnicoAsync(trabajo.Id, tecnico.Id, jefeId);
-
-                if (response.Success)
-                {
-                    await Application.Current.MainPage.DisplayAlert(
-                        "✅ Éxito",
-                        $"Trabajo reasignado a {tecnico.NombreCompleto}",
-                        "OK");
-
-                    await CargarOrdenes();
-                }
-                else
-                {
-                    await Application.Current.MainPage.DisplayAlert(
-                        "Error",
-                        response.Message,
-                        "OK");
-                }
-            }
-            catch (Exception ex)
-            {
-                await Application.Current.MainPage.DisplayAlert(
-                    "Error",
-                    $"Error al reasignar: {ex.Message}",
-                    "OK");
-            }
-            finally
-            {
-                IsLoading = false;
-            }
-        }
-
-        #endregion
 
         private async Task OnLogout()
         {
@@ -466,11 +251,30 @@ namespace CarslineApp.ViewModels.ViewModelsHome
             }
         }
 
+        #endregion
         public event PropertyChangedEventHandler? PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+    // ✅ Clase para Agrupar Citas 
+    public class GrupoCitas : ObservableCollection<CitaConTrabajosDto>
+    {
+
+        public string Titulo { get; set; }
+        public string BackgroundColor { get; set; }
+        public string BorderColor { get; set; }
+        public string TextColor { get; set; }
+
+        public GrupoCitas(string titulo, string backgroundColor, string borderColor, string textColor, List<CitaConTrabajosDto> citas)
+            : base(citas)
+        {
+            Titulo = titulo;
+            BackgroundColor = backgroundColor;
+            BorderColor = borderColor;
+            TextColor = textColor;
         }
     }
 }
