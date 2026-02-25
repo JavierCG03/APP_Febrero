@@ -1,129 +1,201 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <FlyoutPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="CarslineApp.Views.ViewHome.RefaccionesHomePage"
-             xmlns:viewmodels="clr-namespace:CarslineApp.ViewModels.ViewModelsHome"
-             xmlns:models="clr-namespace:CarslineApp.Models"
-             x:DataType="viewmodels:RefaccionesMainViewModel"
-             FlyoutLayoutBehavior="Popover">
+            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+            x:Class="CarslineApp.Views.ViewHome.RefaccionesHomePage"
+            x:Name="RootPage"
+            Shell.NavBarIsVisible="False"
+            NavigationPage.HasNavigationBar="False"
+            xmlns:converters="clr-namespace:CarslineApp.Converters">
+    <FlyoutPage.Resources>
+        <ResourceDictionary>
+            <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
+        </ResourceDictionary>
+    </FlyoutPage.Resources>
 
-    <!-- ============================================ -->
-    <!-- MENÚ LATERAL -->
-    <!-- ============================================ -->
+    <!-- ================== MENÚ LATERAL ================== -->
     <FlyoutPage.Flyout>
-        <ContentPage Title="Menú"
-                     BackgroundColor="Black">
+        <ContentPage Title="Menú" BackgroundColor="#1E1E1E">
             <ScrollView>
-                <VerticalStackLayout Padding="0"
-                                     Spacing="5">
-
+                <VerticalStackLayout Padding="0" Spacing="0">
                     <!-- HEADER DEL MENÚ -->
-                    <Frame BackgroundColor="#B00000" Padding="10,10,20,5" Margin="0" CornerRadius="0" HasShadow="False" BorderColor="#B00000">
-                        <VerticalStackLayout Spacing="0">
+                    <Frame BackgroundColor="#B00000" Padding="20,30,20,25" Margin="0" CornerRadius="0" HasShadow="False" BorderColor="#B00000">
+                        <VerticalStackLayout Spacing="8">
                             <Image Source="refaccion.png"
-                               HeightRequest="100"
-                               WidthRequest="100"
+                               HeightRequest="80"
+                               WidthRequest="90"
                                HorizontalOptions="Center"
                                Aspect="AspectFit"/>
-                            <Label Text="{Binding NombreUsuarioActual}"
-                                   FontSize="18"
+                            <Label Text="Refacciones"
+                                   FontSize="22"
                                    FontAttributes="Bold"
                                    TextColor="White"
                                    HorizontalOptions="Center"/>
-                            <Label Text="Comprador Refacciones"
-                                   FontSize="14"
-                                   TextColor="#FFCCCB"
+                            <Label Text="{Binding NombreUsuarioActual}"
+                                   FontSize="15"
+                                   TextColor="#FFCCCC"
                                    HorizontalOptions="Center"/>
                         </VerticalStackLayout>
                     </Frame>
 
-                    <!-- Separador -->
-                    <BoxView HeightRequest="2"
-                             BackgroundColor="#8B0000"
-                             Margin="0"/>
+                    <!-- SERVICIOS -->
+                    <VerticalStackLayout Padding="15,20" Spacing="8">
+                        <Label Text="TIPO DE ORDEN" 
+                               FontSize="12" 
+                               TextColor="#888" 
+                               FontAttributes="Bold"
+                               Margin="10,0,0,10"/>
 
-                    <!-- SECCIÓN: RECORDATORIOS -->
-                    <Label Text="MENU"
-                           FontSize="12"
-                           FontAttributes="Bold"
-                           TextColor="#FFCCCB"
-                           Margin="20,20,20,10"/>
-
-                    <Frame Margin="10,5"
-                           Padding="0"
-                           CornerRadius="8"
+                        <Frame Padding="0"
+                           Margin="0,0,0,8"
+                           CornerRadius="12"
                            HasShadow="False"
-                           BackgroundColor="#B00000">
-                        <Frame.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding PrimerRecordatorioCommand}"/>
-                        </Frame.GestureRecognizers>
-                        <Grid Padding="15,12"
-                              ColumnDefinitions="40,*,Auto"
-                              ColumnSpacing="10">
-                            <Image Grid.Column="0"
-                                   Source="recordatorio.png"
-                                   HeightRequest="40"
-                                   WidthRequest="40"/>
-                            <Label Grid.Column="1"
-                                   
-                                   Text="Recordatorios"
-                                   TextColor="White"
-                                   FontSize="16"
-                                   FontAttributes="Bold"
-                                   VerticalOptions="Center"/>
-                        </Grid>
+                           BackgroundColor="{Binding EsServicio, Converter={StaticResource BoolToColorConverter}}">
 
-                    </Frame>
+                            <Grid HeightRequest="55"
+                                  Padding="15,0"
+                                  ColumnDefinitions="*,50">
 
-                    <Frame Margin="10,5"
-                           Padding="0"
-                           CornerRadius="8"
+                                <!-- ICONO -->
+                                <ImageButton Grid.Column="1"
+                                     Command="{Binding VerServicioCommand}"
+                                     BackgroundColor="Transparent"
+                                     Source="servicio.png"
+                                     WidthRequest="50"
+                                     HeightRequest="50"                             
+                                     VerticalOptions="Center"/>
+
+                                <!-- TEXTO -->
+                                <Button Grid.Column="0"
+                                        Text="Servicios"
+                                        Command="{Binding VerServicioCommand}"
+                                        BackgroundColor="Transparent"
+                                        TextColor="White"
+                                        FontSize="16"
+                                        FontAttributes="Bold"
+                                        HorizontalOptions="FillAndExpand"/>
+
+                            </Grid>
+                        </Frame>
+
+                        <!-- DIAGNÓSTICO -->
+                        <Frame Padding="0"
+                           Margin="0,0,0,8"
+                           CornerRadius="12"
                            HasShadow="False"
-                           BackgroundColor="#B00000">
-                        <Frame.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding VerAgendaCommand}"/>
-                        </Frame.GestureRecognizers>
-                        <Grid Padding="15,12"
-                              ColumnDefinitions="40,*,Auto"
-                              ColumnSpacing="10">
-                            <Image Grid.Column="0"
-                                   Source="agenda.png"
-                                   HeightRequest="40"
-                                   WidthRequest="40"/>
-                            <Label Grid.Column="1"
-                                   Text="Agenda de Citas "
-                                   TextColor="White"
-                                   FontSize="16"
-                                   FontAttributes="Bold"
-                                   VerticalOptions="Center"/>
-                        </Grid>
-                    </Frame>
+                           BackgroundColor="{Binding EsDiagnostico, Converter={StaticResource BoolToColorConverter}}">
+
+                            <Grid HeightRequest="55"
+                                  Padding="15,0"
+                                  ColumnDefinitions="*,50">
+
+                                <!-- ICONO -->
+                                <ImageButton Grid.Column="1"
+                                     Command="{Binding VerDiagnosticoCommand}"
+                                     BackgroundColor="Transparent"
+                                     Source="diagnostico.png"
+                                     WidthRequest="50"
+                                     HeightRequest="50"                             
+                                     VerticalOptions="Center"/>
+
+                                <!-- TEXTO -->
+                                <Button Grid.Column="0"
+                                        Text="Diagnósticos"
+                                        Command="{Binding VerDiagnosticoCommand}"
+                                        BackgroundColor="Transparent"
+                                        TextColor="White"
+                                        FontSize="16"
+                                        FontAttributes="Bold"
+                                        HorizontalOptions="FillAndExpand"/>
+
+                            </Grid>
+                        </Frame>
+
+                        <!-- 
+                        
+                        -->
+                        <Frame Padding="0"
+                           Margin="0,0,0,8"
+                           CornerRadius="12"
+                           HasShadow="False"
+                           BackgroundColor="{Binding EsReparacion, Converter={StaticResource BoolToColorConverter}}">
+
+                            <Grid HeightRequest="55"
+                                  Padding="15,0"
+                                  ColumnDefinitions="*,50">
+
+                                <!-- ICONO -->
+                                <ImageButton Grid.Column="1"
+                                     Command="{Binding VerReparacionCommand}"
+                                     BackgroundColor="Transparent"
+                                     Source="reparacion.png"
+                                     WidthRequest="50"
+                                     HeightRequest="50"                             
+                                     VerticalOptions="Center"/>
+
+                                <!-- TEXTO -->
+                                <Button Grid.Column="0"
+                                        Text="Reparaciónes"
+                                        Command="{Binding VerReparacionCommand}"
+                                        BackgroundColor="{Binding EsReparacion, Converter={StaticResource BoolToColorConverter}}"
+                                        TextColor="White"
+                                        FontSize="16"
+                                        FontAttributes="Bold"
+                                        HorizontalOptions="FillAndExpand"/>
+
+                            </Grid>
+                        </Frame>
+
+                        <!--GARANTIA -->
+                        <Frame Padding="0"
+                           Margin="0,0,0,8"
+                           CornerRadius="12"
+                           HasShadow="False"
+                           BackgroundColor="{Binding EsGarantia, Converter={StaticResource BoolToColorConverter}}">
+
+                            <Grid HeightRequest="55"
+                                  Padding="15,0"
+                                  ColumnDefinitions="*,50">
+
+                                <!-- ICONO -->
+                                <ImageButton Grid.Column="1"
+                                    Command="{Binding VerGarantiaCommand}"
+                                    BackgroundColor="Transparent"
+                                    Source="garantia.png"
+                                     WidthRequest="50"
+                                     HeightRequest="50"                             
+                                     VerticalOptions="Center"/>
+
+                                <!-- TEXTO -->
+                                <Button Grid.Column="0"
+                                        Text="Garantias"
+                                        Command="{Binding VerGarantiaCommand}"
+                                        BackgroundColor="{Binding EsGarantia, Converter={StaticResource BoolToColorConverter}}"
+                                        TextColor="White"
+                                        FontSize="16"
+                                        FontAttributes="Bold"
+                                        HorizontalOptions="FillAndExpand"/>
+
+                            </Grid>
+                        </Frame>
+
+                        <BoxView HeightRequest="1" BackgroundColor="#333" Margin="20,4"/>
 
 
-                    <!-- Separador -->
-                    <BoxView HeightRequest="2"
-                             BackgroundColor="#8B0000"
-                             Margin="0,20,0,0"/>
+                        <!-- SEPARADOR -->
+                        <BoxView HeightRequest="1" BackgroundColor="#333" Margin="20,10"/>
 
-                    <!-- ACCIONES -->
-                    <Label Text="ACCIONES"
-                           FontSize="12"
-                           FontAttributes="Bold"
-                           TextColor="#FFCCCB"
-                           Margin="20,20,20,10"/>
-
-                    <Frame Padding="0"
-                           Margin="10,0,10,20"
-                           CornerRadius="8"
+                        <Frame Padding="0"
+                           Margin="0,0,0,20"
+                           CornerRadius="12"
                            HasShadow="False"
                            BackgroundColor="#404040">
 
-                        <Grid HeightRequest="55"
+                            <Grid HeightRequest="55"
                                   Padding="15,0"
                                   ColumnDefinitions="50,*">
 
-                            <!-- ICONO -->
-                            <ImageButton Grid.Column="0"
+                                <!-- ICONO -->
+                                <ImageButton Grid.Column="0"
                                      BackgroundColor="Transparent"
                                      Command="{Binding LogoutCommand}"
                                      Source="cerrarsesion.png"
@@ -131,8 +203,8 @@
                                      HeightRequest="50"                             
                                      VerticalOptions="Center"/>
 
-                            <!-- TEXTO -->
-                            <Button Grid.Column="1"
+                                <!-- TEXTO -->
+                                <Button Grid.Column="1"
                                         Text="Cerrar Sesión"
                                         Command="{Binding LogoutCommand}"
                                         BackgroundColor="#404040"
@@ -140,167 +212,292 @@
                                         FontSize="16"
                                         FontAttributes="Bold"
                                         HorizontalOptions="FillAndExpand"/>
-                        </Grid>
-                    </Frame>
+                            </Grid>
+                        </Frame>
+                    </VerticalStackLayout>
                 </VerticalStackLayout>
             </ScrollView>
         </ContentPage>
     </FlyoutPage.Flyout>
 
-    <!-- ============================================ -->
-    <!-- CONTENIDO PRINCIPAL-->
-    <!-- ============================================ -->
+    <!-- ================== CONTENIDO PRINCIPAL ================== -->
     <FlyoutPage.Detail>
-        <NavigationPage BarBackgroundColor="#B00000"
-                        BarTextColor="White">
+        <NavigationPage BarBackgroundColor="#B00000" BarTextColor="White" Shell.NavBarIsVisible="False" >
             <x:Arguments>
-                <ContentPage >
-                    <Grid RowDefinitions="Auto,*" RowSpacing="10">
-
-                        <!-- Header con título y botón hamburguesa -->
-                        <Grid Grid.Row="0"
-                              BackgroundColor="#B00000"
-                              Padding="15,10"
-                              ColumnDefinitions="50,*">
-
-                            <!-- Botón Menú -->
-                            <ImageButton Grid.Column="0"
+                <ContentPage  x:Name="DetailPage">
+                    <Grid RowDefinitions="Auto,*" BackgroundColor="#F5F5F5">
+                        <!-- HEADER -->
+                        <Frame Grid.Row="0" BackgroundColor="#B00000" Padding="10,10" Margin="0" CornerRadius="0" HasShadow="True">
+                            <Grid ColumnDefinitions="Auto,*">
+                                <ImageButton Grid.Column="0"
+                                         Clicked="OnMenuButtonClicked"
                                          Source="menu.png"
                                          BackgroundColor="Transparent"
-                                         WidthRequest="30"
-                                         HeightRequest="30"
-                                         Clicked="OnMenuButtonClicked"
-                                         VerticalOptions="Center"
-                                         HorizontalOptions="Start"/>
-
-                            <!-- Título -->
-                            <Label Grid.Column="1"
-                                   Text="{Binding TituloSeccion}"
-                                   FontSize="20"
-                                   FontAttributes="Bold"
-                                   TextColor="White"
-                                   VerticalOptions="Center"
-                                   HorizontalOptions="Center"/>
-
-                        </Grid>
-
-                        <!-- Contenido Principal -->
-                        <Grid Grid.Row="1">
-                            <Grid Margin="10,0,10,0" RowDefinitions="45,*">
-
-                                <Grid Grid.Row="0" ColumnDefinitions="*,*,*" ColumnSpacing="10">
-                                    <Button Grid.Column="0"
-                                            Text="Primero"
-                                            FontAttributes="Bold"
-                                            Command="{Binding PrimerRecordatorioCommand}"
-                                            BackgroundColor="{Binding EsPrimerRecordatorio, Converter={StaticResource BoolToColorConverter}, ConverterParameter=#FFD700|Transparent}"/>
-                                    <Button Grid.Column="1"
-                                            Text="Segundo"
-                                            FontAttributes="Bold"
-                                            Command="{Binding SegundoRecordatorioCommand}"
-                                            BackgroundColor="{Binding EsSegundoRecordatorio, Converter={StaticResource BoolToColorConverter}, ConverterParameter=#FFD700|Transparent}"/>
-                                    <Button Grid.Column="2"
-                                            Text="Tercero"
-                                            FontAttributes="Bold"
-                                            Command="{Binding TercerRecordatorioCommand}"
-                                            BackgroundColor="{Binding EsTercerRecordatorio, Converter={StaticResource BoolToColorConverter}, ConverterParameter=#FFD700|Transparent}"/>
-                                </Grid>
-
-                                <Grid Grid.Row="1">
-
-                                    <!-- Loading Indicator -->
-                                    <ActivityIndicator 
-                                                       IsRunning="{Binding IsLoading}"
-                                                       IsVisible="{Binding IsLoading}"
-                                                       Color="#B00000"
-                                                       VerticalOptions="Center"
-                                                       HorizontalOptions="Center"/>
-
-                                    <!-- Lista de Recordatorios -->
-                                    <RefreshView 
-                                                 Command="{Binding RefreshCommand}"
-                                                 IsRefreshing="{Binding IsRefreshing}"
-                                                 RefreshColor="#B00000"                                  
-                                                 IsVisible="{Binding TieneRecordatorios}">
-                                        <CollectionView ItemsSource="{Binding Recordatorios}"
-                                                        Margin="10"
-                                                        SelectionMode="None">
-                                            <CollectionView.ItemTemplate>
-                                                <DataTemplate x:DataType="models:RecordatorioServicioSimpleDto">
-                                                    <Frame Margin="15,10,15,10" 
-                                                           Padding="15"
-                                                           CornerRadius="12"
-                                                           HasShadow="True"
-                                                           BackgroundColor="White"
-                                                           BorderColor="#B00000">
-                                                        <Frame.GestureRecognizers>
-                                                            <TapGestureRecognizer 
-                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:CitasMainViewModel}}, Path=VerDetalleRecordatorioCommand}"
-                                                                CommandParameter="{Binding .}"/>
-                                                        </Frame.GestureRecognizers>
-
-                                                        <Grid RowDefinitions="Auto,Auto" RowSpacing="5">
-                                                            <!-- Nombre del Cliente -->
-                                                            <Label Grid.Row="0"
-                                                                   Text="{Binding ClienteNombre}"
-                                                                   FontSize="18"
-                                                                   FontAttributes="Bold"
-                                                                   TextColor="#212121"
-                                                                   LineBreakMode="TailTruncation"/>
-
-                                                            <!-- Tipo de Servicio -->
-                                                            <HorizontalStackLayout Grid.Row="1" Spacing="15">
-                                                                <Label Text="{Binding FechaProximoServicio, StringFormat='📅{0:dd/MMM/yyyy}'}"
-                                                                       FontSize="15"
-                                                                       FontAttributes="Bold"
-                                                                       TextColor="#B00000"
-                                                                       VerticalOptions="Center"/>
-
-                                                                <Label Text="{Binding ProximoServicioNombre, StringFormat='🔧{0:dd/MMM/yyyy}'}"
-                                                                       FontSize="15"
-                                                                       FontAttributes="Bold"
-                                                                       TextColor="#757575"
-                                                                       VerticalOptions="Center"/>
-
-                                                            </HorizontalStackLayout>
-
-                                                            <!-- Fecha Próximo Servicio -->
-                                                            <HorizontalStackLayout Grid.Row="2" Grid.Column="1"
-                                                                                   Spacing="8">
-
-                                                            </HorizontalStackLayout>
-
-                                                        </Grid>
-                                                    </Frame>
-                                                </DataTemplate>
-                                            </CollectionView.ItemTemplate>
-                                        </CollectionView>
-                                    </RefreshView>
-
-                                    <!-- Mensaje cuando no hay recordatorios -->
-                                    <VerticalStackLayout 
-                                                         IsVisible="{Binding TieneRecordatorios, Converter={StaticResource InverseBoolConverter}}"
-                                                         VerticalOptions="Center"
-                                                         HorizontalOptions="Center"
-                                                         Spacing="15"
-                                                         Padding="20">
-                                        <Label Text="📋"
-                                               FontSize="60"
-                                               HorizontalOptions="Center"/>
-                                        <Label Text="{Binding MensajeNoRecordatorios}"
-                                               FontSize="16"
-                                               TextColor="#757575"
-                                               HorizontalOptions="Center"
-                                               HorizontalTextAlignment="Center"/>
-                                    </VerticalStackLayout>
-                                </Grid>
-
+                                         WidthRequest="35"
+                                         HeightRequest="35"
+                                         HorizontalOptions="Start"
+                                         VerticalOptions="Center"/>
+                                <Label Grid.Column="1" 
+                                       Text="{Binding TituloSeccion}"
+                                       FontSize="23" 
+                                       FontAttributes="Bold"
+                                       TextColor="White" 
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center"/>
                             </Grid>
-                        </Grid>
+                        </Frame>
+
+                        <!-- ✅ UNA SOLA COLLECTIONVIEW CON AGRUPACIÓN -->
+                        <RefreshView Grid.Row="1" 
+                                     IsRefreshing="{Binding IsLoading}" 
+                                     Command="{Binding RefreshCommand}"                                 
+                                     BackgroundColor="#F5F5F5">
+
+                            <CollectionView ItemsSource="{Binding TodasLasOrdenesAgrupadas}"
+                                            IsGrouped="True"
+                                            SelectionMode="None">
+
+                                <!-- HEADER DE GRUPO (Estado: Pendientes/Proceso/Finalizadas) -->
+                                <CollectionView.GroupHeaderTemplate>
+                                    <DataTemplate>
+                                        <Frame BackgroundColor="{Binding BackgroundColor}"
+                                               BorderColor="{Binding BorderColor}"
+                                               Padding="15"
+                                               Margin="15,15,15,5"
+                                               HasShadow="True"
+                                               CornerRadius="10">
+                                            <Label Text="{Binding Titulo}"
+                                                   FontSize="18"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{Binding TextColor}"
+                                                   HorizontalOptions="Center"/>
+                                        </Frame>
+                                    </DataTemplate>
+                                </CollectionView.GroupHeaderTemplate>
+
+                                <!-- ITEMS (Órdenes) -->
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Frame BackgroundColor="{Binding BackgroundOrden}"
+                                               Padding="15"
+                                               Margin="15,5"
+                                               HasShadow="False"
+                                               BorderColor="{Binding BorderOrden}"
+                                               CornerRadius="12">
+                                            <VerticalStackLayout Spacing="12">
+
+                                                <!-- ENCABEZADO ORDEN -->
+                                                <Grid ColumnDefinitions="*,Auto">
+                                                    <Label Grid.Column="0"
+                                                           Text="{Binding VehiculoCompleto}"
+                                                           FontSize="18"
+                                                           FontAttributes="Bold"
+                                                           TextColor="{Binding TextOrden}"/>
+                                                    <Frame Grid.Column="1"
+                                                           BackgroundColor="{Binding BadgeColor}"
+                                                           Padding="8,4"
+                                                           CornerRadius="6"
+                                                           HasShadow="False"
+                                                           HeightRequest="30">
+                                                        <Label Text="{Binding NumeroOrden}"
+                                                               FontSize="11"
+                                                               FontAttributes="Bold"
+                                                               TextColor="White"/>
+                                                    </Frame>
+                                                </Grid>
+
+                                                <!-- VIN -->
+                                                <Grid ColumnDefinitions="Auto,Auto">
+                                                    <Label Grid.Column="0"
+                                                           Text="VIN:"
+                                                           FontSize="18"
+                                                           FontAttributes="Bold"
+                                                           TextColor="{Binding TextOrden}"/>
+                                                    <Frame Grid.Column="1"
+                                                           BackgroundColor="{Binding BadgeColor}"
+                                                           Padding="8,4"
+                                                           CornerRadius="6"
+                                                           HasShadow="False"
+                                                           HeightRequest="30">
+                                                        <Label Text="{Binding VIN}"
+                                                               FontSize="11"
+                                                               FontAttributes="Bold"
+                                                               TextColor="White"/>
+                                                    </Frame>
+                                                </Grid>
+                                                <HorizontalStackLayout Spacing="10">
+                                                    <Label Text="⏰ "
+                                                           FontAttributes="Bold"
+                                                           FontSize="18"
+                                                           TextColor="{Binding TextOrden}"/>
+                                                    <Label Text="{Binding Promesa}"
+                                                           FontAttributes="Bold"
+                                                            FontSize="18"
+                                                            TextColor="{Binding TextOrden}"/>
+                                                </HorizontalStackLayout>
+
+                                                <!-- PROGRESO (solo en proceso y finalizadas) -->
+                                                <Frame BackgroundColor="{Binding ProgresoBackground}"
+                                                       Padding="12"
+                                                       HasShadow="False"
+                                                       CornerRadius="8"
+                                                       IsVisible="{Binding MostrarProgreso}">
+                                                    <VerticalStackLayout Spacing="8">
+                                                        <Grid ColumnDefinitions="Auto,*,Auto">
+                                                            <Label Grid.Column="0" 
+                                                                   Text="🔧" 
+                                                                   FontSize="14"/>
+                                                            <Label Grid.Column="1"
+                                                                   FontSize="12"
+                                                                   TextColor="#666"
+                                                                   Margin="5,0,0,0">
+                                                                <Label.FormattedText>
+                                                                    <FormattedString>
+                                                                        <Span Text="Trabajos: "/>
+                                                                        <Span Text="{Binding ProgresoTexto}" 
+                                                                              FontAttributes="Bold"/>
+                                                                    </FormattedString>
+                                                                </Label.FormattedText>
+                                                            </Label>
+                                                            <Label Grid.Column="2"
+                                                                   Text="{Binding ProgresoFormateado}"
+                                                                   FontSize="13"
+                                                                   FontAttributes="Bold"
+                                                                   TextColor="{Binding ProgresoColor}"/>
+                                                        </Grid>
+                                                        <!-- Barra de progreso solo para "En Proceso" -->
+                                                        <ProgressBar Progress="{Binding ProgressBar}"
+                                                                     ProgressColor="{Binding ProgresoColor}"
+                                                                     ScaleY="3"
+                                                                     HeightRequest="12"
+                                                                     IsVisible="{Binding MostrarBarraProgreso}"/>
+                                                    </VerticalStackLayout>
+                                                </Frame>
+
+                                                <!-- TRABAJOS -->
+                                                <Frame BackgroundColor="#FFF5F5"
+                                                       Padding="12"
+                                                       HasShadow="False"
+                                                       CornerRadius="8">
+                                                    <VerticalStackLayout Spacing="10">
+                                                        <Label Text="🔧 TRABAJOS"
+                                                               FontSize="13"
+                                                               FontAttributes="Bold"
+                                                               TextColor="{Binding TrabajosHeaderColor}"/>
+
+                                                        <!-- ✅ TRABAJOS DESENROLLADOS (NO CollectionView) -->
+                                                        <BindableLayout.ItemsSource>
+                                                            <Binding Path="Trabajos"/>
+                                                        </BindableLayout.ItemsSource>
+                                                        <BindableLayout.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Frame BackgroundColor="White"
+                                                                       Padding="10"
+                                                                       Margin="0,5"
+                                                                       HasShadow="False"
+                                                                       BorderColor="{Binding ColorVisualEstado}">
+                                                                    <VerticalStackLayout Spacing="8">
+
+                                                                        <!-- Nombre del trabajo -->
+                                                                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding MostrarEstado}">
+                                                                            <Label Grid.Column="0"
+                                                                                   Text="{Binding Trabajo}"
+                                                                                   FontSize="13"
+                                                                                   FontAttributes="Bold"
+                                                                                   TextColor="Black"/>
+                                                                            <Label Grid.Column="1"
+                                                                                   Text="{Binding EstadoTrabajoNombre}"
+                                                                                   FontSize="13"
+                                                                                   FontAttributes="Bold"
+                                                                                   TextColor="{Binding ColorVisualEstado}"/>
+                                                                        </Grid>
+
+                                                                        <!-- Solo nombre si no hay estado -->
+                                                                        <Label Text="{Binding Trabajo}"
+                                                                               FontSize="13"
+                                                                               FontAttributes="Bold"
+                                                                               TextColor="Black"
+                                                                               IsVisible="{Binding NoMostrarEstado}"/>
+
+                                                                        <!-- Indicaciones -->
+                                                                        <Label Text="{Binding IndicacionesTrabajo}"
+                                                                               FontSize="11"
+                                                                               FontAttributes="Bold"
+                                                                               TextColor="Gray"
+                                                                               IsVisible="{Binding TieneIndicaciones}"/>
+
+                                                                        <!-- Técnico y botones -->
+                                                                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                                                            <!-- Botón Reasignar -->
+                                                                            <Button Grid.Column="0"
+                                                                                    Text="🔄Reasignar"
+                                                                                    Command="{Binding Source={x:Reference DetailPage}, Path=BindingContext.ReasignarTecnicoCommand}"
+                                                                                    CommandParameter="{Binding .}"
+                                                                                    IsVisible="{Binding PuedeReasignar}"
+                                                                                    BackgroundColor="#FF9800"
+                                                                                    TextColor="White"
+                                                                                    FontSize="11"
+                                                                                    HeightRequest="35"
+                                                                                    CornerRadius="6"/>
+
+                                                                            <!-- Técnico asignado -->
+                                                                            <Label Grid.Column="1"
+                                                                                   Text="{Binding TextoTecnico}"
+                                                                                   FontSize="12"
+                                                                                   VerticalOptions="Center"
+                                                                                   TextColor="Black"
+                                                                                   IsVisible="{Binding TieneTecnico}"/>
+                                                                        </Grid>
+
+                                                                        <!-- Botón Asignar -->
+                                                                        <Button Text="👤 ASIGNAR TÉCNICO"
+                                                                                Command="{Binding Source={x:Reference DetailPage}, Path=BindingContext.AsignarTecnicoCommand}"
+                                                                                CommandParameter="{Binding .}"
+                                                                                IsVisible="{Binding PuedeAsignar}"
+                                                                                BackgroundColor="#2196F3"
+                                                                                TextColor="White"
+                                                                                FontSize="11"
+                                                                                HeightRequest="35"
+                                                                                CornerRadius="6"/>
+                                                                    </VerticalStackLayout>
+                                                                </Frame>
+                                                            </DataTemplate>
+                                                        </BindableLayout.ItemTemplate>
+                                                    </VerticalStackLayout>
+                                                </Frame>
+
+                                            </VerticalStackLayout>
+                                        </Frame>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+
+                                <!-- EMPTY VIEW -->
+                                <CollectionView.EmptyView>
+                                    <VerticalStackLayout VerticalOptions="Center"
+                                                         HorizontalOptions="Center"
+                                                         Padding="20">
+                                        <Label Text="📋 No hay órdenes disponibles"
+                                               FontSize="18"
+                                               FontAttributes="Bold"
+                                               TextColor="Gray"
+                                               HorizontalOptions="Center"/>
+                                        <Label Text="Desliza hacia abajo para actualizar"
+                                               FontSize="14"
+                                               TextColor="Gray"
+                                               HorizontalOptions="Center"
+                                               Margin="0,10,0,0"/>
+                                    </VerticalStackLayout>
+                                </CollectionView.EmptyView>
+
+                                <!-- Footer con padding -->
+                                <CollectionView.Footer>
+                                    <BoxView HeightRequest="20" BackgroundColor="Transparent"/>
+                                </CollectionView.Footer>
+                            </CollectionView>
+                        </RefreshView>
                     </Grid>
                 </ContentPage>
             </x:Arguments>
         </NavigationPage>
     </FlyoutPage.Detail>
-
 </FlyoutPage>

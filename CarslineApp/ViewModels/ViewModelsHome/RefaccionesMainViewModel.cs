@@ -1,10 +1,9 @@
 ﻿using CarslineApp.Models;
 using CarslineApp.Services;
+using CarslineApp.Views;
 using CarslineApp.Views.ViewHome;
-using CarslineApp.Views.Citas;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 
@@ -13,136 +12,198 @@ namespace CarslineApp.ViewModels.ViewModelsHome
     public class RefaccionesMainViewModel : INotifyPropertyChanged
     {
         private readonly ApiService _apiService;
+        private int _tipoOrdenSeleccionado = 1;
         private bool _isLoading;
-        private bool _isRefreshing;
-        private string _tituloSeccion = "Recordatorios";
-        private string _mensajeNoRecordatorios = "No hay recordatorios pendientes";
-        private int _tipoRecordatorioActual = 1;
-        private Func<RecordatorioServicioSimpleDto, int, Task> _navigationAction;
+        private string _nombreUsuarioActual = string.Empty;
+
+        // ✅ LISTA ÚNICA AGRUPADA
+        private ObservableCollection<GrupoOrdenes> _todasLasOrdenesAgrupadas = new();
 
         public RefaccionesMainViewModel()
         {
             _apiService = new ApiService();
-            Recordatorios = new ObservableCollection<RecordatorioServicioSimpleDto>();
 
-            // Comandos de navegación entre secciones
-            PrimerRecordatorioCommand = new Command(async () => await CargarRecordatoriosPorTipo(1));
-            SegundoRecordatorioCommand = new Command(async () => await CargarRecordatoriosPorTipo(2));
-            TercerRecordatorioCommand = new Command(async () => await CargarRecordatoriosPorTipo(3));
+            // Comandos de navegación
+            VerServicioCommand = new Command(() => CambiarTipoOrden(1));
+            VerDiagnosticoCommand = new Command(() => CambiarTipoOrden(2));
+            VerReparacionCommand = new Command(() => CambiarTipoOrden(3));
+            VerGarantiaCommand = new Command(() => CambiarTipoOrden(4));
 
-            // Comando para ver detalle
-            VerDetalleRecordatorioCommand = new Command<RecordatorioServicioSimpleDto>(async (recordatorio) => await VerDetalleRecordatorio(recordatorio));
+            // Comandos de acciones
+            RefreshCommand = new Command(async () => await CargarOrdenes());
+            LogoutCommand = new Command(async () => await OnLogout());
 
-            // Otros comandos
-            RefreshCommand = new Command(async () => await CargarRecordatoriosPorTipo(_tipoRecordatorioActual));
-            LogoutCommand = new Command(async () => await CerrarSesion());
-            VerAgendaCommand = new Command(async () => await VerAgenda(), () => !IsLoading);
+            // Comandos para técnicos
+            AsignarTecnicoCommand = new Command<TrabajoDto>(async (trabajo) => await AsignarTecnico(trabajo));
+            ReasignarTecnicoCommand = new Command<TrabajoDto>(async (trabajo) => await ReasignarTecnico(trabajo));
 
+            NombreUsuarioActual = Preferences.Get("user_name", "Jefe de Taller");
         }
 
-        /// <summary>
-        /// Método para inyectar la acción de navegación desde el code-behind
-        /// </summary>
-        public void SetNavigationAction(Func<RecordatorioServicioSimpleDto, int, Task> navigationAction)
+        public async Task InicializarAsync()
         {
-            _navigationAction = navigationAction;
-            Debug.WriteLine("✅ Acción de navegación configurada en el ViewModel");
+            await CargarOrdenes();
         }
 
         #region Propiedades
 
-        public ObservableCollection<RecordatorioServicioSimpleDto> Recordatorios { get; set; }
+        public string NombreUsuarioActual
+        {
+            get => _nombreUsuarioActual;
+            set { _nombreUsuarioActual = value; OnPropertyChanged(); }
+        }
 
+        public int TipoOrdenSeleccionado
+        {
+            get => _tipoOrdenSeleccionado;
+            set
+            {
+                _tipoOrdenSeleccionado = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(TituloSeccion));
+                OnPropertyChanged(nameof(EsServicio));
+                OnPropertyChanged(nameof(EsDiagnostico));
+                OnPropertyChanged(nameof(EsReparacion));
+                OnPropertyChanged(nameof(EsGarantia));
+            }
+        }
+
+        public string TituloSeccion => TipoOrdenSeleccionado switch
+        {
+            1 => "SERVICIOS",
+            2 => "DIAGNÓSTICOS",
+            3 => "REPARACIÓNES",
+            4 => "GARANTÍAS",
+            _ => "ÓRDENES"
+        };
+
+        public bool EsServicio => TipoOrdenSeleccionado == 1;
+        public bool EsDiagnostico => TipoOrdenSeleccionado == 2;
+        public bool EsReparacion => TipoOrdenSeleccionado == 3;
+        public bool EsGarantia => TipoOrdenSeleccionado == 4;
         public bool IsLoading
         {
             get => _isLoading;
+            set { _isLoading = value; OnPropertyChanged(); }
+        }
+
+        // ✅ LISTA ÚNICA OBSERVABLE
+        public ObservableCollection<GrupoOrdenes> TodasLasOrdenesAgrupadas
+        {
+            get => _todasLasOrdenesAgrupadas;
             set
             {
-                _isLoading = value;
+                _todasLasOrdenesAgrupadas = value;
                 OnPropertyChanged();
             }
         }
-        public bool IsRefreshing
-        {
-            get => _isRefreshing;
-            set { _isRefreshing = value; OnPropertyChanged(); }
-        }
-
-        public string TituloSeccion
-        {
-            get => _tituloSeccion;
-            set
-            {
-                _tituloSeccion = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public string MensajeNoRecordatorios
-        {
-            get => _mensajeNoRecordatorios;
-            set
-            {
-                _mensajeNoRecordatorios = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public bool TieneRecordatorios => Recordatorios?.Count > 0;
-
-        public bool EsPrimerRecordatorio => _tipoRecordatorioActual == 1;
-        public bool EsSegundoRecordatorio => _tipoRecordatorioActual == 2;
-        public bool EsTercerRecordatorio => _tipoRecordatorioActual == 3;
-
-        public string NombreUsuarioActual { get; set; } = "Usuario";
 
         #endregion
 
         #region Comandos
 
-        public ICommand PrimerRecordatorioCommand { get; }
-        public ICommand SegundoRecordatorioCommand { get; }
-        public ICommand TercerRecordatorioCommand { get; }
-        public ICommand VerDetalleRecordatorioCommand { get; }
+        public ICommand VerServicioCommand { get; }
+        public ICommand VerDiagnosticoCommand { get; }
+        public ICommand VerReparacionCommand { get; }
+        public ICommand VerGarantiaCommand { get; }
         public ICommand RefreshCommand { get; }
         public ICommand LogoutCommand { get; }
-        public ICommand VerAgendaCommand { get; }
-
+        public ICommand AsignarTecnicoCommand { get; }
+        public ICommand ReasignarTecnicoCommand { get; }
 
         #endregion
 
-        #region Métodos Públicos
+        #region Métodos
 
-        /// <summary>
-        /// Inicializar el ViewModel - Se llama UNA SOLA VEZ desde OnAppearing
-        /// </summary>
-        public async Task InicializarAsync()
+        private async void CambiarTipoOrden(int tipoOrden)
         {
-            Debug.WriteLine("🚀 Inicializando CitasMainViewModel...");
-
-            // Cargar usuario actual
-            CargarUsuarioActual();
-
-            // Cargar primer recordatorio por defecto
-            await CargarRecordatoriosPorTipo(1);
+            TipoOrdenSeleccionado = tipoOrden;
+            await CargarOrdenes();
         }
 
-        #endregion
-
-        #region Métodos Privados
-
-        private async Task VerAgenda()
+        private async Task CargarOrdenes()
         {
+            IsLoading = true;
+
             try
             {
-                IsLoading = true;
-                await Application.Current.MainPage.Navigation.PushAsync(new AgendaCitas(0, 0, 0));
+                // Obtener órdenes básicas
+                var ordenesList = await _apiService.ObtenerOrdenesPorTipo_JefeAsync(TipoOrdenSeleccionado);
+                System.Diagnostics.Debug.WriteLine($"📦 Órdenes recibidas: {ordenesList?.Count ?? 0}");
+
+                if (ordenesList == null || !ordenesList.Any())
+                {
+                    TodasLasOrdenesAgrupadas = new ObservableCollection<GrupoOrdenes>();
+                    return;
+                }
+
+                // Separar por estado
+                var ordenesPendientes = new List<OrdenConTrabajosDto>();
+                var ordenesProceso = new List<OrdenConTrabajosDto>();
+                var ordenesFinalizadas = new List<OrdenConTrabajosDto>();
+
+                foreach (var ordenBasica in ordenesList)
+                {
+                    var ordenCompleta = await _apiService.ObtenerOrdenCompletaAsync(ordenBasica.Id);
+
+                    if (ordenCompleta != null)
+                    {
+                        // ✅ Enriquecer la orden con propiedades de UI
+                        EnriquecerOrden(ordenCompleta);
+
+                        if (ordenCompleta.EstadoOrdenId == 1)
+                            ordenesPendientes.Add(ordenCompleta);
+                        else if (ordenCompleta.EstadoOrdenId == 2)
+                            ordenesProceso.Add(ordenCompleta);
+                        else if (ordenCompleta.EstadoOrdenId == 3)
+                            ordenesFinalizadas.Add(ordenCompleta);
+                    }
+                }
+
+                // ✅ CREAR GRUPOS
+                var grupos = new ObservableCollection<GrupoOrdenes>();
+
+                if (ordenesPendientes.Any())
+                {
+                    grupos.Add(new GrupoOrdenes(
+                        "📋 ÓRDENES PENDIENTES",
+                        "#FFE5E5",// (string titulo, string backgroundColor, string borderColor, string textColor
+                        "#B00000",//
+                        "Black",//
+                        ordenesPendientes
+                    ));
+                }
+
+                if (ordenesProceso.Any())
+                {
+                    grupos.Add(new GrupoOrdenes(
+                        "⚙️ ÓRDENES EN PROCESO",
+                        "#FFF8E1",
+                        "#FFA500",
+                        "#404040",
+                        ordenesProceso
+                    ));
+                }
+
+                if (ordenesFinalizadas.Any())
+                {
+                    grupos.Add(new GrupoOrdenes(
+                        "✅ ÓRDENES FINALIZADAS",
+                        "#F1F8F4",
+                        "#4CAF50",
+                        "#404040",
+                        ordenesFinalizadas
+                    ));
+                }
+
+                TodasLasOrdenesAgrupadas = grupos;
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"❌ ERROR: {ex.Message}");
                 await Application.Current.MainPage.DisplayAlert(
                     "Error",
-                    $"No se pudo abrir la agenda de citas: {ex.Message}",
+                    $"Error al cargar órdenes: {ex.Message}",
                     "OK");
             }
             finally
@@ -152,183 +213,264 @@ namespace CarslineApp.ViewModels.ViewModelsHome
         }
 
         /// <summary>
-        /// Cargar recordatorios por tipo (1, 2 o 3)
+        /// Enriquece la orden con propiedades calculadas para la UI
         /// </summary>
-        private async Task CargarRecordatoriosPorTipo(int tipo)
+        private void EnriquecerOrden(OrdenConTrabajosDto orden)
         {
-
-            if (IsLoading)
+            // Propiedades según el estado
+            switch (orden.EstadoOrdenId)
             {
-                Debug.WriteLine("⚠️ Ya hay una carga en progreso, ignorando...");
-                return;
+                case 1: // Pendiente
+                    orden.BackgroundOrden = "#2A2A2A";
+                    orden.BorderOrden = "White";
+                    orden.TextOrden = "White";
+                    orden.BadgeColor = "#B00000";
+                    orden.TrabajosHeaderColor = "#B00000";
+                    orden.MostrarProgreso = false;
+                    break;
+
+                case 2: // En Proceso
+                    orden.BackgroundOrden = "#FFF8E1";
+                    orden.BorderOrden = "#FFA500";
+                    orden.TextOrden = "#1A1A1A";
+                    orden.BadgeColor = "#FFA500";
+                    orden.ProgresoBackground = "#FFFBF5";
+                    orden.ProgresoColor = "#FFA500";
+                    orden.TrabajosHeaderColor = "#FFA500";
+                    orden.MostrarProgreso = true;
+                    orden.MostrarBarraProgreso = true;
+                    break;
+
+                case 3: // Finalizada
+                    orden.BackgroundOrden = "#F1F8F4";
+                    orden.BorderOrden = "#4CAF50";
+                    orden.TextOrden = "#1A1A1A";
+                    orden.BadgeColor = "#4CAF50";
+                    orden.ProgresoBackground = "#F9FFF9";
+                    orden.ProgresoColor = "#4CAF50";
+                    orden.TrabajosHeaderColor = "#4CAF50";
+                    orden.MostrarProgreso = true;
+                    orden.MostrarBarraProgreso = false;
+                    break;
             }
 
+            // Enriquecer trabajos
+            if (orden.Trabajos != null)
+            {
+                foreach (var trabajo in orden.Trabajos)
+                {
+                    EnriquecerTrabajo(trabajo, orden.EstadoOrdenId);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Enriquece el trabajo con propiedades de UI
+        /// </summary>
+        private void EnriquecerTrabajo(TrabajoDto trabajo, int estadoOrden)
+        {
+            // Mostrar estado solo en Proceso y Finalizadas
+            trabajo.MostrarEstado = estadoOrden == 2 || estadoOrden == 3;
+            trabajo.NoMostrarEstado = estadoOrden == 1;
+
+            // Determinar si tiene técnico
+            trabajo.TieneTecnico = trabajo.TecnicoAsignadoId.HasValue;
+        }
+
+        #endregion
+
+        #region Asignación de Técnicos
+
+        private async Task AsignarTecnico(TrabajoDto trabajo)
+        {
             try
             {
                 IsLoading = true;
-                IsRefreshing = true;
-                _tipoRecordatorioActual = tipo;
 
-                Debug.WriteLine($"📥 Cargando recordatorios tipo {tipo}...");
+                var tecnicos = await _apiService.ObtenerTecnicosAsync();
 
-                // Actualizar título y propiedades de selección
-                TituloSeccion = tipo switch
+                if (tecnicos == null || !tecnicos.Any())
                 {
-                    1 => "Primer Recordatorio",
-                    2 => "Segundo Recordatorio",
-                    3 => "Tercer Recordatorio",
-                    _ => "Recordatorios"
-                };
+                    await Application.Current.MainPage.DisplayAlert(
+                        "Sin técnicos",
+                        "No hay técnicos disponibles para asignar",
+                        "OK");
+                    return;
+                }
 
-                OnPropertyChanged(nameof(EsPrimerRecordatorio));
-                OnPropertyChanged(nameof(EsSegundoRecordatorio));
-                OnPropertyChanged(nameof(EsTercerRecordatorio));
+                var nombresTecnicos = tecnicos.Select(t => t.NombreCompleto).ToArray();
 
-                // Llamar al servicio
-                var response = await _apiService.ObtenerRecordatoriosPorTipoAsync(tipo);
+                string tecnicoSeleccionado = await Application.Current.MainPage.DisplayActionSheet(
+                    $"Asignar técnico a:\n{trabajo.Trabajo}",
+                    "Cancelar",
+                    null,
+                    nombresTecnicos);
+
+                if (string.IsNullOrEmpty(tecnicoSeleccionado) || tecnicoSeleccionado == "Cancelar")
+                    return;
+
+                var tecnico = tecnicos.FirstOrDefault(t => t.NombreCompleto == tecnicoSeleccionado);
+                if (tecnico == null) return;
+
+                bool confirmar = await Application.Current.MainPage.DisplayAlert(
+                    "Confirmar asignación",
+                    $"¿Asignar a {tecnico.NombreCompleto}?\n\nTrabajo: {trabajo.Trabajo}",
+                    "Sí, asignar",
+                    "Cancelar");
+
+                if (!confirmar) return;
+
+                int jefeId = Preferences.Get("user_id", 0);
+                var response = await _apiService.AsignarTecnicoAsync(trabajo.Id, tecnico.Id, jefeId);
 
                 if (response.Success)
                 {
-                    Recordatorios.Clear();
+                    await Application.Current.MainPage.DisplayAlert(
+                        "✅ Éxito",
+                        $"Trabajo asignado a {tecnico.NombreCompleto}",
+                        "OK");
 
-                    if (response.Recordatorios != null && response.Recordatorios.Count > 0)
-                    {
-                        foreach (var recordatorio in response.Recordatorios)
-                        {
-                            Recordatorios.Add(recordatorio);
-                        }
-
-                        MensajeNoRecordatorios = $"No hay recordatorios pendientes en esta categoría";
-                        Debug.WriteLine($"✅ {Recordatorios.Count} recordatorios cargados");
-                    }
-                    else
-                    {
-                        MensajeNoRecordatorios = $"No hay {TituloSeccion.ToLower()}s pendientes";
-                        Debug.WriteLine("ℹ️ No hay recordatorios para este tipo");
-                    }
+                    await CargarOrdenes();
                 }
                 else
                 {
-                    await MostrarError("Error al cargar recordatorios", response.Message);
+                    await Application.Current.MainPage.DisplayAlert(
+                        "Error",
+                        response.Message,
+                        "OK");
                 }
-
-                OnPropertyChanged(nameof(TieneRecordatorios));
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"❌ Error en CargarRecordatoriosPorTipo: {ex.Message}");
-                await MostrarError("Error", $"Error al cargar recordatorios: {ex.Message}");
+                await Application.Current.MainPage.DisplayAlert(
+                    "Error",
+                    $"Error al asignar técnico: {ex.Message}",
+                    "OK");
             }
             finally
             {
                 IsLoading = false;
-                IsRefreshing = false;
             }
         }
 
-        /// <summary>
-        /// Navegar a la vista de detalle del recordatorio
-        /// </summary>
-        private async Task VerDetalleRecordatorio(RecordatorioServicioSimpleDto recordatorioSimple)
+        private async Task ReasignarTecnico(TrabajoDto trabajo)
         {
-            if (recordatorioSimple == null)
-            {
-                Debug.WriteLine("⚠️ recordatorioSimple es null");
-                return;
-            }
-
             try
             {
-                Debug.WriteLine($"🔍 [VIEWMODEL] Intentando navegar al detalle ID: {recordatorioSimple.Id}");
-
-                // Si tenemos la acción de navegación inyectada, usarla
-                if (_navigationAction != null)
+                if (trabajo.EnProceso)
                 {
-                    Debug.WriteLine("✅ [VIEWMODEL] Usando acción de navegación inyectada");
-                    await _navigationAction(recordatorioSimple, _tipoRecordatorioActual);
-                    Debug.WriteLine("✅ [VIEWMODEL] Navegación delegada completada");
+                    await Application.Current.MainPage.DisplayAlert(
+                        "No disponible",
+                        "No se puede reasignar un trabajo que ya está en proceso",
+                        "OK");
+                    return;
+                }
+
+                var tecnicos = await _apiService.ObtenerTecnicosAsync();
+
+                if (tecnicos == null || !tecnicos.Any())
+                {
+                    await Application.Current.MainPage.DisplayAlert(
+                        "Sin técnicos",
+                        "No hay técnicos disponibles",
+                        "OK");
+                    return;
+                }
+
+                var tecnicosDisponibles = tecnicos
+                    .Where(t => t.Id != trabajo.TecnicoAsignadoId)
+                    .ToList();
+
+                if (!tecnicosDisponibles.Any())
+                {
+                    await Application.Current.MainPage.DisplayAlert(
+                        "Sin opciones",
+                        "No hay otros técnicos disponibles para reasignar",
+                        "OK");
+                    return;
+                }
+
+                var nombresTecnicos = tecnicosDisponibles.Select(t => t.NombreCompleto).ToArray();
+
+                string nuevoTecnico = await Application.Current.MainPage.DisplayActionSheet(
+                    $"Reasignar trabajo:\n{trabajo.Trabajo}\n\nTécnico actual: {trabajo.TecnicoNombre}",
+                    "Cancelar",
+                    null,
+                    nombresTecnicos);
+
+                if (string.IsNullOrEmpty(nuevoTecnico) || nuevoTecnico == "Cancelar")
+                    return;
+
+                var tecnico = tecnicosDisponibles.FirstOrDefault(t => t.NombreCompleto == nuevoTecnico);
+                if (tecnico == null) return;
+
+                bool confirmar = await Application.Current.MainPage.DisplayAlert(
+                    "Confirmar reasignación",
+                    $"Cambiar de:\n{trabajo.TecnicoNombre}\n\nA:\n{tecnico.NombreCompleto}\n\nTrabajo: {trabajo.Trabajo}",
+                    "Sí, reasignar",
+                    "Cancelar");
+
+                if (!confirmar) return;
+
+                int jefeId = Preferences.Get("user_id", 0);
+                var response = await _apiService.ReasignarTecnicoAsync(trabajo.Id, tecnico.Id, jefeId);
+
+                if (response.Success)
+                {
+                    await Application.Current.MainPage.DisplayAlert(
+                        "✅ Éxito",
+                        $"Trabajo reasignado a {tecnico.NombreCompleto}",
+                        "OK");
+
+                    await CargarOrdenes();
                 }
                 else
                 {
-                    Debug.WriteLine("⚠️ [VIEWMODEL] No hay acción de navegación inyectada, usando método alternativo");
-
-                    // Fallback: Intentar navegación directa
-                    var paginaDetalle = new RecordatorioDetallePage(recordatorioSimple.Id, _tipoRecordatorioActual);
-
-                    if (Application.Current?.MainPage is FlyoutPage flyoutPage &&
-                        flyoutPage.Detail is NavigationPage navigationPage)
-                    {
-                        Debug.WriteLine("✅ [VIEWMODEL] Navegando vía FlyoutPage.Detail.NavigationPage");
-                        await navigationPage.PushAsync(paginaDetalle);
-                    }
-                    else
-                    {
-                        Debug.WriteLine("❌ [VIEWMODEL] No se pudo determinar la estructura de navegación");
-                        await MostrarError("Error", "No se pudo abrir el detalle del recordatorio");
-                    }
+                    await Application.Current.MainPage.DisplayAlert(
+                        "Error",
+                        response.Message,
+                        "OK");
                 }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"❌ [VIEWMODEL] Error al navegar: {ex.Message}");
-                Debug.WriteLine($"❌ [VIEWMODEL] StackTrace: {ex.StackTrace}");
-                await MostrarError("Error", $"No se pudo abrir el detalle: {ex.Message}");
+                await Application.Current.MainPage.DisplayAlert(
+                    "Error",
+                    $"Error al reasignar: {ex.Message}",
+                    "OK");
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
 
-        /// <summary>
-        /// Cargar información del usuario actual
-        /// </summary>
-        private void CargarUsuarioActual()
-        {
+        #endregion
 
-            NombreUsuarioActual = Preferences.Get("user_name", "Citas");
-            OnPropertyChanged(nameof(NombreUsuarioActual));
-        }
-
-        /// <summary>
-        /// Cerrar sesión
-        /// </summary>
-        private async Task CerrarSesion()
+        private async Task OnLogout()
         {
-            bool confirmar = await Application.Current.MainPage.DisplayAlert(
+            bool confirm = await Application.Current.MainPage.DisplayAlert(
                 "Cerrar Sesión",
                 "¿Estás seguro que deseas cerrar sesión?",
                 "Sí",
                 "No");
 
-            if (confirmar)
+            if (confirm)
             {
-                // Limpiar preferencias
                 Preferences.Clear();
-
-                // Navegar a login
-                Application.Current.MainPage = new LoginPage(); // Ajusta según tu página de login
+                Application.Current.MainPage = new NavigationPage(new LoginPage())
+                {
+                    BarBackgroundColor = Color.FromArgb("#B00000"),
+                    BarTextColor = Colors.White
+                };
             }
         }
 
-        /// <summary>
-        /// Mostrar mensaje de error
-        /// </summary>
-        private async Task MostrarError(string titulo, string mensaje)
-        {
-            if (Application.Current?.MainPage != null)
-            {
-                await Application.Current.MainPage.DisplayAlert(titulo, mensaje, "OK");
-            }
-        }
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-        #endregion
-
-        #region INotifyPropertyChanged
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
-        #endregion
     }
 }

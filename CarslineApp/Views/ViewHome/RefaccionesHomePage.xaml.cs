@@ -1,22 +1,16 @@
+
 using CarslineApp.ViewModels.ViewModelsHome;
-using CarslineApp.Models;
-using CarslineApp.Views.Citas;
 
 namespace CarslineApp.Views.ViewHome;
 
 public partial class RefaccionesHomePage : FlyoutPage
 {
     private readonly RefaccionesMainViewModel _viewModel;
-    private bool _isInitialized = false;
 
     public RefaccionesHomePage()
     {
         InitializeComponent();
         _viewModel = new RefaccionesMainViewModel();
-
-        // Pasar la función de navegación al ViewModel
-        _viewModel.SetNavigationAction(NavegarADetalle);
-
         BindingContext = _viewModel;
 
         // Configurar el comportamiento del flyout según la plataforma
@@ -28,6 +22,8 @@ public partial class RefaccionesHomePage : FlyoutPage
 #if WINDOWS
         // En Windows, el menú inicia cerrado
         IsPresented = false;
+        
+        // Permitir que el menú se pueda cerrar haciendo clic fuera de él
         FlyoutLayoutBehavior = FlyoutLayoutBehavior.Popover;
 #elif ANDROID
         // En Android, el menú se puede deslizar
@@ -45,62 +41,21 @@ public partial class RefaccionesHomePage : FlyoutPage
         IsPresented = !IsPresented;
     }
 
-    // Inicializar datos SOLO UNA VEZ
+    // Inicializar datos y configurar cierre automático del menú
     protected override async void OnAppearing()
     {
         base.OnAppearing();
 
-        // Solo inicializar la primera vez que aparece la página
-        if (!_isInitialized)
+        // Cargar órdenes cuando aparece la página
+        await _viewModel.InicializarAsync();
+
+        // Cerrar el menú cuando se ejecute algún comando de navegación
+        _viewModel.PropertyChanged += (s, e) =>
         {
-            _isInitialized = true;
-
-            // Cargar datos iniciales
-            await _viewModel.InicializarAsync();
-
-            // Cerrar el menú cuando se ejecute algún comando de navegación
-            _viewModel.PropertyChanged += (s, e) =>
+            if (e.PropertyName == nameof(_viewModel.TituloSeccion))
             {
-                if (e.PropertyName == nameof(_viewModel.TituloSeccion))
-                {
-                    IsPresented = false;
-                }
-            };
-        }
-    }
-
-    // Limpiar cuando se sale de la página
-    protected override void OnDisappearing()
-    {
-        base.OnDisappearing();
-        // Aquí podrías limpiar recursos si es necesario
-    }
-
-    // Método helper para navegación desde el ViewModel
-    private async Task NavegarADetalle(RecordatorioServicioSimpleDto recordatorio, int tipoRecordatorio)
-    {
-        try
-        {
-            System.Diagnostics.Debug.WriteLine($"?? [CODE-BEHIND] Navegando al detalle ID: {recordatorio.Id}");
-
-            var paginaDetalle = new RecordatorioDetallePage(recordatorio.Id, tipoRecordatorio);
-
-            // Acceder directamente al NavigationPage del Detail
-            if (this.Detail is NavigationPage navPage)
-            {
-                System.Diagnostics.Debug.WriteLine("? [CODE-BEHIND] NavigationPage encontrado, navegando...");
-                await navPage.PushAsync(paginaDetalle);
-                System.Diagnostics.Debug.WriteLine("? [CODE-BEHIND] Navegación completada");
+                IsPresented = false;
             }
-            else
-            {
-                System.Diagnostics.Debug.WriteLine("? [CODE-BEHIND] Detail no es NavigationPage");
-            }
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"? [CODE-BEHIND] Error en navegación: {ex.Message}");
-            throw;
-        }
+        };
     }
 }

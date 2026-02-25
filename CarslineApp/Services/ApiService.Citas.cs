@@ -339,20 +339,18 @@ namespace CarslineApp.Services
         }
 
         /// <summary>
-        /// Obtener citas con sus trabajos por fecha
-        /// GET api/Citas/Trabajos-Citas?fecha=2025-01-15
+        /// Obtener citas con sus trabajos por fecha y tipo de orden
+        /// GET api/Citas/Trabajos-Citas?tipoOrdenId=1&fecha=2025-01-15
         /// </summary>
-        public async Task<List<CitaConTrabajosDto>> ObtenerTrabajosCitasPorFechaAsync(DateTime? fecha = null)
+        public async Task<List<CitaConTrabajosDto>> ObtenerTrabajosCitasPorFechaAsync(int tipoOrdenId, DateTime? fecha = null)
         {
             try
             {
                 var fechaConsulta = fecha ?? DateTime.Today.AddDays(1);
-                var url = $"{BaseUrl}/Citas/Trabajos-Citas?fecha={fechaConsulta:yyyy-MM-dd}";
-
-                System.Diagnostics.Debug.WriteLine($"📅 Obteniendo trabajos-citas para: {fechaConsulta:dd/MMM/yyyy}");
+                var url = $"{BaseUrl}/Citas/Trabajos-Citas?tipoOrdenId={tipoOrdenId}&fecha={fechaConsulta:yyyy-MM-dd}";
+                System.Diagnostics.Debug.WriteLine($"📅 Obteniendo trabajos-citas | TipoOrden: {tipoOrdenId} | Fecha: {fechaConsulta:dd/MMM/yyyy}");
 
                 var response = await _httpClient.GetAsync(url);
-
                 if (response.IsSuccessStatusCode)
                 {
                     var result = await response.Content.ReadFromJsonAsync<List<CitaConTrabajosDto>>(
@@ -360,12 +358,10 @@ namespace CarslineApp.Services
                         {
                             PropertyNameCaseInsensitive = true
                         });
-
                     var lista = result ?? new List<CitaConTrabajosDto>();
                     System.Diagnostics.Debug.WriteLine($"✅ Se obtuvieron {lista.Count} cita(s) con trabajos");
                     return lista;
                 }
-
                 System.Diagnostics.Debug.WriteLine($"❌ Error HTTP: {response.StatusCode}");
                 return new List<CitaConTrabajosDto>();
             }
@@ -374,13 +370,6 @@ namespace CarslineApp.Services
                 System.Diagnostics.Debug.WriteLine($"❌ Error en ObtenerTrabajosCitasPorFechaAsync: {ex.Message}");
                 return new List<CitaConTrabajosDto>();
             }
-        }
-        /// <summary>
-        /// Obtener trabajos-citas de mañana (comportamiento por defecto del endpoint)
-        /// </summary>
-        public async Task<List<CitaConTrabajosDto>> ObtenerTrabajosCitasMañanaAsync()
-        {
-            return await ObtenerTrabajosCitasPorFechaAsync(DateTime.Today.AddDays(1));
         }
     }
 }
