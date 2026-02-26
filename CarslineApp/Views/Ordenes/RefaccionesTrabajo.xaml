@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="CarslineApp.Views.Ordenes.RefaccionesTrabajo"
              xmlns:models="clr-namespace:CarslineApp.Models"
-             xmlns:viewmodel="clr-namespace:CarslineApp.ViewModels"
+             xmlns:viewmodel="clr-namespace:CarslineApp.ViewModels.Ordenes"
              x:DataType="viewmodel:RefaccionesTrabajoViewModel"
              Title="Refacciones del Trabajo"
              x:Name="Page"

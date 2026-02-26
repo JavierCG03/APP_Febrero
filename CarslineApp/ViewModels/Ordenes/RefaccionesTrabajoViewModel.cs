@@ -5,7 +5,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 
-namespace CarslineApp.ViewModels
+namespace CarslineApp.ViewModels.Ordenes
 {
     public class RefaccionesTrabajoViewModel : INotifyPropertyChanged
     {

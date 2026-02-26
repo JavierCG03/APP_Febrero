@@ -30,6 +30,7 @@ namespace CarslineApp.ViewModels.ViewModelsHome
             VerDiagnosticoCommand = new Command(() => CambiarTipoCita(2));
             VerReparacionCommand = new Command(() => CambiarTipoCita(3));
             VerGarantiaCommand = new Command(() => CambiarTipoCita(4));
+            VerInventarioCommand = new Command(async () => await OnVerInventario());
 
             // Comandos de acciones
             RefreshCommand = new Command(async () => await CargarCitas());
@@ -123,8 +124,8 @@ namespace CarslineApp.ViewModels.ViewModelsHome
         public ICommand VerGarantiaCommand { get; }
         public ICommand RefreshCommand { get; }
         public ICommand LogoutCommand { get; }
-        public ICommand AbrirRefaccionesTrabajoCommand { get; } // ✅ Navegación a refacciones
-
+        public ICommand AbrirRefaccionesTrabajoCommand { get; } 
+        public ICommand VerInventarioCommand { get; }
         #endregion
 
         #region Métodos
@@ -132,10 +133,8 @@ namespace CarslineApp.ViewModels.ViewModelsHome
         // ✅ Navega a RefaccionesTrabajoCitaPage con los datos del trabajo seleccionado
         private async Task AbrirRefaccionesTrabajo(TrabajoCitaDto trabajo)
         {
-            System.Diagnostics.Debug.WriteLine($"📦 Consultando Refacciones de: {trabajo.Id}");
             if (trabajo == null) return;
 
-            // Buscar la cita padre para obtener VehiculoCompleto y VIN
             string vehiculo = "Vehículo";
             string vin = string.Empty;
 
@@ -157,21 +156,52 @@ namespace CarslineApp.ViewModels.ViewModelsHome
                 vehiculo: vehiculo,
                 vin: vin);
 
-            System.Diagnostics.Debug.WriteLine($"📦 Consultando Refacciones de: {trabajo.Id}, {trabajo.Trabajo},{vehiculo},{vin}");
-
-            // Navegar desde el NavigationPage que está dentro del Detail del FlyoutPage
-            if (Application.Current?.MainPage is FlyoutPage flyout &&
-                flyout.Detail is NavigationPage navPage)
+            // ✅ Navega desde el NavigationPage correcto (Detail)
+            if (Application.Current?.MainPage is FlyoutPage flyout)
             {
-                flyout.IsPresented = false; // Cerrar menú lateral si estaba abierto
+                flyout.IsPresented = false;
+
+                if (flyout.Detail is NavigationPage navPage)
+                {
+                    // ✅ Usa navPage directamente, no MainPage
+                    await navPage.Navigation.PushAsync(pagina);
+                }
+                else
+                {
+                    // Fallback seguro
+                    await Application.Current.MainPage.Navigation.PushAsync(pagina);
+                }
+            }
+            else
+            {
+                // Si no hay FlyoutPage (ej. después de login)
                 await Application.Current.MainPage.Navigation.PushAsync(pagina);
             }
         }
-
         private async void CambiarTipoCita(int tipoCita)
         {
             TipoCitaSeleccionado = tipoCita;
             await CargarCitas();
+        }
+
+        private async Task OnVerInventario()
+        {
+            try
+            {
+                IsLoading = true;
+                await Application.Current.MainPage.Navigation.PushAsync(new InventarioPage());
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert(
+                    "Error",
+                    $"No se pudo abrir el inventario: {ex.Message}",
+                    "OK");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         private async Task CargarCitas()

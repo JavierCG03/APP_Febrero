@@ -91,6 +91,49 @@ namespace CarslineApp.Services
 
             return await AgregarRefaccionesCitaAsync(request);
         }
+        /// <summary>
+        /// Marcar un trabajo de cita como con refacciones listas
+        /// PUT api/RefaccionesCita/{trabajoCitaId}/marcar-listas
+        /// </summary>
+        public async Task<RefaccionCitaResponse> MarcarRefaccionesListasAsync(int trabajoCitaId)
+        {
+            try
+            {
+                Debug.WriteLine($"📦 Marcando refacciones como listas para trabajo de cita {trabajoCitaId}");
+
+                var response = await _httpClient.PutAsync(
+                    $"{BaseUrl}/RefaccionesCita/{trabajoCitaId}/marcar-listas",
+                    null); // No enviamos body
+
+                var result = await response.Content
+                    .ReadFromJsonAsync<RefaccionCitaResponse>();
+
+                if (result != null)
+                {
+                    if (result.Success)
+                        Debug.WriteLine("✅ Refacciones marcadas como listas correctamente");
+                    else
+                        Debug.WriteLine($"⚠️ No se pudo marcar: {result.Message}");
+
+                    return result;
+                }
+
+                return new RefaccionCitaResponse
+                {
+                    Success = false,
+                    Message = $"Error HTTP: {response.StatusCode}"
+                };
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"❌ Error en MarcarRefaccionesListasAsync: {ex.Message}");
+                return new RefaccionCitaResponse
+                {
+                    Success = false,
+                    Message = $"Error: {ex.Message}"
+                };
+            }
+        }
 
         /// <summary>
         /// Obtener todas las refacciones de un trabajo de cita específico

@@ -5,7 +5,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 
-namespace CarslineApp.ViewModels
+namespace CarslineApp.ViewModels.Ordenes
 {
     public class RefaccionesTrabajoCitaViewModel : INotifyPropertyChanged
     {
@@ -26,6 +26,7 @@ namespace CarslineApp.ViewModels
         private bool _formularioExpandido = false;
         private bool _predeterminadasExpandido = true;
         private bool _infoTrabajoVisible = true;
+        private bool _refaccionesListasVisible = false;
 
         private string _nombreTrabajo = string.Empty;
         private string _vehiculoCompleto = string.Empty;
@@ -43,13 +44,12 @@ namespace CarslineApp.ViewModels
             _refaccionesPredeterminadas = new ObservableCollection<RefaccionPredeterminadaViewModel>();
 
             AgregarRefaccionCommand = new Command(async () => await AgregarRefaccion(), () => !EstaCargando);
-            EliminarRefaccionCommand = new Command<RefaccionCitaViewModel>(async (r) => await EliminarRefaccion(r));
-            EditarPrecioVentaCommand = new Command<RefaccionCitaViewModel>(async (r) => await EditarPrecioVenta(r));
+            EliminarRefaccionCommand = new Command<RefaccionCitaViewModel>(async (r) => await EliminarRefaccion(r));      
             ToggleFormularioCommand = new Command(() => FormularioExpandido = !FormularioExpandido);
             ToggleInfoCommand = new Command(() => InfoTrabajoVisible = !InfoTrabajoVisible);
             TogglePredeterminadasCommand = new Command(() => PredeterminadasExpandido = !PredeterminadasExpandido);
-            AgregarPredeterminadaCommand = new Command<RefaccionPredeterminadaViewModel>(
-                async (r) => await AgregarRefaccionPredeterminada(r));
+            AgregarPredeterminadaCommand = new Command<RefaccionPredeterminadaViewModel>(async (r) => await AgregarRefaccionPredeterminada(r));
+            MarcarRefaccionesListasCommand = new Command(async () => await MarcarRefaccionesListas(),() => !EstaCargando && Refacciones.Any());
         }
 
         #region Propiedades
@@ -116,11 +116,16 @@ namespace CarslineApp.ViewModels
 
         public string IconoFormulario => FormularioExpandido ? "▲" : "▼";
         public string IconoInfo => InfoTrabajoVisible ? "▲" : "▼";
-
         public string NombreTrabajo
         {
             get => _nombreTrabajo;
             set { _nombreTrabajo = value; OnPropertyChanged(); }
+        }
+
+        public bool RefaccioneslistasVisibles
+        {
+            get => _refaccionesListasVisible;
+            set { _refaccionesListasVisible = value; OnPropertyChanged(); }
         }
 
         public string VehiculoCompleto
@@ -138,7 +143,10 @@ namespace CarslineApp.ViewModels
         public bool EstaCargando
         {
             get => _estaCargando;
-            set { _estaCargando = value; OnPropertyChanged(); ((Command)AgregarRefaccionCommand).ChangeCanExecute(); }
+            set { _estaCargando = value; OnPropertyChanged(); 
+                ((Command)AgregarRefaccionCommand).ChangeCanExecute();
+                ((Command)MarcarRefaccionesListasCommand).ChangeCanExecute();
+            }
         }
 
         public string NuevaRefaccion
@@ -171,11 +179,11 @@ namespace CarslineApp.ViewModels
 
         public ICommand AgregarRefaccionCommand { get; }
         public ICommand EliminarRefaccionCommand { get; }
-        public ICommand EditarPrecioVentaCommand { get; }
         public ICommand ToggleFormularioCommand { get; }
         public ICommand ToggleInfoCommand { get; }
         public ICommand TogglePredeterminadasCommand { get; }
         public ICommand AgregarPredeterminadaCommand { get; }
+        public ICommand MarcarRefaccionesListasCommand { get; }
 
         #endregion
 
@@ -275,6 +283,7 @@ namespace CarslineApp.ViewModels
             return new List<RefaccionPredeterminadaViewModel>();
         }
 
+
         private async Task AgregarRefaccionPredeterminada(RefaccionPredeterminadaViewModel predeterminada)
         {
             if (predeterminada == null) return;
@@ -340,6 +349,54 @@ namespace CarslineApp.ViewModels
 
         #region Métodos Privados
 
+        private async Task MarcarRefaccionesListas()
+        {
+            if (!Refacciones.Any())
+            {
+                await MostrarAlerta("Sin refacciones",
+                    "No puedes marcar como listas si no hay refacciones registradas.");
+                return;
+            }
+
+            bool confirmar = await Application.Current.MainPage.DisplayAlert(
+                "Confirmar",
+                "¿Confirmar que todas las refacciones están listas?",
+                "Sí, confirmar",
+                "Cancelar");
+
+            if (!confirmar)
+                return;
+
+            EstaCargando = true;
+
+            try
+            {
+                var response = await _apiService
+                    .MarcarRefaccionesListasAsync(_trabajoCitaId);
+
+                if (response.Success)
+                {
+                    await MostrarAlerta("Éxito", response.Message);
+
+                    // Refrescar datos para actualizar estado visual
+                    await CargarRefacciones();
+                }
+                else
+                {
+                    await MostrarAlerta("Error", response.Message);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ {ex.Message}");
+                await MostrarAlerta("Error",
+                    "No se pudo actualizar el estado de las refacciones");
+            }
+            finally
+            {
+                EstaCargando = false;
+            }
+        }
         private async Task CargarRefacciones()
         {
             EstaCargando = true;
@@ -354,6 +411,16 @@ namespace CarslineApp.ViewModels
 
                     TotalCosto = response.TotalCosto;
                     TotalVenta = response.TotalVenta;
+                    if(response.RefaccionesListas)
+                    {
+                        RefaccioneslistasVisibles = false;
+                    }
+                    else
+                    {
+                        RefaccioneslistasVisibles = true;
+
+                    }
+                    
 
                     // Quitar predeterminadas ya agregadas
                     var yaAgregadas = Refacciones
@@ -466,49 +533,6 @@ namespace CarslineApp.ViewModels
             {
                 System.Diagnostics.Debug.WriteLine($"❌ {ex.Message}");
                 await MostrarAlerta("Error", "No se pudo eliminar la refacción");
-            }
-            finally { EstaCargando = false; }
-        }
-
-        private async Task EditarPrecioVenta(RefaccionCitaViewModel refaccion)
-        {
-            if (refaccion == null) return;
-
-            if (refaccion.Transferida)
-            {
-                await MostrarAlerta("No permitido",
-                    "Esta refacción ya fue transferida y no puede modificarse.");
-                return;
-            }
-
-            string resultado = await Application.Current.MainPage.DisplayPromptAsync(
-                "Precio de Venta",
-                $"Ingresa el precio de venta para:\n{refaccion.Nombre}",
-                initialValue: refaccion.PrecioVentaRaw?.ToString("F2") ?? string.Empty,
-                keyboard: Keyboard.Numeric,
-                placeholder: "$0.00");
-
-            if (resultado == null) return; // canceló
-
-            if (!decimal.TryParse(resultado, out decimal nuevoPrecio) || nuevoPrecio <= 0)
-            {
-                await MostrarAlerta("Precio inválido", "Ingresa un precio de venta mayor a 0");
-                return;
-            }
-
-            EstaCargando = true;
-            try
-            {
-                var response = await _apiService.ActualizarPrecioVentaRefaccionCitaAsync(refaccion.Id, nuevoPrecio);
-                if (response.Success)
-                    await CargarRefacciones();
-                else
-                    await MostrarAlerta("Error", response.Message);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"❌ {ex.Message}");
-                await MostrarAlerta("Error", "No se pudo actualizar el precio de venta");
             }
             finally { EstaCargando = false; }
         }
