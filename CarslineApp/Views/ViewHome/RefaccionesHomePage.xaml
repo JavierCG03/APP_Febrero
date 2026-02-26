@@ -5,7 +5,9 @@
             x:Name="RootPage"
             Shell.NavBarIsVisible="False"
             NavigationPage.HasNavigationBar="False"
-            xmlns:converters="clr-namespace:CarslineApp.Converters">
+            xmlns:converters="clr-namespace:CarslineApp.Converters"
+            xmlns:models="clr-namespace:CarslineApp.Models"
+            xmlns:viewmodel="clr-namespace:CarslineApp.ViewModels.ViewModelsHome">
     <FlyoutPage.Resources>
         <ResourceDictionary>
             <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
@@ -243,7 +245,7 @@
                                        VerticalOptions="Center"/>
                             </Grid>
                         </Frame>
-                        
+
                         <HorizontalStackLayout Grid.Row="1" Grid.ColumnSpan="2"
                                                        HorizontalOptions="Center"
                                                        Spacing="8"
@@ -261,7 +263,7 @@
                                                 MinimumDate="01/01/2026"
                                                 MaximumDate="12/12/2028"/>
                         </HorizontalStackLayout>
-                        
+
                         <!-- ✅ UNA SOLA COLLECTIONVIEW CON AGRUPACIÓN -->
                         <RefreshView Grid.Row="2" 
                                      IsRefreshing="{Binding IsLoading}" 
@@ -300,7 +302,7 @@
                                                BorderColor="{Binding BorderCita}"
                                                CornerRadius="12">
                                             <VerticalStackLayout Spacing="12">
-                                                
+
                                                 <Label Grid.Column="0"
                                                     Text="{Binding VehiculoCompleto}"
                                                     FontSize="18"
@@ -327,7 +329,7 @@
                                                                TextColor="White"/>
                                                     </Frame>
                                                 </Grid>
-                                                
+
                                                 <HorizontalStackLayout Spacing="10">
                                                     <Label Text="⏰ "
                                                            FontAttributes="Bold"
@@ -351,35 +353,57 @@
                                                             <Binding Path="Trabajos"/>
                                                         </BindableLayout.ItemsSource>
                                                         <BindableLayout.ItemTemplate>
-                                                            <DataTemplate>
+                                                            <DataTemplate x:DataType="models:TrabajoCitaDto">
                                                                 <Frame Padding="10"
-                                                                       Margin="0"
+                                                                       Margin="0,0,0,4"
                                                                        HasShadow="False"
                                                                        BackgroundColor="{Binding FondoTrabajo}"
                                                                        BorderColor="{Binding BordeTrabajo}">
-                                                                       
-                                                                    <VerticalStackLayout Spacing="8">
-                                                                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
-                                                                            <Label Grid.Column="0"
-                                                                                 Text="✅ "
-                                                                                 FontSize="13"
-                                                                                 FontAttributes="Bold"
-                                                                                 IsVisible="{Binding RefaccionesListas}"/>
-                                                                            <Label Grid.Column="1"
-                                                                                 Text="{Binding Trabajo}"
-                                                                                 FontSize="13"
-                                                                                 FontAttributes="Bold"
-                                                                                 TextColor="Black"/>
-                                                                            <!-- Indicaciones -->
-                                                                            <Label Grid.Row="1" Grid.ColumnSpan="2"
-                                                                                   Text="{Binding IndicacionesTrabajo}"
+
+                                                                    <!-- ✅ TapGesture que llama al comando del ViewModel con el trabajo como parámetro -->
+                                                                    <Frame.GestureRecognizers>
+                                                                        <TapGestureRecognizer
+                                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:RefaccionesMainViewModel}}, Path=AbrirRefaccionesTrabajoCommand}"
+                                                                            CommandParameter="{Binding .}"/>
+                                                                    </Frame.GestureRecognizers>
+
+                                                                    <Grid ColumnDefinitions="Auto,*,Auto"
+                                                                          RowDefinitions="Auto,Auto"
+                                                                          ColumnSpacing="4">
+
+                                                                        <!-- Checkmark si ya están listas -->
+                                                                        <Label Grid.Column="0" Grid.Row="0"
+                                                                               Text="✅ "
+                                                                               FontSize="13"
+                                                                               FontAttributes="Bold"
+                                                                               VerticalOptions="Center"
+                                                                               IsVisible="{Binding RefaccionesListas}"/>
+
+                                                                        <!-- Nombre del trabajo -->
+                                                                        <Label Grid.Column="1" Grid.Row="0"
+                                                                               Text="{Binding Trabajo}"
+                                                                               FontSize="13"
+                                                                               FontAttributes="Bold"
+                                                                               TextColor="Black"
+                                                                               VerticalOptions="Center"/>
+
+                                                                        <!-- ✅ Flecha indicadora de que es tappeable -->
+                                                                        <Label Grid.Column="2" Grid.Row="0"
+                                                                               Text="›"
+                                                                               FontSize="22"
+                                                                               FontAttributes="Bold"
+                                                                               TextColor="#800020"
+                                                                               VerticalOptions="Center"
+                                                                               HorizontalOptions="End"/>
+
+                                                                        <!-- Indicaciones -->
+                                                                        <Label Grid.Row="1" Grid.ColumnSpan="3"
+                                                                               Text="{Binding IndicacionesTrabajo}"
                                                                                FontSize="11"
                                                                                FontAttributes="Bold"
                                                                                TextColor="Gray"
                                                                                IsVisible="{Binding TieneIndicaciones}"/>
-                                                                        </Grid>
-                                                                              
-                                                                    </VerticalStackLayout>
+                                                                    </Grid>
                                                                 </Frame>
                                                             </DataTemplate>
                                                         </BindableLayout.ItemTemplate>

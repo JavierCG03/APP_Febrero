@@ -10,59 +10,51 @@ namespace CarslineApp.ViewModels
     public class RefaccionesTrabajoCitaViewModel : INotifyPropertyChanged
     {
         private readonly ApiService _apiService;
-        private readonly int _trabajoId;
+        private readonly int _trabajoCitaId;
 
-        private ObservableCollection<RefaccionTrabajoViewModel> _refacciones;
+        private ObservableCollection<RefaccionCitaViewModel> _refacciones;
         private ObservableCollection<RefaccionPredeterminadaViewModel> _refaccionesPredeterminadas;
         private bool _estaCargando;
-        private decimal _totalRefacciones;
-        private decimal _precioManoObra;
-        private decimal _manoObraOriginal;
+        private decimal _totalCosto;
+        private decimal? _totalVenta;
+
         private string _nuevaRefaccion = string.Empty;
         private string _nuevaCantidad = string.Empty;
-        private string _nuevoPrecioUnitario = string.Empty;
-        private string _precioManoObraTexto = string.Empty;
-        private bool _formularioExpandido = false;
-        private bool _manoObraExpandido = false;
-        private bool _predeterminadasExpandido = true;
+        private string _nuevoPrecio = string.Empty;
+        private string _nuevoPrecioVenta = string.Empty;
 
-        private string _costoTotalTrabajoTexto = string.Empty;
-        private decimal _manoObraCalculada = 0;
-        private bool _hayManoObraCalculada = false;
+        private bool _formularioExpandido = false;
+        private bool _predeterminadasExpandido = true;
+        private bool _infoTrabajoVisible = true;
 
         private string _nombreTrabajo = string.Empty;
         private string _vehiculoCompleto = string.Empty;
         private string _vin = string.Empty;
-        private bool _infoTrabajoVisible = true;
 
         public RefaccionesTrabajoCitaViewModel(int trabajoCitaId, string trabajo, string vehiculo, string vin)
         {
             _apiService = new ApiService();
-            _trabajoId = trabajoCitaId;
+            _trabajoCitaId = trabajoCitaId;
+            _nombreTrabajo = trabajo;
             _vehiculoCompleto = vehiculo;
             _vin = vin;
-            _nombreTrabajo = trabajo;
-            _refacciones = new ObservableCollection<RefaccionTrabajoViewModel>();
+
+            _refacciones = new ObservableCollection<RefaccionCitaViewModel>();
             _refaccionesPredeterminadas = new ObservableCollection<RefaccionPredeterminadaViewModel>();
 
             AgregarRefaccionCommand = new Command(async () => await AgregarRefaccion(), () => !EstaCargando);
-            EliminarRefaccionCommand = new Command<RefaccionTrabajoViewModel>(async (r) => await EliminarRefaccion(r));
-            EditarManoObraCommand = new Command(async () => await GuardarManoObra());
+            EliminarRefaccionCommand = new Command<RefaccionCitaViewModel>(async (r) => await EliminarRefaccion(r));
+            EditarPrecioVentaCommand = new Command<RefaccionCitaViewModel>(async (r) => await EditarPrecioVenta(r));
             ToggleFormularioCommand = new Command(() => FormularioExpandido = !FormularioExpandido);
-            ToggleManoObraCommand = new Command(() => ManoObraExpandido = !ManoObraExpandido);
             ToggleInfoCommand = new Command(() => InfoTrabajoVisible = !InfoTrabajoVisible);
-
             TogglePredeterminadasCommand = new Command(() => PredeterminadasExpandido = !PredeterminadasExpandido);
             AgregarPredeterminadaCommand = new Command<RefaccionPredeterminadaViewModel>(
                 async (r) => await AgregarRefaccionPredeterminada(r));
-            CalcularManoObraCommand = new Command(CalcularManoObraDesdeTotal);
-            AplicarManoObraCalculadaCommand = new Command(async () => await AplicarManoObraCalculada(),
-                () => HayManoObraCalculada);
         }
 
         #region Propiedades
 
-        public ObservableCollection<RefaccionTrabajoViewModel> Refacciones
+        public ObservableCollection<RefaccionCitaViewModel> Refacciones
         {
             get => _refacciones;
             set { _refacciones = value; OnPropertyChanged(); }
@@ -83,62 +75,37 @@ namespace CarslineApp.ViewModels
         public string IconoPredeterminadas => PredeterminadasExpandido ? "▲" : "▼";
         public bool HayRefaccionesPredeterminadas => RefaccionesPredeterminadas?.Count > 0;
 
-        public string CostoTotalTrabajoTexto
+        public decimal TotalCosto
         {
-            get => _costoTotalTrabajoTexto;
-            set { _costoTotalTrabajoTexto = value; OnPropertyChanged(); }
-        }
-
-        public decimal ManoObraCalculada
-        {
-            get => _manoObraCalculada;
-            set { _manoObraCalculada = value; OnPropertyChanged(); OnPropertyChanged(nameof(ManoObraCalculadaFormateada)); }
-        }
-
-        public bool HayManoObraCalculada
-        {
-            get => _hayManoObraCalculada;
-            set { _hayManoObraCalculada = value; OnPropertyChanged(); ((Command)AplicarManoObraCalculadaCommand).ChangeCanExecute(); }
-        }
-
-        public string ManoObraCalculadaFormateada => $"${ManoObraCalculada:N2}";
-
-        public decimal TotalRefacciones
-        {
-            get => _totalRefacciones;
+            get => _totalCosto;
             set
             {
-                _totalRefacciones = value;
+                _totalCosto = value;
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(TotalRefaccionesFormateado));
-                CalcularTotales();
-                if (!string.IsNullOrWhiteSpace(CostoTotalTrabajoTexto))
-                    CalcularManoObraDesdeTotal();
+                OnPropertyChanged(nameof(TotalCostoFormateado));
             }
         }
 
-        public decimal PrecioManoObra
+        public decimal? TotalVenta
         {
-            get => _precioManoObra;
-            set { _precioManoObra = value; OnPropertyChanged(); OnPropertyChanged(nameof(ManoObraFormateado)); CalcularTotales(); }
+            get => _totalVenta;
+            set
+            {
+                _totalVenta = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(TotalVentaFormateado));
+                OnPropertyChanged(nameof(TieneVenta));
+            }
         }
 
-        public string PrecioManoObraTexto
-        {
-            get => _precioManoObraTexto;
-            set { _precioManoObraTexto = value; OnPropertyChanged(); }
-        }
+        public string TotalCostoFormateado => $"${TotalCosto:N2}";
+        public string TotalVentaFormateado => TotalVenta.HasValue ? $"${TotalVenta.Value:N2}" : "-";
+        public bool TieneVenta => TotalVenta.HasValue;
 
         public bool FormularioExpandido
         {
             get => _formularioExpandido;
             set { _formularioExpandido = value; OnPropertyChanged(); OnPropertyChanged(nameof(IconoFormulario)); }
-        }
-
-        public bool ManoObraExpandido
-        {
-            get => _manoObraExpandido;
-            set { _manoObraExpandido = value; OnPropertyChanged(); OnPropertyChanged(nameof(IconoManoObra)); }
         }
 
         public bool InfoTrabajoVisible
@@ -148,7 +115,6 @@ namespace CarslineApp.ViewModels
         }
 
         public string IconoFormulario => FormularioExpandido ? "▲" : "▼";
-        public string IconoManoObra => ManoObraExpandido ? "▲" : "▼";
         public string IconoInfo => InfoTrabajoVisible ? "▲" : "▼";
 
         public string NombreTrabajo
@@ -169,16 +135,6 @@ namespace CarslineApp.ViewModels
             set { _vin = value; OnPropertyChanged(); }
         }
 
-        public decimal Subtotal => TotalRefacciones + PrecioManoObra;
-        public decimal Iva => Subtotal * 0.16m;
-        public decimal TotalGeneral => Subtotal + Iva;
-
-        public string TotalRefaccionesFormateado => $"${TotalRefacciones:N2}";
-        public string ManoObraFormateado => $"${PrecioManoObra:N2}";
-        public string SubtotalFormateado => $"${Subtotal:N2}";
-        public string IvaFormateado => $"${Iva:N2}";
-        public string TotalGeneralFormateado => $"${TotalGeneral:N2}";
-
         public bool EstaCargando
         {
             get => _estaCargando;
@@ -197,10 +153,16 @@ namespace CarslineApp.ViewModels
             set { _nuevaCantidad = value; OnPropertyChanged(); }
         }
 
-        public string NuevoPrecioUnitario
+        public string NuevoPrecio
         {
-            get => _nuevoPrecioUnitario;
-            set { _nuevoPrecioUnitario = value; OnPropertyChanged(); }
+            get => _nuevoPrecio;
+            set { _nuevoPrecio = value; OnPropertyChanged(); }
+        }
+
+        public string NuevoPrecioVenta
+        {
+            get => _nuevoPrecioVenta;
+            set { _nuevoPrecioVenta = value; OnPropertyChanged(); }
         }
 
         #endregion
@@ -209,14 +171,11 @@ namespace CarslineApp.ViewModels
 
         public ICommand AgregarRefaccionCommand { get; }
         public ICommand EliminarRefaccionCommand { get; }
-        public ICommand EditarManoObraCommand { get; }
+        public ICommand EditarPrecioVentaCommand { get; }
         public ICommand ToggleFormularioCommand { get; }
-        public ICommand ToggleManoObraCommand { get; }
         public ICommand ToggleInfoCommand { get; }
         public ICommand TogglePredeterminadasCommand { get; }
         public ICommand AgregarPredeterminadaCommand { get; }
-        public ICommand CalcularManoObraCommand { get; }
-        public ICommand AplicarManoObraCalculadaCommand { get; }
 
         #endregion
 
@@ -224,9 +183,8 @@ namespace CarslineApp.ViewModels
 
         public async Task InicializarAsync()
         {
-            await CargarInformacionTrabajo();
+            CargarRefaccionesPredeterminadas(_nombreTrabajo);
             await CargarRefacciones();
-            await CargarManoObra();
         }
 
         #endregion
@@ -247,13 +205,6 @@ namespace CarslineApp.ViewModels
             OnPropertyChanged(nameof(HayRefaccionesPredeterminadas));
         }
 
-        /// <summary>
-        /// Catálogo de refacciones predeterminadas.
-        ///
-        /// Para definir cantidad FIJA:    new() { Nombre = "Filtro de aceite", Cantidad = 1 }
-        /// Para definir cantidad VARIABLE: new() { Nombre = "Aceite de motor", Cantidad = null }
-        ///   → en pantalla aparecerá un campo para que el usuario ingrese la cantidad.
-        /// </summary>
         private List<RefaccionPredeterminadaViewModel> ObtenerCatalogoPorTrabajo(string nombreTrabajo)
         {
             if (string.IsNullOrWhiteSpace(nombreTrabajo))
@@ -261,40 +212,35 @@ namespace CarslineApp.ViewModels
 
             string nombre = nombreTrabajo.ToLowerInvariant();
 
-            // --- 1er y 3er Servicio ---
             if (nombre.Contains("1er") || nombre.Contains("3er"))
                 return new List<RefaccionPredeterminadaViewModel>
                 {
-                    new() { Nombre = "Aceite de motor",         Cantidad = null }, // variable: 4 o 5 lt según auto
+                    new() { Nombre = "Aceite de motor",         Cantidad = null },
                     new() { Nombre = "Filtro de aceite",        Cantidad = 1 },
                     new() { Nombre = "Filtro de Aire de Motor", Cantidad = 1 },
                 };
 
-            // --- 2do Servicio y Externos ---
             if (nombre.Contains("2do") || nombre.Contains("externo"))
                 return new List<RefaccionPredeterminadaViewModel>
                 {
-                    new() { Nombre = "Aceite de motor",           Cantidad = null }, // variable
+                    new() { Nombre = "Aceite de motor",           Cantidad = null },
                     new() { Nombre = "Filtro de aceite",          Cantidad = 1 },
                     new() { Nombre = "Filtro de Aire de Motor",   Cantidad = 1 },
                     new() { Nombre = "Filtro de Aire de Polen",   Cantidad = 1 },
                 };
 
-            // --- Balatas delanteras ---
             if (nombre.Contains("balatas delanteras"))
                 return new List<RefaccionPredeterminadaViewModel>
                 {
                     new() { Nombre = "Pastillas de freno delanteras", Cantidad = 1 },
                 };
 
-            // --- Balatas traseras ---
             if (nombre.Contains("balatas traseras"))
                 return new List<RefaccionPredeterminadaViewModel>
                 {
                     new() { Nombre = "Pastillas de freno traseras", Cantidad = 1 },
                 };
 
-            // --- Suspensión ---
             if (nombre.Contains("suspension"))
                 return new List<RefaccionPredeterminadaViewModel>
                 {
@@ -304,7 +250,6 @@ namespace CarslineApp.ViewModels
                     new() { Nombre = "Bujes de suspensión",    Cantidad = 4 },
                 };
 
-            // --- Embrague / Clutch ---
             if (nombre.Contains("embrague") || nombre.Contains("clutch"))
                 return new List<RefaccionPredeterminadaViewModel>
                 {
@@ -312,7 +257,6 @@ namespace CarslineApp.ViewModels
                     new() { Nombre = "Collarín de embrague", Cantidad = 1 },
                 };
 
-            // --- Batería ---
             if (nombre.Contains("batería") || nombre.Contains("bateria"))
                 return new List<RefaccionPredeterminadaViewModel>
                 {
@@ -320,7 +264,6 @@ namespace CarslineApp.ViewModels
                     new() { Nombre = "Bornes de batería", Cantidad = 2 },
                 };
 
-            // --- Bujías ---
             if (nombre.Contains("bujía") || nombre.Contains("bujia") || nombre.Contains("encendido"))
                 return new List<RefaccionPredeterminadaViewModel>
                 {
@@ -336,41 +279,44 @@ namespace CarslineApp.ViewModels
         {
             if (predeterminada == null) return;
 
-            // Validar cantidad (solo si es variable)
             int? cantidadEfectiva = predeterminada.CantidadEfectiva;
             if (cantidadEfectiva == null)
             {
-                await MostrarAlerta("Cantidad requerida",
-                    $"Ingresa la cantidad para:\n{predeterminada.Nombre}");
+                await MostrarAlerta("Cantidad requerida", $"Ingresa la cantidad para:\n{predeterminada.Nombre}");
                 return;
             }
 
-            // Validar precio
             if (!decimal.TryParse(predeterminada.PrecioTexto, out decimal precio) || precio <= 0)
             {
-                await MostrarAlerta("Precio requerido",
-                    $"Ingresa el precio unitario para:\n{predeterminada.Nombre}");
+                await MostrarAlerta("Precio requerido", $"Ingresa el precio de costo para:\n{predeterminada.Nombre}");
                 return;
             }
-
+            
+            // Precio de venta es opcional para predeterminadas
+            decimal? precioVenta = null;
+            if (!string.IsNullOrWhiteSpace(predeterminada.PrecioVentaTexto) &&
+                decimal.TryParse(predeterminada.PrecioVentaTexto, out decimal pv) && pv > 0)
+                precioVenta = pv;
+            
             EstaCargando = true;
             try
             {
-                var request = new AgregarRefaccionesTrabajoRequest
+                var request = new AgregarRefaccionesCitaRequest
                 {
-                    TrabajoId = _trabajoId,
-                    Refacciones = new List<AgregarRefaccionDto>
+                    TrabajoCitaId = _trabajoCitaId,
+                    Refacciones = new List<AgregarRefaccionCitaDto>
                     {
-                        new AgregarRefaccionDto
+                        new AgregarRefaccionCitaDto
                         {
-                            Refaccion      = predeterminada.Nombre,
-                            Cantidad       = cantidadEfectiva.Value,
-                            PrecioUnitario = precio
+                            Refaccion  = predeterminada.Nombre,
+                            Cantidad   = cantidadEfectiva.Value,
+                            Precio     = precio,
+                            PrecioVenta = precioVenta
                         }
                     }
                 };
 
-                var response = await _apiService.AgregarRefaccionesTrabajo(request);
+                var response = await _apiService.AgregarRefaccionesCitaAsync(request);
                 if (response.Success)
                 {
                     RefaccionesPredeterminadas.Remove(predeterminada);
@@ -392,96 +338,38 @@ namespace CarslineApp.ViewModels
 
         #endregion
 
-        #region Cálculo Automático de Mano de Obra
-
-        private void CalcularManoObraDesdeTotal()
-        {
-            if (!decimal.TryParse(CostoTotalTrabajoTexto, out decimal costoTotal) || costoTotal <= 0)
-            {
-                HayManoObraCalculada = false; ManoObraCalculada = 0; return;
-            }
-
-            decimal manoObra = (costoTotal / 1.16m) - TotalRefacciones;
-
-            if (manoObra < 0)
-            {
-                HayManoObraCalculada = false; ManoObraCalculada = 0; return;
-            }
-
-            ManoObraCalculada = manoObra;
-            HayManoObraCalculada = true;
-        }
-
-        private async Task AplicarManoObraCalculada()
-        {
-            if (!HayManoObraCalculada) return;
-            EstaCargando = true;
-            try
-            {
-                var response = await _apiService.FijarCostoManoObraAsync(_trabajoId, ManoObraCalculada);
-                if (response.Success)
-                {
-                    PrecioManoObra = ManoObraCalculada;
-                    _manoObraOriginal = ManoObraCalculada;
-                    PrecioManoObraTexto = ManoObraCalculada.ToString("F2");
-                    await MostrarAlerta("✅ Éxito", "Mano de obra calculada y guardada correctamente");
-                }
-                else { await MostrarAlerta("Error", response.Message); }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"❌ {ex.Message}");
-                await MostrarAlerta("Error", "No se pudo guardar la mano de obra");
-            }
-            finally { EstaCargando = false; }
-        }
-
-        #endregion
-
         #region Métodos Privados
-
-        private async Task CargarInformacionTrabajo()
-        {
-            EstaCargando = true;
-            try
-            {
-                var response = await _apiService.ObtenerInfoTrabajo(_trabajoId);
-                if (response.Success)
-                {
-                    NombreTrabajo = response.Trabajo;
-                    VehiculoCompleto = response.VehiculoCompleto;
-                    VIN = response.VIN;
-                    InfoTrabajoVisible = true;
-                    CargarRefaccionesPredeterminadas(NombreTrabajo);
-                }
-                else { InfoTrabajoVisible = false; }
-            }
-            catch { InfoTrabajoVisible = false; }
-            finally { EstaCargando = false; }
-        }
 
         private async Task CargarRefacciones()
         {
             EstaCargando = true;
             try
             {
-                var response = await _apiService.ObtenerRefaccionesPorTrabajo(_trabajoId);
+                var response = await _apiService.ObtenerRefaccionesPorTrabajoCitaAsync(_trabajoCitaId);
                 if (response.Success)
                 {
                     Refacciones.Clear();
                     foreach (var r in response.Refacciones)
-                        Refacciones.Add(new RefaccionTrabajoViewModel(r));
+                        Refacciones.Add(new RefaccionCitaViewModel(r));
 
-                    TotalRefacciones = response.TotalRefacciones;
+                    TotalCosto = response.TotalCosto;
+                    TotalVenta = response.TotalVenta;
 
-                    var yaAgregadas = Refacciones.Select(r => r.Nombre.ToLowerInvariant()).ToHashSet();
+                    // Quitar predeterminadas ya agregadas
+                    var yaAgregadas = Refacciones
+                        .Select(r => r.Nombre.ToLowerInvariant())
+                        .ToHashSet();
                     foreach (var item in RefaccionesPredeterminadas
-                        .Where(p => yaAgregadas.Contains(p.Nombre.ToLowerInvariant())).ToList())
+                        .Where(p => yaAgregadas.Contains(p.Nombre.ToLowerInvariant()))
+                        .ToList())
                         RefaccionesPredeterminadas.Remove(item);
 
                     OnPropertyChanged(nameof(HayRefaccionesPredeterminadas));
                 }
-                else { await MostrarAlerta("Error", response.Message); }
+                else
+                {
+                    await MostrarAlerta("Error", response.Message);
+                }
             }
             catch (Exception ex)
             {
@@ -491,82 +379,50 @@ namespace CarslineApp.ViewModels
             finally { EstaCargando = false; }
         }
 
-        private async Task CargarManoObra()
-        {
-            EstaCargando = true;
-            try
-            {
-                var response = await _apiService.ObtenerCostoManoObraAsync(_trabajoId);
-                if (response.Success)
-                {
-                    PrecioManoObra = response.CostoManoObra;
-                    _manoObraOriginal = response.CostoManoObra;
-                    PrecioManoObraTexto = PrecioManoObra.ToString("F2");
-                }
-                else { PrecioManoObra = 0; _manoObraOriginal = 0; PrecioManoObraTexto = "0.00"; }
-            }
-            catch { PrecioManoObra = 0; _manoObraOriginal = 0; PrecioManoObraTexto = "0.00"; }
-            finally { EstaCargando = false; }
-        }
-
-        private async Task GuardarManoObra()
-        {
-            EstaCargando = true;
-            try
-            {
-                if (!decimal.TryParse(PrecioManoObraTexto, out decimal nuevoPrecio) || nuevoPrecio < 0)
-                {
-                    await MostrarAlerta("Campo inválido", "Ingresa un precio válido"); return;
-                }
-                if (nuevoPrecio != _manoObraOriginal)
-                {
-                    var response = await _apiService.FijarCostoManoObraAsync(_trabajoId, nuevoPrecio);
-                    if (response.Success)
-                    {
-                        PrecioManoObra = nuevoPrecio; _manoObraOriginal = nuevoPrecio;
-                        PrecioManoObraTexto = nuevoPrecio.ToString("F2");
-                        await MostrarAlerta("✅ Éxito", "Mano de obra actualizada correctamente");
-                    }
-                    else
-                    {
-                        await MostrarAlerta("Error", response.Message);
-                        PrecioManoObraTexto = _manoObraOriginal.ToString("F2");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"❌ {ex.Message}");
-                await MostrarAlerta("Error", "No se pudo actualizar la mano de obra");
-                PrecioManoObraTexto = _manoObraOriginal.ToString("F2");
-            }
-            finally { EstaCargando = false; }
-        }
-
         private async Task AgregarRefaccion()
         {
             if (string.IsNullOrWhiteSpace(NuevaRefaccion))
             { await MostrarAlerta("Campo requerido", "Ingresa el nombre de la refacción"); return; }
-            if (string.IsNullOrWhiteSpace(NuevaCantidad) || !int.TryParse(NuevaCantidad, out int cantidad) || cantidad <= 0)
+
+            if (string.IsNullOrWhiteSpace(NuevaCantidad) ||
+                !int.TryParse(NuevaCantidad, out int cantidad) || cantidad <= 0)
             { await MostrarAlerta("Campo inválido", "Ingresa una cantidad válida"); return; }
-            if (string.IsNullOrWhiteSpace(NuevoPrecioUnitario) || !decimal.TryParse(NuevoPrecioUnitario, out decimal precio) || precio <= 0)
-            { await MostrarAlerta("Campo inválido", "Ingresa un precio unitario válido"); return; }
+
+            if (string.IsNullOrWhiteSpace(NuevoPrecio) ||
+                !decimal.TryParse(NuevoPrecio, out decimal precio) || precio <= 0)
+            { await MostrarAlerta("Campo inválido", "Ingresa un precio de costo válido"); return; }
+
+            // Precio de venta es opcional
+            decimal? precioVenta = null;
+            if (!string.IsNullOrWhiteSpace(NuevoPrecioVenta) &&
+                decimal.TryParse(NuevoPrecioVenta, out decimal pv) && pv > 0)
+                precioVenta = pv;
 
             EstaCargando = true;
             try
             {
-                var request = new AgregarRefaccionesTrabajoRequest
+                var request = new AgregarRefaccionesCitaRequest
                 {
-                    TrabajoId = _trabajoId,
-                    Refacciones = new List<AgregarRefaccionDto>
-                    { new() { Refaccion = NuevaRefaccion.Trim(), Cantidad = cantidad, PrecioUnitario = precio } }
+                    TrabajoCitaId = _trabajoCitaId,
+                    Refacciones = new List<AgregarRefaccionCitaDto>
+                    {
+                        new() {
+                            Refaccion   = NuevaRefaccion.Trim(),
+                            Cantidad    = cantidad,
+                            Precio      = precio,
+                            PrecioVenta = precioVenta
+                        }
+                    }
                 };
-                var response = await _apiService.AgregarRefaccionesTrabajo(request);
+
+                var response = await _apiService.AgregarRefaccionesCitaAsync(request);
                 if (response.Success)
                 {
-                    NuevaRefaccion = string.Empty; NuevaCantidad = string.Empty; NuevoPrecioUnitario = string.Empty;
+                    NuevaRefaccion = string.Empty;
+                    NuevaCantidad = string.Empty;
+                    NuevoPrecio = string.Empty;
+                    NuevoPrecioVenta = string.Empty;
                     await CargarRefacciones();
-                    await MostrarAlerta("✅ Éxito", "Refacción agregada correctamente");
                 }
                 else { await MostrarAlerta("Error", response.Message); }
             }
@@ -578,23 +434,31 @@ namespace CarslineApp.ViewModels
             finally { EstaCargando = false; }
         }
 
-        private async Task EliminarRefaccion(RefaccionTrabajoViewModel refaccion)
+        private async Task EliminarRefaccion(RefaccionCitaViewModel refaccion)
         {
             if (refaccion == null) return;
+
+            if (refaccion.Transferida)
+            {
+                await MostrarAlerta("No permitido",
+                    "Esta refacción ya fue transferida a una orden de trabajo y no puede eliminarse.");
+                return;
+            }
+
             bool confirmar = await Application.Current.MainPage.DisplayAlert(
-                "Confirmar eliminación", $"¿Eliminar la refacción:\n{refaccion.Nombre}?",
+                "Confirmar eliminación",
+                $"¿Eliminar la refacción:\n{refaccion.Nombre}?",
                 "Sí, eliminar", "Cancelar");
             if (!confirmar) return;
 
             EstaCargando = true;
             try
             {
-                var response = await _apiService.EliminarRefaccionTrabajo(refaccion.Id);
+                var response = await _apiService.EliminarRefaccionCitaAsync(refaccion.Id);
                 if (response.Success)
                 {
                     await CargarRefacciones();
                     CargarRefaccionesPredeterminadas(NombreTrabajo);
-                    await MostrarAlerta("✅ Éxito", "Refacción eliminada correctamente");
                 }
                 else { await MostrarAlerta("Error", response.Message); }
             }
@@ -606,16 +470,56 @@ namespace CarslineApp.ViewModels
             finally { EstaCargando = false; }
         }
 
-        private void CalcularTotales()
+        private async Task EditarPrecioVenta(RefaccionCitaViewModel refaccion)
         {
-            OnPropertyChanged(nameof(Subtotal)); OnPropertyChanged(nameof(Iva));
-            OnPropertyChanged(nameof(TotalGeneral)); OnPropertyChanged(nameof(SubtotalFormateado));
-            OnPropertyChanged(nameof(IvaFormateado)); OnPropertyChanged(nameof(TotalGeneralFormateado));
+            if (refaccion == null) return;
+
+            if (refaccion.Transferida)
+            {
+                await MostrarAlerta("No permitido",
+                    "Esta refacción ya fue transferida y no puede modificarse.");
+                return;
+            }
+
+            string resultado = await Application.Current.MainPage.DisplayPromptAsync(
+                "Precio de Venta",
+                $"Ingresa el precio de venta para:\n{refaccion.Nombre}",
+                initialValue: refaccion.PrecioVentaRaw?.ToString("F2") ?? string.Empty,
+                keyboard: Keyboard.Numeric,
+                placeholder: "$0.00");
+
+            if (resultado == null) return; // canceló
+
+            if (!decimal.TryParse(resultado, out decimal nuevoPrecio) || nuevoPrecio <= 0)
+            {
+                await MostrarAlerta("Precio inválido", "Ingresa un precio de venta mayor a 0");
+                return;
+            }
+
+            EstaCargando = true;
+            try
+            {
+                var response = await _apiService.ActualizarPrecioVentaRefaccionCitaAsync(refaccion.Id, nuevoPrecio);
+                if (response.Success)
+                    await CargarRefacciones();
+                else
+                    await MostrarAlerta("Error", response.Message);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ {ex.Message}");
+                await MostrarAlerta("Error", "No se pudo actualizar el precio de venta");
+            }
+            finally { EstaCargando = false; }
         }
 
         private async Task MostrarAlerta(string titulo, string mensaje)
         {
-            try { if (Application.Current?.MainPage != null) await Application.Current.MainPage.DisplayAlert(titulo, mensaje, "OK"); }
+            try
+            {
+                if (Application.Current?.MainPage != null)
+                    await Application.Current.MainPage.DisplayAlert(titulo, mensaje, "OK");
+            }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"❌ {ex.Message}"); }
         }
 
@@ -630,4 +534,36 @@ namespace CarslineApp.ViewModels
         #endregion
     }
 
+    // ─────────────────────────────────────────────────────
+    // ViewModel de fila para la lista de refacciones de cita
+    // ─────────────────────────────────────────────────────
+    public class RefaccionCitaViewModel : INotifyPropertyChanged
+    {
+        private readonly RefaccionCitaDto _dto;
+
+        public RefaccionCitaViewModel(RefaccionCitaDto dto)
+        {
+            _dto = dto;
+        }
+
+        public int Id => _dto.Id;
+        public string Nombre => _dto.Refaccion;
+        public string CantidadTexto => _dto.CantidadTexto;
+        public string PrecioFormateado => _dto.PrecioFormateado;
+        public string PrecioVentaFormateado => _dto.PrecioVentaFormateado;
+        public string TotalCostoFormateado => _dto.TotalCostoFormateado;
+        public string TotalVentaFormateado => _dto.TotalVentaFormateado;
+        public bool Transferida => _dto.Transferida;
+        public bool PuedeEditar => !_dto.Transferida;
+        public decimal? PrecioVentaRaw => _dto.PrecioVenta;
+        public bool TienePrecioVenta => _dto.PrecioVenta.HasValue;
+
+        // Color visual según si ya fue transferida
+        public string ColorEstado => _dto.Transferida ? "#43A047" : "#FB8C00";
+        public string TextoEstado => _dto.Transferida ? "✔ Transferida" : "⏳ Pendiente";
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected virtual void OnPropertyChanged([CallerMemberName] string? name = null)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
 }

@@ -1,9 +1,11 @@
 ﻿using CarslineApp.Models;
 using CarslineApp.Services;
 using CarslineApp.Views;
+using CarslineApp.Views.Citas;
 using CarslineApp.Views.ViewHome;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 
@@ -32,6 +34,10 @@ namespace CarslineApp.ViewModels.ViewModelsHome
             // Comandos de acciones
             RefreshCommand = new Command(async () => await CargarCitas());
             LogoutCommand = new Command(async () => await OnLogout());
+
+            // ✅ Navegar a refacciones del trabajo de cita seleccionado
+            AbrirRefaccionesTrabajoCommand = new Command<TrabajoCitaDto>(
+                async (trabajo) => await AbrirRefaccionesTrabajo(trabajo));
 
             NombreUsuarioActual = Preferences.Get("user_name", "Encargado Refacciones");
         }
@@ -72,7 +78,7 @@ namespace CarslineApp.ViewModels.ViewModelsHome
                 {
                     _fechaSeleccionada = value;
                     OnPropertyChanged();
-                     _ = CargarCitas();
+                    _ = CargarCitas();
                 }
             }
         }
@@ -117,10 +123,50 @@ namespace CarslineApp.ViewModels.ViewModelsHome
         public ICommand VerGarantiaCommand { get; }
         public ICommand RefreshCommand { get; }
         public ICommand LogoutCommand { get; }
+        public ICommand AbrirRefaccionesTrabajoCommand { get; } // ✅ Navegación a refacciones
 
         #endregion
 
         #region Métodos
+
+        // ✅ Navega a RefaccionesTrabajoCitaPage con los datos del trabajo seleccionado
+        private async Task AbrirRefaccionesTrabajo(TrabajoCitaDto trabajo)
+        {
+            System.Diagnostics.Debug.WriteLine($"📦 Consultando Refacciones de: {trabajo.Id}");
+            if (trabajo == null) return;
+
+            // Buscar la cita padre para obtener VehiculoCompleto y VIN
+            string vehiculo = "Vehículo";
+            string vin = string.Empty;
+
+            foreach (var grupo in TodasLasCitasAgrupadas)
+            {
+                var citaPadre = grupo.FirstOrDefault(c =>
+                    c.Trabajos != null && c.Trabajos.Any(t => t.Id == trabajo.Id));
+                if (citaPadre != null)
+                {
+                    vehiculo = citaPadre.VehiculoCompleto ?? vehiculo;
+                    vin = citaPadre.VIN ?? vin;
+                    break;
+                }
+            }
+
+            var pagina = new RefaccionesTrabajoCitaPage(
+                trabajoCitaId: trabajo.Id,
+                trabajo: trabajo.Trabajo,
+                vehiculo: vehiculo,
+                vin: vin);
+
+            System.Diagnostics.Debug.WriteLine($"📦 Consultando Refacciones de: {trabajo.Id}, {trabajo.Trabajo},{vehiculo},{vin}");
+
+            // Navegar desde el NavigationPage que está dentro del Detail del FlyoutPage
+            if (Application.Current?.MainPage is FlyoutPage flyout &&
+                flyout.Detail is NavigationPage navPage)
+            {
+                flyout.IsPresented = false; // Cerrar menú lateral si estaba abierto
+                await Application.Current.MainPage.Navigation.PushAsync(pagina);
+            }
+        }
 
         private async void CambiarTipoCita(int tipoCita)
         {
@@ -188,7 +234,7 @@ namespace CarslineApp.ViewModels.ViewModelsHome
                         citasListas
                     ));
                 }
-                TodasLasCitasAgrupadas = grupos;                
+                TodasLasCitasAgrupadas = grupos;
             }
             catch (Exception ex)
             {

@@ -632,6 +632,7 @@ namespace CarslineApp.ViewModels
     {
         private string _precioTexto = string.Empty;
         private string _cantidadTextoEditable = string.Empty;
+        private string _precioVentaTexto = string.Empty;
 
         public string Nombre { get; set; } = string.Empty;
 
@@ -659,6 +660,17 @@ namespace CarslineApp.ViewModels
             {
                 if (Cantidad.HasValue) return Cantidad.Value;
                 return int.TryParse(CantidadTextoEditable, out int cant) && cant > 0 ? cant : null;
+            }
+        }
+       
+
+        public string PrecioVentaTexto
+        {
+            get => _precioVentaTexto;
+            set
+            {
+                _precioVentaTexto = value;
+                OnPropertyChanged();
             }
         }
 
