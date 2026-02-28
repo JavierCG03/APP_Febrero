@@ -1,5 +1,6 @@
-﻿using CarslineApp.Services;
-using CarslineApp.Models;
+﻿using CarslineApp.Models;
+using CarslineApp.Services;
+using Microsoft.Maui.Controls;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -13,6 +14,7 @@ namespace CarslineApp.ViewModels.Ordenes
         private readonly int _trabajoId;
 
         private ObservableCollection<RefaccionTrabajoViewModel> _refacciones;
+        private ObservableCollection<RefaccionCitaViewModel> _refaccionesCompradas;
         private ObservableCollection<RefaccionPredeterminadaViewModel> _refaccionesPredeterminadas;
         private bool _estaCargando;
         private decimal _totalRefacciones;
@@ -39,6 +41,7 @@ namespace CarslineApp.ViewModels.Ordenes
         {
             _apiService = new ApiService();
             _trabajoId = trabajoId;
+            _refaccionesCompradas = new ObservableCollection<RefaccionCitaViewModel>();
             _refacciones = new ObservableCollection<RefaccionTrabajoViewModel>();
             _refaccionesPredeterminadas = new ObservableCollection<RefaccionPredeterminadaViewModel>();
 
@@ -50,15 +53,19 @@ namespace CarslineApp.ViewModels.Ordenes
             ToggleInfoCommand = new Command(() => InfoTrabajoVisible = !InfoTrabajoVisible);
 
             TogglePredeterminadasCommand = new Command(() => PredeterminadasExpandido = !PredeterminadasExpandido);
-            AgregarPredeterminadaCommand = new Command<RefaccionPredeterminadaViewModel>(
-                async (r) => await AgregarRefaccionPredeterminada(r));
+            AgregarPredeterminadaCommand = new Command<RefaccionPredeterminadaViewModel>(async (r) => await AgregarRefaccionPredeterminada(r));
             CalcularManoObraCommand = new Command(CalcularManoObraDesdeTotal);
+            BackCommand = new Command(async () => await RegresarAtras());
             AplicarManoObraCalculadaCommand = new Command(async () => await AplicarManoObraCalculada(),
                 () => HayManoObraCalculada);
         }
 
         #region Propiedades
-
+        public ObservableCollection<RefaccionCitaViewModel> RefaccionesCompradas
+        {
+            get => _refaccionesCompradas;
+            set { _refaccionesCompradas = value; OnPropertyChanged(); }
+        }
         public ObservableCollection<RefaccionTrabajoViewModel> Refacciones
         {
             get => _refacciones;
@@ -214,6 +221,7 @@ namespace CarslineApp.ViewModels.Ordenes
         public ICommand AgregarPredeterminadaCommand { get; }
         public ICommand CalcularManoObraCommand { get; }
         public ICommand AplicarManoObraCalculadaCommand { get; }
+        public ICommand BackCommand { get; }
 
         #endregion
 
@@ -327,6 +335,18 @@ namespace CarslineApp.ViewModels.Ordenes
                 };
 
             return new List<RefaccionPredeterminadaViewModel>();
+        }
+
+        private async Task RegresarAtras()
+        {
+            try
+            {
+                await Application.Current.MainPage.Navigation.PopAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error al regresar: {ex.Message}");
+            }
         }
 
         private async Task AgregarRefaccionPredeterminada(RefaccionPredeterminadaViewModel predeterminada)
@@ -485,8 +505,46 @@ namespace CarslineApp.ViewModels.Ordenes
                 System.Diagnostics.Debug.WriteLine($"❌ {ex.Message}");
                 await MostrarAlerta("Error", "No se pudieron cargar las refacciones");
             }
+            await CargarRefaccionesCompradas();
+            //finally { EstaCargando = false; }
+        }
+
+        private async Task CargarRefaccionesCompradas()
+        {
+            EstaCargando = true;
+            try
+            {
+                var response = await _apiService.ObtenerRefaccionesPorTrabajoCitaAsync(_trabajoId, true);
+                if (response.Success)
+                {
+                    RefaccionesCompradas.Clear();
+                    foreach (var r in response.Refacciones)
+                        RefaccionesCompradas.Add(new RefaccionCitaViewModel(r));
+
+                    // Quitar predeterminadas ya agregadas
+                    var yaAgregadas = RefaccionesCompradas
+                        .Select(r => r.Nombre.ToLowerInvariant())
+                        .ToHashSet();
+                    foreach (var item in RefaccionesPredeterminadas
+                        .Where(p => yaAgregadas.Contains(p.Nombre.ToLowerInvariant()))
+                        .ToList())
+                        RefaccionesPredeterminadas.Remove(item);
+
+                    OnPropertyChanged(nameof(HayRefaccionesPredeterminadas));
+                }
+                else
+                {
+                    await MostrarAlerta("Error", response.Message);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ {ex.Message}");
+                await MostrarAlerta("Error", "No se pudieron cargar las refacciones");
+            }
             finally { EstaCargando = false; }
         }
+
 
         private async Task CargarManoObra()
         {
@@ -625,57 +683,5 @@ namespace CarslineApp.ViewModels.Ordenes
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         #endregion
-    }
-
-    // ViewModel para cada refacción predeterminada
-    public class RefaccionPredeterminadaViewModel : INotifyPropertyChanged
-    {
-        private string _precioTexto = string.Empty;
-        private string _cantidadTextoEditable = string.Empty;
-        private string _precioVentaTexto = string.Empty;
-
-        public string Nombre { get; set; } = string.Empty;
-
-        public int? Cantidad { get; set; }
-
-        public bool CantidadFija => Cantidad.HasValue;
-        public bool CantidadVariable => !Cantidad.HasValue;
-
-        public string CantidadLabelTexto => Cantidad.HasValue ? $"x{Cantidad}" : string.Empty;
-
-        public string CantidadTextoEditable
-        {
-            get => _cantidadTextoEditable;
-            set { _cantidadTextoEditable = value; OnPropertyChanged(); }
-        }
-
-        public string PrecioTexto
-        {
-            get => _precioTexto;
-            set { _precioTexto = value; OnPropertyChanged(); }
-        }
-        public int? CantidadEfectiva
-        {
-            get
-            {
-                if (Cantidad.HasValue) return Cantidad.Value;
-                return int.TryParse(CantidadTextoEditable, out int cant) && cant > 0 ? cant : null;
-            }
-        }
-       
-
-        public string PrecioVentaTexto
-        {
-            get => _precioVentaTexto;
-            set
-            {
-                _precioVentaTexto = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string prop = null)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
     }
 }

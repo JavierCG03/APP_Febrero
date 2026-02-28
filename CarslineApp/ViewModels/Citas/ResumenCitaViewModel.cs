@@ -426,9 +426,11 @@ namespace CarslineApp.ViewModels
                     .Select(t => new TrabajoCrearDto
                     {
                         Trabajo = t.Trabajo,
-                        Indicaciones = t.IndicacionesTrabajo
+                        Indicaciones = t.IndicacionesTrabajo,
+                        TrabajoCitaId = t.Id
                     })
                     .ToList();
+
                 var request = new CrearOrdenConTrabajosRequest
                 {
                     TipoOrdenId = TipoOrdenId,
@@ -497,8 +499,6 @@ namespace CarslineApp.ViewModels
                 IsLoading = false;
             }
         }
-
-
 
         #endregion
 

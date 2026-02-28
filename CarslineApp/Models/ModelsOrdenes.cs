@@ -298,6 +298,7 @@ namespace CarslineApp.Models
         public string Trabajo { get; set; } = string.Empty;
 
         public string? Indicaciones { get; set; }
+        public int? TrabajoCitaId { get; set; }
     }
 
     public class MisTrabajosResponseDto

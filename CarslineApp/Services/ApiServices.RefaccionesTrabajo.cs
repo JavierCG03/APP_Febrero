@@ -58,8 +58,7 @@ namespace CarslineApp.Services
             /// <summary>
             /// Obtener todas las refacciones de un trabajo
             /// </summary>
-        public async Task<ObtenerRefaccionesTrabajoResponse> ObtenerRefaccionesPorTrabajo(
-                int trabajoId)
+        public async Task<ObtenerRefaccionesTrabajoResponse> ObtenerRefaccionesPorTrabajo(int trabajoId)
             {
                 try
                 {

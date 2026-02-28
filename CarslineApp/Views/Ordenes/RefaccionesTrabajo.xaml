@@ -5,145 +5,172 @@
              xmlns:models="clr-namespace:CarslineApp.Models"
              xmlns:viewmodel="clr-namespace:CarslineApp.ViewModels.Ordenes"
              x:DataType="viewmodel:RefaccionesTrabajoViewModel"
+             NavigationPage.HasNavigationBar="False"
              Title="Refacciones del Trabajo"
              x:Name="Page"
              BackgroundColor="#F5F5F5">
-    <ScrollView>
-        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" Padding="15">
-            <!-- ══════════════════════════════════════════ -->
-            <!-- SECCIÓN 1: Info del Trabajo                -->
-            <!-- ══════════════════════════════════════════ -->
-            <Frame Grid.Row="0"
+
+    <Grid RowDefinitions="Auto,*">
+        <Frame Grid.Row="0"
+               CornerRadius="0"
+               BackgroundColor="#800020"
+               Margin="0,0,0,0">
+            <Grid ColumnDefinitions="Auto,*">
+                <ImageButton Grid.Column="0"
+                    Source="back.png"
+                    BackgroundColor="White"
+                    HeightRequest="35"
+                    WidthRequest="40"
+                    Command="{Binding BackCommand}"
+                    Padding="5"
+                    CornerRadius="25" />
+                <Label  Grid.Column="1"
+                   Text="Refacciones Trabajos"
+                   FontSize="20"
+                   VerticalOptions="Center"
+                   HorizontalOptions="Center"
+                   FontAttributes="Bold"
+                   TextColor="White"></Label>
+
+            </Grid>
+        </Frame>
+
+        <ScrollView Grid.Row="1">
+            <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" Padding="15">
+                <!-- ══════════════════════════════════════════ -->
+                <!-- SECCIÓN 1: Info del Trabajo                -->
+                <!-- ══════════════════════════════════════════ -->
+                <Frame Grid.Row="0"
                    BackgroundColor="White"
                    CornerRadius="12"
                    Padding="0"
                    BorderColor="#800020"
                    Margin="0,0,0,10"
                    HasShadow="True">
-                <VerticalStackLayout Spacing="0" Padding="4">
-                    <Grid BackgroundColor="White"
+                    <VerticalStackLayout Spacing="0" Padding="4">
+                        <Grid BackgroundColor="White"
                           Padding="15,12"
                           ColumnDefinitions="Auto,*">
-                        <Grid.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding ToggleInfoCommand}"/>
-                        </Grid.GestureRecognizers>
-                        <Label Grid.Column="0" Text="{Binding IconoInfo}"
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ToggleInfoCommand}"/>
+                            </Grid.GestureRecognizers>
+                            <Label Grid.Column="0" Text="{Binding IconoInfo}"
                                FontSize="16" FontAttributes="Bold" TextColor="#800020"
                                VerticalOptions="Center" Margin="0,0,10,0"/>
-                        <Label Grid.Column="1" Text="📋 Información del Trabajo"
+                            <Label Grid.Column="1" Text="📋 Información del Trabajo"
                                FontSize="15" FontAttributes="Bold" TextColor="#800020"
                                VerticalOptions="Center"/>
-                    </Grid>
+                        </Grid>
 
-                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="*,*,*" ColumnSpacing="5"
+                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="*,*,*" ColumnSpacing="5"
                           IsVisible="{Binding InfoTrabajoVisible}">
-                        <Label Grid.Column="0" Grid.Row="0" Text="Trabajo:" FontSize="14"
+                            <Label Grid.Column="0" Grid.Row="0" Text="Trabajo:" FontSize="14"
                                FontAttributes="Bold" TextColor="#555" VerticalOptions="Center"/>
-                        <Label Grid.Column="1" Grid.Row="0" Text="{Binding NombreTrabajo}"
+                            <Label Grid.Column="1" Grid.Row="0" Text="{Binding NombreTrabajo}"
                                FontSize="17" FontAttributes="Bold" TextColor="#333"
                                LineBreakMode="WordWrap" VerticalOptions="Center"/>
-                        <Label Grid.Column="0" Grid.Row="1" Text="Vehículo:" FontSize="14"
+                            <Label Grid.Column="0" Grid.Row="1" Text="Vehículo:" FontSize="14"
                                FontAttributes="Bold" TextColor="#555" VerticalOptions="Start"/>
-                        <Label Grid.Column="1" Grid.Row="1" Text="{Binding VehiculoCompleto}"
+                            <Label Grid.Column="1" Grid.Row="1" Text="{Binding VehiculoCompleto}"
                                FontSize="14" TextColor="#333" LineBreakMode="WordWrap"
                                VerticalOptions="Start"/>
-                        <Label Grid.Column="0" Grid.Row="2" Text="VIN:" FontSize="14"
+                            <Label Grid.Column="0" Grid.Row="2" Text="VIN:" FontSize="14"
                                FontAttributes="Bold" TextColor="#555" VerticalOptions="Start"/>
-                        <Label Grid.Column="1" Grid.Row="2" Text="{Binding VIN}"
+                            <Label Grid.Column="1" Grid.Row="2" Text="{Binding VIN}"
                                FontSize="14" TextColor="#333" FontFamily="Courier"
                                VerticalOptions="Start"/>
-                    </Grid>
-                </VerticalStackLayout>
-            </Frame>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Frame>
 
-            <!-- ══════════════════════════════════════════ -->
-            <!-- SECCIÓN 2: Mano de Obra                    -->
-            <!-- ══════════════════════════════════════════ -->
-            <Frame Grid.Row="1"
+                <!-- ══════════════════════════════════════════ -->
+                <!-- SECCIÓN 2: Mano de Obra                    -->
+                <!-- ══════════════════════════════════════════ -->
+                <Frame Grid.Row="1"
                    BackgroundColor="White"
                    CornerRadius="12"
                    Padding="0"
                    Margin="0,0,0,10"
                    HasShadow="True">
-                <VerticalStackLayout Spacing="0">
-                    <Grid BackgroundColor="#800020" Padding="15,12" ColumnDefinitions="Auto,*">
-                        <Grid.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding ToggleManoObraCommand}"/>
-                        </Grid.GestureRecognizers>
-                        <Label Grid.Column="0" Text="{Binding IconoManoObra}"
+                    <VerticalStackLayout Spacing="0">
+                        <Grid BackgroundColor="#800020" Padding="15,12" ColumnDefinitions="Auto,*">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ToggleManoObraCommand}"/>
+                            </Grid.GestureRecognizers>
+                            <Label Grid.Column="0" Text="{Binding IconoManoObra}"
                                FontSize="16" FontAttributes="Bold" TextColor="White"
                                VerticalOptions="Center" Margin="0,0,10,0"/>
-                        <Label Grid.Column="1" Text="🔧 Mano de Obra"
+                            <Label Grid.Column="1" Text="🔧 Mano de Obra"
                                FontSize="15" FontAttributes="Bold" TextColor="White"
                                VerticalOptions="Center"/>
-                    </Grid>
+                        </Grid>
 
-                    <VerticalStackLayout Spacing="12" Padding="15"
+                        <VerticalStackLayout Spacing="12" Padding="15"
                                          IsVisible="{Binding ManoObraExpandido}">
 
-                        <Label Text="Ingresar manualmente" FontSize="13" TextColor="#666"
+                            <Label Text="Ingresar manualmente" FontSize="13" TextColor="#666"
                                FontAttributes="Bold"/>
-                        <Grid ColumnDefinitions="150,140" ColumnSpacing="10">
-                            <Frame Grid.Column="0" BorderColor="#800020" CornerRadius="8"
+                            <Grid ColumnDefinitions="150,140" ColumnSpacing="10">
+                                <Frame Grid.Column="0" BorderColor="#800020" CornerRadius="8"
                                    Padding="0" BackgroundColor="Transparent" HasShadow="False">
-                                <Entry Placeholder="$0.00"
+                                    <Entry Placeholder="$0.00"
                                        Text="{Binding PrecioManoObraTexto}"
                                        Keyboard="Numeric" BackgroundColor="White"
                                        PlaceholderColor="#999" TextColor="#333"
                                        ReturnCommand="{Binding EditarManoObraCommand}"
                                        HeightRequest="45" Margin="10,0"/>
-                            </Frame>
-                            <Button Grid.Column="1" Text="Guardar"
+                                </Frame>
+                                <Button Grid.Column="1" Text="Guardar"
                                     Command="{Binding EditarManoObraCommand}"
                                     BackgroundColor="#800020" TextColor="White"
                                     CornerRadius="8" HeightRequest="45"
                                     VerticalOptions="End" FontSize="13" FontAttributes="Bold"/>
-                        </Grid>
+                            </Grid>
 
-                        <!-- Separador -->
-                        <BoxView HeightRequest="1" Color="#E8E8E8" Margin="0,4"/>
+                            <!-- Separador -->
+                            <BoxView HeightRequest="1" Color="#E8E8E8" Margin="0,4"/>
 
-                        <!--Calcular automáticamente-->
-                        <Label Text="📊 Cuadrar mano de obra "
+                            <!--Calcular automáticamente-->
+                            <Label Text="📊 Cuadrar mano de obra "
                                FontSize="13" TextColor="#666" FontAttributes="Bold"/>
-                        <Label Text="Ingresa el costo total que cobrará al cliente."
+                            <Label Text="Ingresa el costo total que cobrará al cliente."
                                FontSize="12" TextColor="#888" LineBreakMode="WordWrap"/>
 
-                        <Grid ColumnDefinitions="150,140" ColumnSpacing="10">
-                            <Frame Grid.Column="0" BorderColor="#555" CornerRadius="8"
+                            <Grid ColumnDefinitions="150,140" ColumnSpacing="10">
+                                <Frame Grid.Column="0" BorderColor="#555" CornerRadius="8"
                                    Padding="0" BackgroundColor="Transparent" HasShadow="False">
-                                <Entry Placeholder="Total ($)"
+                                    <Entry Placeholder="Total ($)"
                                        Text="{Binding CostoTotalTrabajoTexto}"
                                        Keyboard="Numeric" BackgroundColor="White"
                                        PlaceholderColor="#999" TextColor="#333"
                                        HeightRequest="45" Margin="10,0"
                                        ReturnCommand="{Binding CalcularManoObraCommand}"/>
-                            </Frame>
-                            <Button Grid.Column="1" Text="Calcular"
+                                </Frame>
+                                <Button Grid.Column="1" Text="Calcular"
                                     Command="{Binding CalcularManoObraCommand}"
                                     BackgroundColor="#555" TextColor="White"
                                     CornerRadius="8" HeightRequest="45"
                                     VerticalOptions="End" FontSize="13" FontAttributes="Bold"/>
-                        </Grid>
+                            </Grid>
 
-                        <!-- Resultado del cálculo -->
-                        <Frame IsVisible="{Binding HayManoObraCalculada}"
+                            <!-- Resultado del cálculo -->
+                            <Frame IsVisible="{Binding HayManoObraCalculada}"
                                BackgroundColor="#F0FFF4" BorderColor="#2E7D32"
                                CornerRadius="8" Padding="12" HasShadow="False">
-                            <Grid ColumnDefinitions="Auto,Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="6">
-                                
-                                <Label Grid.Column="0" Grid.Row="0"
+                                <Grid ColumnDefinitions="Auto,Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="6">
+
+                                    <Label Grid.Column="0" Grid.Row="0"
                                        Text="Calculo:"
                                        HorizontalOptions="Start"
                                        VerticalOptions="Center"
                                        FontSize="13" TextColor="Black" FontAttributes="Bold"/>
-                                <Label Grid.Column="1" Grid.Row="0"
+                                    <Label Grid.Column="1" Grid.Row="0"
                                        VerticalOptions="Center"
                                        Text="{Binding ManoObraCalculadaFormateada}"
                                        FontSize="16" TextColor="#2E7D32" FontAttributes="Bold"
                                        HorizontalTextAlignment="End"/>
 
-                                <Button Grid.Column="2" Grid.Row="0"
+                                    <Button Grid.Column="2" Grid.Row="0"
                                         Text="✅ Aplicar "
                                         Command="{Binding AplicarManoObraCalculadaCommand}"
                                         BackgroundColor="#2E7D32" TextColor="White"
@@ -152,75 +179,75 @@
                                         HorizontalOptions="End"
                                         FontSize="13" FontAttributes="Bold"
                                         Margin="0,0,0,0"/>
-                            </Grid>
-                        </Frame>
+                                </Grid>
+                            </Frame>
 
+                        </VerticalStackLayout>
                     </VerticalStackLayout>
-                </VerticalStackLayout>
-            </Frame>
+                </Frame>
 
-            <!-- ══════════════════════════════════════════════ -->
-            <!-- SECCIÓN 3: Refacciones Predeterminadas         -->
-            <!-- ══════════════════════════════════════════════ -->
-            <Frame Grid.Row="2"
+                <!-- ══════════════════════════════════════════════ -->
+                <!-- SECCIÓN 3: Refacciones Predeterminadas         -->
+                <!-- ══════════════════════════════════════════════ -->
+                <Frame Grid.Row="2"
                    BackgroundColor="White"
                    CornerRadius="12"
                    Padding="0"
                    Margin="0,0,0,10"
                    HasShadow="True"
                    IsVisible="{Binding HayRefaccionesPredeterminadas}">
-                <VerticalStackLayout Spacing="0">
-                    <!-- Encabezado -->
-                    <Grid BackgroundColor="#5C4033" Padding="15,12" ColumnDefinitions="Auto,*">
-                        <Grid.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding TogglePredeterminadasCommand}"/>
-                        </Grid.GestureRecognizers>
-                        <Label Grid.Column="0" Text="{Binding IconoPredeterminadas}"
+                    <VerticalStackLayout Spacing="0">
+                        <!-- Encabezado -->
+                        <Grid BackgroundColor="#5C4033" Padding="15,12" ColumnDefinitions="Auto,*">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding TogglePredeterminadasCommand}"/>
+                            </Grid.GestureRecognizers>
+                            <Label Grid.Column="0" Text="{Binding IconoPredeterminadas}"
                                FontSize="16" FontAttributes="Bold" TextColor="White"
                                VerticalOptions="Center" Margin="0,0,10,0"/>
-                        <Label Grid.Column="1" Text="⚡Refacciones Sugeridas "
+                            <Label Grid.Column="1" Text="⚡Refacciones Sugeridas "
                                FontSize="15" FontAttributes="Bold" TextColor="White"
                                VerticalOptions="Center"/>
-                    </Grid>
-
-                    <!-- Lista de predeterminadas -->
-                    <VerticalStackLayout Spacing="0" Padding="0"
-                                         IsVisible="{Binding PredeterminadasExpandido}">
-
-                        <!-- Encabezado columnas -->
-                        <Grid ColumnDefinitions="3*,1.2*,2*,1.5*" ColumnSpacing="8"
-                              BackgroundColor="#F5EFE6" Padding="12,8">
-                            <Label Grid.Column="0" Text="Refacción" FontSize="12"
-                                   FontAttributes="Bold" TextColor="#5C4033"/>
-                            <Label Grid.Column="1" Text="Cant." FontSize="12"
-                                   FontAttributes="Bold" TextColor="#5C4033"
-                                   HorizontalTextAlignment="Center"/>
-                            <Label Grid.Column="2" Text="Precio Unit." FontSize="12"
-                                   FontAttributes="Bold" TextColor="#5C4033"
-                                   HorizontalTextAlignment="Center"/>
-                            <Label Grid.Column="3" Text="" FontSize="12" TextColor="#5C4033"/>
                         </Grid>
 
-                        <CollectionView ItemsSource="{Binding RefaccionesPredeterminadas}"
+                        <!-- Lista de predeterminadas -->
+                        <VerticalStackLayout Spacing="0" Padding="0"
+                                         IsVisible="{Binding PredeterminadasExpandido}">
+
+                            <!-- Encabezado columnas -->
+                            <Grid ColumnDefinitions="3*,1.2*,2*,1.5*" ColumnSpacing="8"
+                              BackgroundColor="#F5EFE6" Padding="12,8">
+                                <Label Grid.Column="0" Text="Refacción" FontSize="12"
+                                   FontAttributes="Bold" TextColor="#5C4033"/>
+                                <Label Grid.Column="1" Text="Cant." FontSize="12"
+                                   FontAttributes="Bold" TextColor="#5C4033"
+                                   HorizontalTextAlignment="Center"/>
+                                <Label Grid.Column="2" Text="Precio Unit." FontSize="12"
+                                   FontAttributes="Bold" TextColor="#5C4033"
+                                   HorizontalTextAlignment="Center"/>
+                                <Label Grid.Column="3" Text="" FontSize="12" TextColor="#5C4033"/>
+                            </Grid>
+
+                            <CollectionView ItemsSource="{Binding RefaccionesPredeterminadas}"
                                         SelectionMode="None">
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate x:DataType="viewmodel:RefaccionPredeterminadaViewModel">
-                                    <Grid ColumnDefinitions="3*,1.6*,2*,1.5*"
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="models:RefaccionPredeterminadaViewModel">
+                                        <Grid ColumnDefinitions="3*,1.6*,2*,1.5*"
                                           ColumnSpacing="8" Padding="12,10"
                                           BackgroundColor="White">
 
-                                        <!-- Línea separadora inferior -->
-                                        <BoxView Grid.ColumnSpan="4" HeightRequest="1"
+                                            <!-- Línea separadora inferior -->
+                                            <BoxView Grid.ColumnSpan="4" HeightRequest="1"
                                                  Color="#F0F0F0" VerticalOptions="End"/>
 
-                                        <!-- Nombre -->
-                                        <Label Grid.Column="0" Text="{Binding Nombre}"
+                                            <!-- Nombre -->
+                                            <Label Grid.Column="0" Text="{Binding Nombre}"
                                                FontSize="13" TextColor="#333"
                                                LineBreakMode="WordWrap"
                                                VerticalOptions="Center"/>
 
-                                        <!-- Cantidad FIJA: solo muestra el valor -->
-                                        <Label Grid.Column="1"
+                                            <!-- Cantidad FIJA: solo muestra el valor -->
+                                            <Label Grid.Column="1"
                                                Text="{Binding CantidadLabelTexto}"
                                                FontSize="13" TextColor="#5C4033"
                                                FontAttributes="Bold"
@@ -228,14 +255,14 @@
                                                VerticalOptions="Center"
                                                IsVisible="{Binding CantidadFija}"/>
 
-                                        <!-- Cantidad VARIABLE: campo editable -->
-                                        <Frame Grid.Column="1"
+                                            <!-- Cantidad VARIABLE: campo editable -->
+                                            <Frame Grid.Column="1"
                                                BorderColor="#5C4033"
                                                CornerRadius="6" Padding="0"
                                                BackgroundColor="Transparent" HasShadow="False"
                                                VerticalOptions="Center"
                                                IsVisible="{Binding CantidadVariable}">
-                                            <Entry Placeholder="Cant."
+                                                <Entry Placeholder="Cant."
                                                    Text="{Binding CantidadTextoEditable}"
                                                    Keyboard="Numeric"
                                                    BackgroundColor="White"
@@ -244,14 +271,14 @@
                                                    FontSize="13"
                                                    HeightRequest="36"
                                                    Margin="4,0"/>
-                                        </Frame>
+                                            </Frame>
 
-                                        <!-- Precio (siempre editable) -->
-                                        <Frame Grid.Column="2" BorderColor="#5C4033"
+                                            <!-- Precio (siempre editable) -->
+                                            <Frame Grid.Column="2" BorderColor="#5C4033"
                                                CornerRadius="6" Padding="0"
                                                BackgroundColor="Transparent" HasShadow="False"
                                                VerticalOptions="Center">
-                                            <Entry Placeholder="$0.00"
+                                                <Entry Placeholder="$0.00"
                                                    Text="{Binding PrecioTexto}"
                                                    Keyboard="Numeric"
                                                    BackgroundColor="White"
@@ -260,10 +287,10 @@
                                                    FontSize="13"
                                                    HeightRequest="36"
                                                    Margin="6,0"/>
-                                        </Frame>
+                                            </Frame>
 
-                                        <!-- Botón Agregar -->
-                                        <Button Grid.Column="3"
+                                            <!-- Botón Agregar -->
+                                            <Button Grid.Column="3"
                                                 Text="+"
                                                 Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:RefaccionesTrabajoViewModel}}, Path=AgregarPredeterminadaCommand}"
                                                 CommandParameter="{Binding .}"
@@ -276,167 +303,240 @@
                                                 WidthRequest="40"
                                                 HorizontalOptions="Center"
                                                 VerticalOptions="Center"/>
-                                    </Grid>
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
+                                        </Grid>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
 
-                        <Label Text="💡 Ingresa el precio y pulsa + para agregar a la lista"
+                            <Label Text="💡 Ingresa el precio y pulsa + para agregar a la lista"
                                FontSize="11" TextColor="#888"
                                HorizontalTextAlignment="Center"
                                Margin="0,8,0,12"/>
+                        </VerticalStackLayout>
                     </VerticalStackLayout>
-                </VerticalStackLayout>
-            </Frame>
+                </Frame>
 
-            <!-- ══════════════════════════════════════════ -->
-            <!-- SECCIÓN 4: Agregar Refacción Manual        -->
-            <!-- ══════════════════════════════════════════ -->
-            <Frame Grid.Row="3"
+                <!-- ══════════════════════════════════════════ -->
+                <!-- SECCIÓN 4: Agregar Refacción Manual        -->
+                <!-- ══════════════════════════════════════════ -->
+                <Frame Grid.Row="3"
                    BackgroundColor="White"
                    CornerRadius="12"
                    Padding="0"
                    Margin="0,0,0,10"
                    HasShadow="True">
-                <VerticalStackLayout Spacing="0">
-                    <Grid BackgroundColor="#800020" Padding="15,12" ColumnDefinitions="Auto,*">
-                        <Grid.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding ToggleFormularioCommand}"/>
-                        </Grid.GestureRecognizers>
-                        <Label Grid.Column="0" Text="{Binding IconoFormulario}"
+                    <VerticalStackLayout Spacing="0">
+                        <Grid BackgroundColor="#800020" Padding="15,12" ColumnDefinitions="Auto,*">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ToggleFormularioCommand}"/>
+                            </Grid.GestureRecognizers>
+                            <Label Grid.Column="0" Text="{Binding IconoFormulario}"
                                FontSize="16" FontAttributes="Bold" TextColor="White"
                                VerticalOptions="Center" Margin="0,0,10,0"/>
-                        <Label Grid.Column="1" Text=" Agregar Refacción Personalizada"
+                            <Label Grid.Column="1" Text=" Agregar Refacción Personalizada"
                                FontSize="15" FontAttributes="Bold" TextColor="White"
                                VerticalOptions="Center"/>
-                    </Grid>
+                        </Grid>
 
-                    <VerticalStackLayout Spacing="5" Padding="15"
+                        <VerticalStackLayout Spacing="5" Padding="15"
                                          IsVisible="{Binding FormularioExpandido}">
-                        <!-- Nombre -->
-                        <VerticalStackLayout Spacing="5">
-                            <Label Text="Refacción" FontSize="14" TextColor="#666" FontAttributes="Bold"/>
-                            <Frame BorderColor="#800020" BackgroundColor="Transparent"
+                            <!-- Nombre -->
+                            <VerticalStackLayout Spacing="5">
+                                <Label Text="Refacción" FontSize="14" TextColor="#666" FontAttributes="Bold"/>
+                                <Frame BorderColor="#800020" BackgroundColor="Transparent"
                                    CornerRadius="8" Padding="0" HasShadow="False">
-                                <Entry Placeholder="Nombre de la refacción"
+                                    <Entry Placeholder="Nombre de la refacción"
                                        Text="{Binding NuevaRefaccion}"
                                        BackgroundColor="White" PlaceholderColor="#999"
                                        TextColor="#333" HeightRequest="40" Margin="10,0"/>
-                            </Frame>
-                        </VerticalStackLayout>
-
-                        <!-- Cantidad y Precio -->
-                        <Grid ColumnDefinitions="Auto,Auto,150" ColumnSpacing="10">
-                            <VerticalStackLayout Grid.Column="0" Spacing="5">
-                                <Label Text="Cantidad" FontSize="14" TextColor="#666" FontAttributes="Bold"/>
-                                <Frame BorderColor="#800020" BackgroundColor="Transparent"
-                                       CornerRadius="8" Padding="0" HasShadow="False">
-                                    <Entry Placeholder="0" Text="{Binding NuevaCantidad}"
-                                           Keyboard="Numeric" BackgroundColor="White"
-                                           MaxLength="3" PlaceholderColor="#999"
-                                           TextColor="#333" HeightRequest="40" Margin="10,0"/>
                                 </Frame>
                             </VerticalStackLayout>
 
-                            <VerticalStackLayout Grid.Column="1" Spacing="5">
-                                <Label Text="Precio Unitario" FontSize="13" TextColor="#666" FontAttributes="Bold"/>
-                                <Frame BorderColor="#800020" BackgroundColor="Transparent"
+                            <!-- Cantidad y Precio -->
+                            <Grid ColumnDefinitions="Auto,Auto,150" ColumnSpacing="10">
+                                <VerticalStackLayout Grid.Column="0" Spacing="5">
+                                    <Label Text="Cantidad" FontSize="14" TextColor="#666" FontAttributes="Bold"/>
+                                    <Frame BorderColor="#800020" BackgroundColor="Transparent"
                                        CornerRadius="8" Padding="0" HasShadow="False">
-                                    <Entry Placeholder="$0.00" Text="{Binding NuevoPrecioUnitario}"
+                                        <Entry Placeholder="0" Text="{Binding NuevaCantidad}"
+                                           Keyboard="Numeric" BackgroundColor="White"
+                                           MaxLength="3" PlaceholderColor="#999"
+                                           TextColor="#333" HeightRequest="40" Margin="10,0"/>
+                                    </Frame>
+                                </VerticalStackLayout>
+
+                                <VerticalStackLayout Grid.Column="1" Spacing="5">
+                                    <Label Text="Precio Unitario" FontSize="13" TextColor="#666" FontAttributes="Bold"/>
+                                    <Frame BorderColor="#800020" BackgroundColor="Transparent"
+                                       CornerRadius="8" Padding="0" HasShadow="False">
+                                        <Entry Placeholder="$0.00" Text="{Binding NuevoPrecioUnitario}"
                                            Keyboard="Numeric" BackgroundColor="White"
                                            PlaceholderColor="#999" TextColor="#333"
                                            HeightRequest="40"
                                            ReturnCommand="{Binding AgregarRefaccionCommand}"
                                            Margin="10,0"/>
-                                </Frame>
-                            </VerticalStackLayout>
+                                    </Frame>
+                                </VerticalStackLayout>
 
-                            <Button Grid.Column="2" Text="Agregar "
+                                <Button Grid.Column="2" Text="Agregar "
                                     Command="{Binding AgregarRefaccionCommand}"
                                     BackgroundColor="#800020" TextColor="White"
                                     CornerRadius="8" HeightRequest="48"
                                     FontAttributes="Bold" FontSize="14"
                                     VerticalOptions="End" Margin="0,5,0,0"/>
-                        </Grid>
+                            </Grid>
+                        </VerticalStackLayout>
                     </VerticalStackLayout>
-                </VerticalStackLayout>
-            </Frame>
+                </Frame>
 
-            <!-- ══════════════════════════════════════════ -->
-            <!-- Encabezado tabla de refacciones            -->
-            <!-- ══════════════════════════════════════════ -->
-            <Frame Grid.Row="4" BackgroundColor="#800020" CornerRadius="8"
+                <!-- ══════════════════════════════════════════ -->
+                <!-- Encabezado tabla de refacciones            -->
+                <!-- ══════════════════════════════════════════ -->
+                <Frame Grid.Row="4" BackgroundColor="#800020" CornerRadius="8"
+               Padding="12,10" HasShadow="False" Margin="0,0,0,0">
+                    <Grid ColumnDefinitions="3*,1.2*,1.8*,1.5*,1*" ColumnSpacing="4">
+                        <Label Grid.Column="0" Text="Refacción Comprada" FontSize="12"
+                       FontAttributes="Bold" TextColor="White"/>
+                        <Label Grid.Column="1" Text="Cant." FontSize="12"
+                       FontAttributes="Bold" TextColor="White" HorizontalTextAlignment="Center"/>
+                        <Label Grid.Column="2" Text="Costo" FontSize="12"
+                       FontAttributes="Bold" TextColor="White" HorizontalTextAlignment="Center"/>
+                        <Label Grid.Column="3" Text="Estado" FontSize="12"
+                       FontAttributes="Bold" TextColor="White" HorizontalTextAlignment="Center"/>
+                        <Label Grid.Column="4" Text="" FontSize="12" TextColor="White"/>
+                    </Grid>
+                </Frame>
+
+                <BoxView Grid.Row="5" HeightRequest="1" Color="#E0E0E0" Margin="0"/>
+
+                <!-- ══════════════════════════════════════════ -->
+                <!-- Lista de refacciones                       -->
+                <!-- ══════════════════════════════════════════ -->
+                <Frame Grid.Row="6" BackgroundColor="White" CornerRadius="8"
+               Padding="0" HasShadow="True" Margin="0,0,0,10">
+                    <CollectionView ItemsSource="{Binding RefaccionesCompradas}" SelectionMode="None">
+                        <CollectionView.EmptyView>
+                            <DataTemplate>
+                                <StackLayout Padding="30" HorizontalOptions="Center">
+                                    <Label Text="📋 No hay refacciones registradas"
+                                   TextColor="#888" FontSize="15"
+                                   HorizontalOptions="Center"/>
+                                </StackLayout>
+                            </DataTemplate>
+                        </CollectionView.EmptyView>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:RefaccionCitaViewModel">
+                                <SwipeView>
+                                    <Grid ColumnDefinitions="3*,1.2*,1.8*,1.5*,1*"
+                                  ColumnSpacing="4" Padding="12,12"
+                                  BackgroundColor="White">
+                                        <BoxView Grid.ColumnSpan="6" HeightRequest="1"
+                                         Color="#F0F0F0" VerticalOptions="End"/>
+
+                                        <!-- Nombre -->
+                                        <Label Grid.Column="0" Text="{Binding Nombre}"
+                                       FontSize="13" TextColor="#333"
+                                       LineBreakMode="WordWrap" VerticalOptions="Center"/>
+
+                                        <!-- Cantidad -->
+                                        <Label Grid.Column="1" Text="{Binding CantidadTexto}"
+                                       FontSize="13" TextColor="#555"
+                                       HorizontalTextAlignment="Center" VerticalOptions="Center"/>
+
+                                        <!-- Precio costo total -->
+                                        <Label Grid.Column="2" Text="{Binding TotalCostoFormateado}"
+                                       FontSize="13" TextColor="#555"
+                                       HorizontalTextAlignment="Center" VerticalOptions="Center"/>
+                                        <!-- Estado transferencia -->
+                                        <Label Grid.Column="3" Text="{Binding TextoEstado}"
+                                       FontSize="11" TextColor="{Binding ColorEstado}"
+                                       FontAttributes="Bold"
+                                       HorizontalTextAlignment="Center"
+                                       VerticalOptions="Center"/>
+
+                                    </Grid>
+                                </SwipeView>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Frame>
+
+
+                <!-- ══════════════════════════════════════════ -->
+                <!-- Encabezado tabla de refacciones            -->
+                <!-- ══════════════════════════════════════════ -->
+                <Frame Grid.Row="7" BackgroundColor="#800020" CornerRadius="8"
                    Padding="12,10" HasShadow="False" Margin="0,0,0,0">
-                <Grid ColumnDefinitions="3*,1.8*,2*,2*,1*" ColumnSpacing="5">
-                    <Label Grid.Column="0" Text="Refacción" FontSize="13"
+                    <Grid ColumnDefinitions="3*,1.8*,2*,2*,1*" ColumnSpacing="5">
+                        <Label Grid.Column="0" Text="Refacción Cargada" FontSize="13"
                            FontAttributes="Bold" TextColor="White"/>
-                    <Label Grid.Column="1" Text="Cantidad" FontSize="13"
+                        <Label Grid.Column="1" Text="Cantidad" FontSize="13"
                            FontAttributes="Bold" TextColor="White" HorizontalTextAlignment="Center"/>
-                    <Label Grid.Column="2" Text="Precio Unit." FontSize="13"
+                        <Label Grid.Column="2" Text="Precio Unit." FontSize="13"
                            FontAttributes="Bold" TextColor="White" HorizontalTextAlignment="End"/>
-                    <Label Grid.Column="3" Text="Subtotal" FontSize="13"
+                        <Label Grid.Column="3" Text="Subtotal" FontSize="13"
                            FontAttributes="Bold" TextColor="White" HorizontalTextAlignment="End"/>
-                    <Label Grid.Column="4" Text="" FontSize="13" TextColor="White"/>
-                </Grid>
-            </Frame>
+                        <Label Grid.Column="4" Text="" FontSize="13" TextColor="White"/>
+                    </Grid>
+                </Frame>
 
-            <BoxView Grid.Row="5" HeightRequest="1" Color="#E0E0E0" Margin="0"/>
+                <BoxView Grid.Row="8" HeightRequest="1" Color="#E0E0E0" Margin="0"/>
 
-            <!-- ══════════════════════════════════════════ -->
-            <!-- Lista de refacciones                       -->
-            <!-- ══════════════════════════════════════════ -->
-            <ScrollView Grid.Row="6">
-                <VerticalStackLayout Spacing="0">
-                    <Frame BackgroundColor="White" CornerRadius="8"
+                <!-- ══════════════════════════════════════════ -->
+                <!-- Lista de refacciones                       -->
+                <!-- ══════════════════════════════════════════ -->
+                <ScrollView Grid.Row="9">
+                    <VerticalStackLayout Spacing="0">
+                        <Frame BackgroundColor="White" CornerRadius="8"
                            Padding="0" HasShadow="True" Margin="0">
-                        <CollectionView ItemsSource="{Binding Refacciones}" SelectionMode="None">
-                            <CollectionView.EmptyView>
-                                <DataTemplate>
-                                    <StackLayout Padding="20" HorizontalOptions="Center"
+                            <CollectionView ItemsSource="{Binding Refacciones}" SelectionMode="None">
+                                <CollectionView.EmptyView>
+                                    <DataTemplate>
+                                        <StackLayout Padding="20" HorizontalOptions="Center"
                                                  VerticalOptions="Center">
-                                        <Label Text="📋 No hay refacciones cargadas"
+                                            <Label Text="📋 No hay refacciones cargadas"
                                                TextColor="Black" FontSize="16"
                                                HorizontalOptions="Center"
                                                VerticalOptions="Center"/>
-                                    </StackLayout>
-                                </DataTemplate>
-                            </CollectionView.EmptyView>
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate x:DataType="models:RefaccionTrabajoViewModel">
-                                    <SwipeView>
-                                        <SwipeView.RightItems>
-                                            <SwipeItems Mode="Execute">
-                                                <SwipeItem Text="Eliminar"
+                                        </StackLayout>
+                                    </DataTemplate>
+                                </CollectionView.EmptyView>
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="models:RefaccionTrabajoViewModel">
+                                        <SwipeView>
+                                            <SwipeView.RightItems>
+                                                <SwipeItems Mode="Execute">
+                                                    <SwipeItem Text="Eliminar"
                                                            BackgroundColor="#C41E3A"
                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:RefaccionesTrabajoViewModel}}, Path=EliminarRefaccionCommand}"
                                                            CommandParameter="{Binding .}"/>
-                                            </SwipeItems>
-                                        </SwipeView.RightItems>
+                                                </SwipeItems>
+                                            </SwipeView.RightItems>
 
-                                        <Grid ColumnDefinitions="3*,1.5*,2*,2*,1*"
+                                            <Grid ColumnDefinitions="3*,1.5*,2*,2*,1*"
                                               ColumnSpacing="5" Padding="12,15"
                                               BackgroundColor="White">
-                                            <BoxView Grid.ColumnSpan="5" HeightRequest="1"
+                                                <BoxView Grid.ColumnSpan="5" HeightRequest="1"
                                                      Color="#F0F0F0" VerticalOptions="End"/>
 
-                                            <Label Grid.Column="0" Text="{Binding Nombre}"
+                                                <Label Grid.Column="0" Text="{Binding Nombre}"
                                                    FontSize="14" TextColor="#333"
                                                    LineBreakMode="WordWrap"
                                                    VerticalOptions="Center"/>
-                                            <Label Grid.Column="1" Text="{Binding CantidadTexto}"
+                                                <Label Grid.Column="1" Text="{Binding CantidadTexto}"
                                                    FontSize="14" TextColor="#555"
                                                    HorizontalTextAlignment="Center"
                                                    VerticalOptions="Center"/>
-                                            <Label Grid.Column="2" Text="{Binding PrecioFormateado}"
+                                                <Label Grid.Column="2" Text="{Binding PrecioFormateado}"
                                                    FontSize="14" TextColor="#555"
                                                    HorizontalTextAlignment="End"
                                                    VerticalOptions="Center"/>
-                                            <Label Grid.Column="3" Text="{Binding TotalFormateado}"
+                                                <Label Grid.Column="3" Text="{Binding TotalFormateado}"
                                                    FontSize="14" FontAttributes="Bold"
                                                    TextColor="#800020"
                                                    HorizontalTextAlignment="End"
                                                    VerticalOptions="Center"/>
-                                            <ImageButton Grid.Column="4"
+                                                <ImageButton Grid.Column="4"
                                                          BackgroundColor="Transparent"
                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:RefaccionesTrabajoViewModel}}, Path=EliminarRefaccionCommand}"
                                                          CommandParameter="{Binding .}"
@@ -444,72 +544,74 @@
                                                          WidthRequest="32" HeightRequest="32"
                                                          VerticalOptions="Center"
                                                          HorizontalOptions="Center"/>
-                                        </Grid>
-                                    </SwipeView>
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
-                    </Frame>
-                </VerticalStackLayout>
-            </ScrollView>
+                                            </Grid>
+                                        </SwipeView>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </Frame>
+                    </VerticalStackLayout>
+                </ScrollView>
+                
 
-            <!-- ══════════════════════════════════════════ -->
-            <!-- Resumen de Totales                         -->
-            <!-- ══════════════════════════════════════════ -->
-            <Frame Grid.Row="7" BackgroundColor="White" CornerRadius="12"
+                <!-- ══════════════════════════════════════════ -->
+                <!-- Resumen de Totales                         -->
+                <!-- ══════════════════════════════════════════ -->
+                <Frame Grid.Row="10" BackgroundColor="White" CornerRadius="12"
                    Padding="20,15" Margin="0,15,0,0" HasShadow="True"
                    BorderColor="#800020">
-                <VerticalStackLayout Spacing="5">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <Label Grid.Column="0" Text="Subtotal Refacciones:"
+                    <VerticalStackLayout Spacing="5">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="Subtotal Refacciones:"
                                FontSize="13" TextColor="#666" VerticalOptions="Center"/>
-                        <Label Grid.Column="1" Text="{Binding TotalRefaccionesFormateado}"
+                            <Label Grid.Column="1" Text="{Binding TotalRefaccionesFormateado}"
                                FontSize="13" TextColor="#333" FontAttributes="Bold"
                                VerticalOptions="Center"/>
-                    </Grid>
-                    <Grid ColumnDefinitions="*,Auto">
-                        <Label Grid.Column="0" Text="Mano de Obra:"
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="Mano de Obra:"
                                FontSize="13" TextColor="#666" VerticalOptions="Center"/>
-                        <Label Grid.Column="1" Text="{Binding ManoObraFormateado}"
+                            <Label Grid.Column="1" Text="{Binding ManoObraFormateado}"
                                FontSize="13" TextColor="#333" FontAttributes="Bold"
                                VerticalOptions="Center"/>
-                    </Grid>
-                    <BoxView HeightRequest="1" Color="#E0E0E0" Margin="0,5"/>
-                    <Grid ColumnDefinitions="*,Auto">
-                        <Label Grid.Column="0" Text="Subtotal:"
+                        </Grid>
+                        <BoxView HeightRequest="1" Color="#E0E0E0" Margin="0,5"/>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="Subtotal:"
                                FontSize="14" FontAttributes="Bold" TextColor="#333"
                                VerticalOptions="Center"/>
-                        <Label Grid.Column="1" Text="{Binding SubtotalFormateado}"
+                            <Label Grid.Column="1" Text="{Binding SubtotalFormateado}"
                                FontSize="14" FontAttributes="Bold" TextColor="#333"
                                VerticalOptions="Center"/>
-                    </Grid>
-                    <Grid ColumnDefinitions="*,Auto">
-                        <Label Grid.Column="0" Text="IVA (16%):"
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="IVA (16%):"
                                FontSize="13" TextColor="#666" VerticalOptions="Center"/>
-                        <Label Grid.Column="1" Text="{Binding IvaFormateado}"
+                            <Label Grid.Column="1" Text="{Binding IvaFormateado}"
                                FontSize="13" TextColor="#333" FontAttributes="Bold"
                                VerticalOptions="Center"/>
-                    </Grid>
-                    <BoxView HeightRequest="2" Color="#800020" Margin="0,0"/>
-                    <Grid ColumnDefinitions="*,Auto" Margin="0,5,0,0">
-                        <Label Grid.Column="0" Text="TOTAL GENERAL:"
+                        </Grid>
+                        <BoxView HeightRequest="2" Color="#800020" Margin="0,0"/>
+                        <Grid ColumnDefinitions="*,Auto" Margin="0,5,0,0">
+                            <Label Grid.Column="0" Text="TOTAL GENERAL:"
                                FontSize="15" FontAttributes="Bold" TextColor="#800020"
                                VerticalOptions="Center"/>
-                        <Label Grid.Column="1" Text="{Binding TotalGeneralFormateado}"
+                            <Label Grid.Column="1" Text="{Binding TotalGeneralFormateado}"
                                FontSize="17" FontAttributes="Bold" TextColor="#800020"
                                VerticalOptions="Center"/>
-                    </Grid>
-                </VerticalStackLayout>
-            </Frame>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Frame>
 
-            <!-- Indicador de carga -->
-            <ActivityIndicator Grid.RowSpan="8"
+                <!-- Indicador de carga -->
+                <ActivityIndicator Grid.RowSpan="11"
                                IsRunning="{Binding EstaCargando}"
                                IsVisible="{Binding EstaCargando}"
                                Color="#800020"
                                WidthRequest="50" HeightRequest="50"
                                HorizontalOptions="Center"
                                VerticalOptions="Center"/>
-        </Grid>
-    </ScrollView>
+            </Grid>
+        </ScrollView>
+    </Grid>
 </ContentPage>

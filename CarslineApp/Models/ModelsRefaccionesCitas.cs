@@ -112,12 +112,13 @@ namespace CarslineApp.Models
     /// </summary>
     public class AgregarRefaccionesCitaRequest
     {
-        public int TrabajoCitaId { get; set; }
+        public int TrabajoId { get; set; }
+        public bool Orden { get; set; } = false;
         public List<AgregarRefaccionCitaDto> Refacciones { get; set; } = new();
 
         // Validación cliente
         public bool EsValido =>
-            TrabajoCitaId > 0 &&
+            TrabajoId > 0 &&
             Refacciones.Any() &&
             Refacciones.All(r =>
                 !string.IsNullOrWhiteSpace(r.Refaccion) &&
@@ -140,7 +141,7 @@ namespace CarslineApp.Models
     {
         public bool Success { get; set; }
         public string Message { get; set; } = string.Empty;
-        public List<RefaccionCitaDto> RefaccionesAgregadas { get; set; } = new();
+        public List<AgregarRefaccionCitaDto> RefaccionesAgregadas { get; set; } = new();
         public int CantidadRefacciones { get; set; }
         public decimal TotalCosto { get; set; }
 
@@ -148,6 +149,40 @@ namespace CarslineApp.Models
         public string TotalCostoFormateado => $"${TotalCosto:N2}";
         public bool TieneRefacciones => RefaccionesAgregadas.Any();
     }
+    public class RefaccionCompradaDto
+    {
+        public int Id { get; set; }
+
+        // Nullable: null cuando viene de orden sin cita
+        public int? TrabajoCitaId { get; set; }
+
+        // Nullable: null cuando la cita aún no se convirtió a orden
+        public int? TrabajoOrdenId { get; set; }
+
+        public string Refaccion { get; set; } = string.Empty;
+        public int Cantidad { get; set; }
+
+        // Renombrado de Precio
+        public decimal Precio { get; set; }
+        public decimal? PrecioVenta { get; set; }
+
+        public decimal TotalCosto => Cantidad * Precio;
+        public decimal? TotalVenta => PrecioVenta.HasValue ? Cantidad * PrecioVenta.Value : null;
+
+        public DateTime FechaCompra { get; set; }
+
+        // true = ya vinculada a una orden de trabajo
+        public bool Transferida { get; set; }
+        // Propiedades calculadas para UI
+        public string PrecioFormateado => $"${Precio:N2}";
+        public string PrecioVentaFormateado => PrecioVenta.HasValue ? $"${PrecioVenta.Value:N2}" : "Sin precio venta";
+        public string TotalCostoFormateado => $"${TotalCosto:N2}";
+        public string TotalVentaFormateado => TotalVenta.HasValue ? $"${TotalVenta.Value:N2}" : "-";
+        public string CantidadTexto => $"{Cantidad}";
+        public string EstadoTransferencia => Transferida ? "Transferida" : "Pendiente";
+        public string ColorEstado => Transferida ? "#43A047" : "#FB8C00";
+    }
+
 
     /// <summary>
     /// Respuesta al obtener refacciones de un trabajo de cita
@@ -156,12 +191,12 @@ namespace CarslineApp.Models
     {
         public bool Success { get; set; }
         public string Message { get; set; } = string.Empty;
-        public int TrabajoCitaId { get; set; }
-        public string TrabajoCitaNombre { get; set; } = string.Empty;
-        public List<RefaccionCitaDto> Refacciones { get; set; } = new();
+        public int TrabajoId { get; set; }
+        public string TrabajoNombre { get; set; } = string.Empty;
         public decimal TotalCosto { get; set; }
         public decimal? TotalVenta { get; set; }
         public bool RefaccionesListas { get; set; }
+        public List<RefaccionCompradaDto> Refacciones { get; set; } = new();
 
         // Propiedades calculadas
         public string TotalCostoFormateado => $"${TotalCosto:N2}";
@@ -215,42 +250,33 @@ namespace CarslineApp.Models
         public bool TieneRefacciones => Trabajos.Any(t => t.TieneRefacciones);
     }
 
-    /// <summary>
-    /// ViewModel para gestionar refacciones de cita en una vista
-    /// </summary>
     public class RefaccionCitaViewModel : INotifyPropertyChanged
     {
-        private RefaccionCitaDto _refaccion;
-        private bool _seleccionada;
+        private readonly RefaccionCompradaDto _dto;
 
-        public RefaccionCitaViewModel(RefaccionCitaDto refaccion)
+        public RefaccionCitaViewModel(RefaccionCompradaDto dto)
         {
-            _refaccion = refaccion;
+            _dto = dto;
         }
 
-        public RefaccionCitaDto Refaccion
-        {
-            get => _refaccion;
-            set { _refaccion = value; OnPropertyChanged(); }
-        }
+        public int Id => _dto.Id;
+        public string Nombre => _dto.Refaccion;
+        public string CantidadTexto => _dto.CantidadTexto;
+        public string PrecioFormateado => _dto.PrecioFormateado;
+        public string PrecioVentaFormateado => _dto.PrecioVentaFormateado;
+        public string TotalCostoFormateado => _dto.TotalCostoFormateado;
+        public string TotalVentaFormateado => _dto.TotalVentaFormateado;
+        public bool Transferida => _dto.Transferida;
+        public bool PuedeEditar => !_dto.Transferida;
+        public decimal? PrecioVentaRaw => _dto.PrecioVenta;
+        public bool TienePrecioVenta => _dto.PrecioVenta.HasValue;
 
-        public bool Seleccionada
-        {
-            get => _seleccionada;
-            set { _seleccionada = value; OnPropertyChanged(); }
-        }
-
-        // Accesos rápidos
-        public int Id => Refaccion.Id;
-        public string Nombre => Refaccion.Refaccion;
-        public string CantidadTexto => Refaccion.CantidadTexto;
-        public string PrecioFormateado => Refaccion.PrecioFormateado;
-        public string PrecioVentaFormateado => Refaccion.PrecioVentaFormateado;
-        public string TotalCostoFormateado => Refaccion.TotalCostoFormateado;
-        public bool Transferida => Refaccion.Transferida;
+        // Color visual según si ya fue transferida
+        public string ColorEstado => _dto.Transferida ? "#43A047" : "#FB8C00";
+        public string TextoEstado => _dto.Transferida ? "✔ Transferida" : "⏳ Pendiente";
 
         public event PropertyChangedEventHandler? PropertyChanged;
-        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        protected virtual void OnPropertyChanged([CallerMemberName] string? name = null)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

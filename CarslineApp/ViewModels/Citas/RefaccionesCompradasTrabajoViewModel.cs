@@ -5,12 +5,13 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 
-namespace CarslineApp.ViewModels.Ordenes
+namespace CarslineApp.ViewModels.Citas
 {
-    public class RefaccionesTrabajoCitaViewModel : INotifyPropertyChanged
+    public class RefaccionesCompradasTrabajoViewModel : INotifyPropertyChanged
     {
         private readonly ApiService _apiService;
-        private readonly int _trabajoCitaId;
+        private readonly int _trabajoId;
+        private readonly bool _orden;
 
         private ObservableCollection<RefaccionCitaViewModel> _refacciones;
         private ObservableCollection<RefaccionPredeterminadaViewModel> _refaccionesPredeterminadas;
@@ -32,10 +33,11 @@ namespace CarslineApp.ViewModels.Ordenes
         private string _vehiculoCompleto = string.Empty;
         private string _vin = string.Empty;
 
-        public RefaccionesTrabajoCitaViewModel(int trabajoCitaId, string trabajo, string vehiculo, string vin)
+        public RefaccionesCompradasTrabajoViewModel(int trabajoId, string trabajo, string vehiculo, string vin, bool orden)
         {
             _apiService = new ApiService();
-            _trabajoCitaId = trabajoCitaId;
+            _trabajoId = trabajoId;
+            _orden = orden;
             _nombreTrabajo = trabajo;
             _vehiculoCompleto = vehiculo;
             _vin = vin;
@@ -50,6 +52,7 @@ namespace CarslineApp.ViewModels.Ordenes
             TogglePredeterminadasCommand = new Command(() => PredeterminadasExpandido = !PredeterminadasExpandido);
             AgregarPredeterminadaCommand = new Command<RefaccionPredeterminadaViewModel>(async (r) => await AgregarRefaccionPredeterminada(r));
             MarcarRefaccionesListasCommand = new Command(async () => await MarcarRefaccionesListas(),() => !EstaCargando && Refacciones.Any());
+            BackCommand = new Command(async () => await RegresarAtras());
         }
 
         #region Propiedades
@@ -184,6 +187,8 @@ namespace CarslineApp.ViewModels.Ordenes
         public ICommand TogglePredeterminadasCommand { get; }
         public ICommand AgregarPredeterminadaCommand { get; }
         public ICommand MarcarRefaccionesListasCommand { get; }
+        public ICommand BackCommand { get; }
+
 
         #endregion
 
@@ -199,6 +204,17 @@ namespace CarslineApp.ViewModels.Ordenes
 
         #region Refacciones Predeterminadas
 
+        private async Task RegresarAtras()
+        {
+            try
+            {
+                await Application.Current.MainPage.Navigation.PopToRootAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error al regresar: {ex.Message}");
+            }
+        }
         private void CargarRefaccionesPredeterminadas(string nombreTrabajo)
         {
             var catalogo = ObtenerCatalogoPorTrabajo(nombreTrabajo);
@@ -312,7 +328,8 @@ namespace CarslineApp.ViewModels.Ordenes
             {
                 var request = new AgregarRefaccionesCitaRequest
                 {
-                    TrabajoCitaId = _trabajoCitaId,
+                    TrabajoId = _trabajoId,
+                    Orden= _orden,
                     Refacciones = new List<AgregarRefaccionCitaDto>
                     {
                         new AgregarRefaccionCitaDto
@@ -351,12 +368,6 @@ namespace CarslineApp.ViewModels.Ordenes
 
         private async Task MarcarRefaccionesListas()
         {
-            if (!Refacciones.Any())
-            {
-                await MostrarAlerta("Sin refacciones",
-                    "No puedes marcar como listas si no hay refacciones registradas.");
-                return;
-            }
 
             bool confirmar = await Application.Current.MainPage.DisplayAlert(
                 "Confirmar",
@@ -372,7 +383,7 @@ namespace CarslineApp.ViewModels.Ordenes
             try
             {
                 var response = await _apiService
-                    .MarcarRefaccionesListasAsync(_trabajoCitaId);
+                    .MarcarRefaccionesListasAsync(_trabajoId, _orden);
 
                 if (response.Success)
                 {
@@ -402,7 +413,7 @@ namespace CarslineApp.ViewModels.Ordenes
             EstaCargando = true;
             try
             {
-                var response = await _apiService.ObtenerRefaccionesPorTrabajoCitaAsync(_trabajoCitaId);
+                var response = await _apiService.ObtenerRefaccionesPorTrabajoCitaAsync(_trabajoId, _orden);
                 if (response.Success)
                 {
                     Refacciones.Clear();
@@ -470,7 +481,8 @@ namespace CarslineApp.ViewModels.Ordenes
             {
                 var request = new AgregarRefaccionesCitaRequest
                 {
-                    TrabajoCitaId = _trabajoCitaId,
+                    TrabajoId = _trabajoId,
+                    Orden= _orden,
                     Refacciones = new List<AgregarRefaccionCitaDto>
                     {
                         new() {
@@ -556,38 +568,5 @@ namespace CarslineApp.ViewModels.Ordenes
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         #endregion
-    }
-
-    // ─────────────────────────────────────────────────────
-    // ViewModel de fila para la lista de refacciones de cita
-    // ─────────────────────────────────────────────────────
-    public class RefaccionCitaViewModel : INotifyPropertyChanged
-    {
-        private readonly RefaccionCitaDto _dto;
-
-        public RefaccionCitaViewModel(RefaccionCitaDto dto)
-        {
-            _dto = dto;
-        }
-
-        public int Id => _dto.Id;
-        public string Nombre => _dto.Refaccion;
-        public string CantidadTexto => _dto.CantidadTexto;
-        public string PrecioFormateado => _dto.PrecioFormateado;
-        public string PrecioVentaFormateado => _dto.PrecioVentaFormateado;
-        public string TotalCostoFormateado => _dto.TotalCostoFormateado;
-        public string TotalVentaFormateado => _dto.TotalVentaFormateado;
-        public bool Transferida => _dto.Transferida;
-        public bool PuedeEditar => !_dto.Transferida;
-        public decimal? PrecioVentaRaw => _dto.PrecioVenta;
-        public bool TienePrecioVenta => _dto.PrecioVenta.HasValue;
-
-        // Color visual según si ya fue transferida
-        public string ColorEstado => _dto.Transferida ? "#43A047" : "#FB8C00";
-        public string TextoEstado => _dto.Transferida ? "✔ Transferida" : "⏳ Pendiente";
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-        protected virtual void OnPropertyChanged([CallerMemberName] string? name = null)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

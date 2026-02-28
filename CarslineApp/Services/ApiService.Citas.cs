@@ -9,9 +9,7 @@ namespace CarslineApp.Services
         /// <summary>
         /// Crear una cita con trabajos asociados
         /// </summary>
-        public async Task<CrearCitaResponse> CrearCitaConTrabajosAsync(
-            CrearCitaConTrabajosRequest request,
-            int encargadoCitasId)
+        public async Task<CrearCitaResponse> CrearCitaConTrabajosAsync(CrearCitaConTrabajosRequest request,int encargadoCitasId)
         {
             try
             {

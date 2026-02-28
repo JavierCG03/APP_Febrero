@@ -12,10 +12,10 @@ namespace CarslineApp.Services
         {
             try
             {
-                Debug.WriteLine($"📤 Agregando {request.Refacciones.Count} refacciones al trabajo de cita {request.TrabajoCitaId}");
+                Debug.WriteLine($"📤 Agregando {request.Refacciones.Count} refacciones al trabajo de cita {request.TrabajoId}");
 
                 var response = await _httpClient.PostAsJsonAsync(
-                    $"{BaseUrl}/RefaccionesCita/agregar",
+                    $"{BaseUrl}/RefaccionesCompradas/agregar",
                     request);
 
                 if (response.IsSuccessStatusCode)
@@ -68,15 +68,17 @@ namespace CarslineApp.Services
         /// Agregar una sola refacción a un trabajo de cita (método simplificado)
         /// </summary>
         public async Task<AgregarRefaccionesCitaResponse> AgregarRefaccionCitaSimpleAsync(
-            int trabajoCitaId,
+            int trabajoId,
             string nombreRefaccion,
             int cantidad,
             decimal precio,
+            bool orden,
             decimal? precioVenta = null)
         {
             var request = new AgregarRefaccionesCitaRequest
             {
-                TrabajoCitaId = trabajoCitaId,
+                TrabajoId = trabajoId,
+                Orden = orden,
                 Refacciones = new List<AgregarRefaccionCitaDto>
                 {
                     new AgregarRefaccionCitaDto
@@ -95,15 +97,17 @@ namespace CarslineApp.Services
         /// Marcar un trabajo de cita como con refacciones listas
         /// PUT api/RefaccionesCita/{trabajoCitaId}/marcar-listas
         /// </summary>
-        public async Task<RefaccionCitaResponse> MarcarRefaccionesListasAsync(int trabajoCitaId)
+        public async Task<RefaccionCitaResponse> MarcarRefaccionesListasAsync(
+            int trabajoId,
+            bool orden = false)
         {
             try
             {
-                Debug.WriteLine($"📦 Marcando refacciones como listas para trabajo de cita {trabajoCitaId}");
+                Debug.WriteLine($"📦 Marcando refacciones como listas para trabajo {trabajoId} (orden={orden})");
 
                 var response = await _httpClient.PutAsync(
-                    $"{BaseUrl}/RefaccionesCita/{trabajoCitaId}/marcar-listas",
-                    null); // No enviamos body
+                    $"{BaseUrl}/RefaccionesCompradas/{trabajoId}/marcar-listas?orden={orden.ToString().ToLower()}",
+                    null);
 
                 var result = await response.Content
                     .ReadFromJsonAsync<RefaccionCitaResponse>();
@@ -114,7 +118,6 @@ namespace CarslineApp.Services
                         Debug.WriteLine("✅ Refacciones marcadas como listas correctamente");
                     else
                         Debug.WriteLine($"⚠️ No se pudo marcar: {result.Message}");
-
                     return result;
                 }
 
@@ -139,28 +142,26 @@ namespace CarslineApp.Services
         /// Obtener todas las refacciones de un trabajo de cita específico
         /// GET api/RefaccionesCita/trabajo/{trabajoCitaId}
         /// </summary>
-        public async Task<ObtenerRefaccionesCitaResponse> ObtenerRefaccionesPorTrabajoCitaAsync(
-            int trabajoCitaId)
+        public async Task<ObtenerRefaccionesCitaResponse> ObtenerRefaccionesPorTrabajoCitaAsync(int trabajoId, bool orden = false)
         {
             try
             {
-                Debug.WriteLine($"📥 Obteniendo refacciones del trabajo de cita {trabajoCitaId}");
+                Debug.WriteLine($"📥 Obteniendo refacciones del trabajo {trabajoId} (orden={orden})");
 
+                // Se agrega ?orden=true o ?orden=false según el valor recibido
                 var response = await _httpClient.GetAsync(
-                    $"{BaseUrl}/RefaccionesCita/trabajo/{trabajoCitaId}");
+                    $"{BaseUrl}/RefaccionesCompradas/trabajo/{trabajoId}?orden={orden.ToString().ToLower()}");
 
                 if (response.IsSuccessStatusCode)
                 {
                     var result = await response.Content
                         .ReadFromJsonAsync<ObtenerRefaccionesCitaResponse>();
-
-                    Debug.WriteLine($"✅ Se obtuvieron {result?.Refacciones.Count ?? 0} refacciones del trabajo de cita");
-
+                    Debug.WriteLine($"✅ Se obtuvieron {result?.Refacciones.Count ?? 0} refacciones");
                     return result ?? new ObtenerRefaccionesCitaResponse
                     {
                         Success = false,
                         Message = "Error al procesar la respuesta",
-                        Refacciones = new List<RefaccionCitaDto>()
+                        Refacciones = new List<RefaccionCompradaDto>()
                     };
                 }
 
@@ -169,8 +170,8 @@ namespace CarslineApp.Services
                     return new ObtenerRefaccionesCitaResponse
                     {
                         Success = false,
-                        Message = "Trabajo de cita no encontrado",
-                        Refacciones = new List<RefaccionCitaDto>()
+                        Message = "Trabajo no encontrado",
+                        Refacciones = new List<RefaccionCompradaDto>()
                     };
                 }
 
@@ -178,7 +179,7 @@ namespace CarslineApp.Services
                 {
                     Success = false,
                     Message = "No se pudieron obtener las refacciones",
-                    Refacciones = new List<RefaccionCitaDto>()
+                    Refacciones = new List<RefaccionCompradaDto>()
                 };
             }
             catch (Exception ex)
@@ -188,11 +189,10 @@ namespace CarslineApp.Services
                 {
                     Success = false,
                     Message = $"Error: {ex.Message}",
-                    Refacciones = new List<RefaccionCitaDto>()
+                    Refacciones = new List<RefaccionCompradaDto>()
                 };
             }
         }
-
         /// <summary>
         /// Obtener todas las refacciones de una cita completa agrupadas por trabajo
         /// GET api/RefaccionesCita/cita/{citaId}
@@ -205,7 +205,7 @@ namespace CarslineApp.Services
                 Debug.WriteLine($"📥 Obteniendo refacciones de la cita {citaId}");
 
                 var response = await _httpClient.GetAsync(
-                    $"{BaseUrl}/RefaccionesCita/cita/{citaId}");
+                    $"{BaseUrl}/RefaccionesCompradas/cita/{citaId}");
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -276,7 +276,7 @@ namespace CarslineApp.Services
                 Debug.WriteLine($"🗑️ Eliminando refacción de cita {refaccionId}");
 
                 var response = await _httpClient.DeleteAsync(
-                    $"{BaseUrl}/RefaccionesCita/{refaccionId}");
+                    $"{BaseUrl}/RefaccionesCompradas/{refaccionId}");
 
                 var content = await response.Content
                     .ReadFromJsonAsync<RefaccionCitaResponse>();
@@ -326,7 +326,7 @@ namespace CarslineApp.Services
                 };
 
                 var response = await _httpClient.PutAsJsonAsync(
-                    $"{BaseUrl}/RefaccionesCita/{refaccionId}/precio-venta",
+                    $"{BaseUrl}/RefaccionesCompradas/{refaccionId}/precio-venta",
                     request);
 
                 var result = await response.Content

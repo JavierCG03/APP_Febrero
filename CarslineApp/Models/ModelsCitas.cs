@@ -166,7 +166,9 @@ namespace CarslineApp.Models
     // Nuevo DTO — agrégalo al final del archivo
     public class CitaConTrabajosDto
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
+        public int? OrdenId { get; set; }
+        public bool Orden { get; set; } = false; //valor boleano que define si es orden o cita cita=0 orden=1
         public int TipoOrdenId { get; set; }
         public int VehiculoId { get; set; }
         public string VehiculoCompleto { get; set; } = string.Empty;

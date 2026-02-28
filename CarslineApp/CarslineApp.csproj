@@ -67,6 +67,9 @@
 	  <Compile Update="Views\Buscador\ClientesPage.xaml.cs">
 	    <DependentUpon>ClientesPage.xaml</DependentUpon>
 	  </Compile>
+	  <Compile Update="Views\Citas\RefaccionesCompradasTrabajoPage.xaml.cs">
+	    <DependentUpon>RefaccionesCompradasTrabajoPage.xaml</DependentUpon>
+	  </Compile>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -106,7 +109,7 @@
 		<MauiXaml Update="Views\Citas\CrearCitaPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Views\Citas\RefaccionesTrabajoCitaPage.xaml">
+		<MauiXaml Update="Views\Citas\RefaccionesCompradasTrabajoPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\Usuarios\CrearUsuarioPage.xaml">

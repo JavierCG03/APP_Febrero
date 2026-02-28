@@ -17,7 +17,7 @@ namespace CarslineApp.ViewModels.ViewModelsHome
         private int _tipoCitaSeleccionado = 1;
         private bool _isLoading;
         private string _nombreUsuarioActual = string.Empty;
-        private DateTime _fechaSeleccionada = DateTime.Today.AddDays(1);
+        private DateTime _fechaSeleccionada = DateTime.Today;
         // ✅ LISTA ÚNICA AGRUPADA
         private ObservableCollection<GrupoCitas> _todasLasCitasAgrupadas = new();
 
@@ -137,6 +137,7 @@ namespace CarslineApp.ViewModels.ViewModelsHome
 
             string vehiculo = "Vehículo";
             string vin = string.Empty;
+            bool orden = false;
 
             foreach (var grupo in TodasLasCitasAgrupadas)
             {
@@ -146,15 +147,17 @@ namespace CarslineApp.ViewModels.ViewModelsHome
                 {
                     vehiculo = citaPadre.VehiculoCompleto ?? vehiculo;
                     vin = citaPadre.VIN ?? vin;
+                    orden = citaPadre.Orden;
                     break;
                 }
             }
 
-            var pagina = new RefaccionesTrabajoCitaPage(
-                trabajoCitaId: trabajo.Id,
+            var pagina = new RefaccionesCompradasTrabajoPage(
+                trabajoId: trabajo.Id,
                 trabajo: trabajo.Trabajo,
                 vehiculo: vehiculo,
-                vin: vin);
+                vin: vin,
+                orden: orden);
 
             // ✅ Navega desde el NavigationPage correcto (Detail)
             if (Application.Current?.MainPage is FlyoutPage flyout)

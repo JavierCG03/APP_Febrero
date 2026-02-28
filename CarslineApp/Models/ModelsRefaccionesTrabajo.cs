@@ -121,9 +121,9 @@ namespace CarslineApp.Models
         public bool Success { get; set; }
         public string Message { get; set; } = string.Empty;
         public int TrabajoId { get; set; }
-        public string NumeroOrden { get; set; } = string.Empty;
-        public List<RefaccionTrabajoDto> Refacciones { get; set; } = new();
+        public string NumeroOrden { get; set; } = string.Empty;   
         public decimal TotalRefacciones { get; set; }
+        public List<RefaccionTrabajoDto> Refacciones { get; set; } = new();
 
         // Propiedades calculadas
         public string TotalFormateado => $"${TotalRefacciones:N2}";
@@ -177,5 +177,49 @@ namespace CarslineApp.Models
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+    }
+    public class RefaccionPredeterminadaViewModel : INotifyPropertyChanged
+    {
+        private string _precioTexto = string.Empty;
+        private string _cantidadTextoEditable = string.Empty;
+        private string _precioVentaTexto = string.Empty;
+
+        public string Nombre { get; set; } = string.Empty;
+        public int? Cantidad { get; set; }
+
+        public bool CantidadFija => Cantidad.HasValue;
+        public bool CantidadVariable => !Cantidad.HasValue;
+        public string CantidadLabelTexto => Cantidad.HasValue ? $"x{Cantidad}" : string.Empty;
+
+        public string CantidadTextoEditable
+        {
+            get => _cantidadTextoEditable;
+            set { _cantidadTextoEditable = value; OnPropertyChanged(); }
+        }
+
+        public string PrecioTexto
+        {
+            get => _precioTexto;
+            set { _precioTexto = value; OnPropertyChanged(); }
+        }
+
+        public string PrecioVentaTexto
+        {
+            get => _precioVentaTexto;
+            set { _precioVentaTexto = value; OnPropertyChanged(); }
+        }
+
+        public int? CantidadEfectiva
+        {
+            get
+            {
+                if (Cantidad.HasValue) return Cantidad.Value;
+                return int.TryParse(CantidadTextoEditable, out int cant) && cant > 0 ? cant : null;
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string prop = null)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
     }
 }
